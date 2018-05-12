@@ -40,6 +40,16 @@ var (
 	ErrRemote = errors.New("No remote URL found")
 )
 
+var (
+	keyVCSMode     = "vcs"
+	keyRemoteName  = "remote-name"
+	keyRemoteURL   = "remote-url"
+	keyVersion     = "version"
+	keyDeps        = "deps"
+	keyDepsMissing = "missing"
+	keyRequiredBy  = "required-by"
+)
+
 //
 // Package define Go package information: path to package, version, whether is
 // tag or not, and VCS mode.
@@ -50,11 +60,11 @@ type Package struct {
 	RemoteName  string
 	RemoteURL   string
 	Version     string
-	isTag       bool
 	DepsMissing []string
-	Deps        []*Package
-	RequiredBy  []*Package
+	Deps        []string
+	RequiredBy  []string
 	vcs         VCSMode
+	isTag       bool
 }
 
 //
@@ -151,7 +161,7 @@ func (pkg *Package) gitScanRemote() (err error) {
 	}
 
 	pkg.RemoteName = gitDefRemote
-	pkg.RemoteURL = string(url)
+	pkg.RemoteURL = url
 
 	return
 }
@@ -309,12 +319,12 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 //
 func (pkg *Package) linkDep(env *Env, dep *Package) bool {
 	for x := 0; x < len(pkg.Deps); x++ {
-		if dep.ImportPath == pkg.Deps[x].ImportPath {
+		if dep.ImportPath == pkg.Deps[x] {
 			return false
 		}
 	}
 
-	pkg.Deps = append(pkg.Deps, dep)
+	pkg.Deps = append(pkg.Deps, dep.ImportPath)
 
 	if env.Debug >= DebugL2 {
 		log.Printf("%15s >>> %s\n", dbgLinkDep, dep.ImportPath)
@@ -325,14 +335,39 @@ func (pkg *Package) linkDep(env *Env, dep *Package) bool {
 
 func (pkg *Package) linkRequiredBy(env *Env, parentPkg *Package) bool {
 	for x := 0; x < len(pkg.RequiredBy); x++ {
-		if parentPkg.ImportPath == pkg.RequiredBy[x].ImportPath {
+		if parentPkg.ImportPath == pkg.RequiredBy[x] {
 			return false
 		}
 	}
 
-	pkg.RequiredBy = append(pkg.RequiredBy, parentPkg)
+	pkg.RequiredBy = append(pkg.RequiredBy, parentPkg.ImportPath)
 
 	return true
+}
+
+func (pkg *Package) load(sec *ini.Section) {
+	for _, v := range sec.Vars {
+		switch v.KeyLower {
+		case keyVCSMode:
+			switch v.Value {
+			case valVCSModeGit:
+				pkg.vcs = VCSModeGit
+			}
+		case keyRemoteName:
+			pkg.RemoteName = v.Value
+		case keyRemoteURL:
+			pkg.RemoteURL = v.Value
+		case keyVersion:
+			pkg.Version = v.Value
+			pkg.setIsTag()
+		case keyDeps:
+			pkg.Deps = append(pkg.Deps, v.Value)
+		case keyDepsMissing:
+			pkg.DepsMissing = append(pkg.DepsMissing, v.Value)
+		case keyRequiredBy:
+			pkg.RequiredBy = append(pkg.RequiredBy, v.Value)
+		}
+	}
 }
 
 //
@@ -341,34 +376,18 @@ func (pkg *Package) linkRequiredBy(env *Env, parentPkg *Package) bool {
 func (pkg *Package) String() string {
 	var buf bytes.Buffer
 
-	fmt.Fprintf(&buf, `{
-   ImportPath: %s
-   RemoteName: %s
-    RemoteURL: %s
-      Version: %s
-  DepsMissing: %v
-         Deps: [`, pkg.ImportPath, pkg.RemoteName, pkg.RemoteURL, pkg.Version,
-		pkg.DepsMissing)
+	fmt.Fprintf(&buf, `
+[package "%s"]
+          VCS = %d
+   RemoteName = %s
+    RemoteURL = %s
+      Version = %s
+        IsTag = %v
+         Deps = %v
+   RequiredBy = %v
+  DepsMissing = %v
+`, pkg.ImportPath, pkg.vcs, pkg.RemoteName, pkg.RemoteURL, pkg.Version,
+		pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
 
-	for x := 0; x < len(pkg.Deps); x++ {
-		if x > 0 {
-			buf.WriteByte(' ')
-		}
-		fmt.Fprintf(&buf, "%s", pkg.Deps[x].ImportPath)
-	}
-
-	buf.WriteString("]")
-
-	buf.WriteString(`
-   RequiredBy: [`)
-
-	for x := 0; x < len(pkg.RequiredBy); x++ {
-		if x > 0 {
-			buf.WriteByte(' ')
-		}
-		fmt.Fprintf(&buf, "%s", pkg.RequiredBy[x].ImportPath)
-	}
-
-	buf.WriteString("]\n}")
 	return buf.String()
 }

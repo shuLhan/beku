@@ -14,3 +14,7 @@ type VCSMode uint
 const (
 	VCSModeGit VCSMode = 1 << iota
 )
+
+const (
+	valVCSModeGit = "git"
+)
