@@ -388,7 +388,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 
 	fmt.Printf("Updating package from,\n%s\nto,\n%s\n", curPkg, newPkg)
 
-	ok = confirm(msgUpdateView, false)
+	ok = confirm(os.Stdin, msgUpdateView, false)
 	if ok {
 		err = curPkg.BrowseCompare(newPkg)
 		if err != nil {
@@ -396,7 +396,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		}
 	}
 
-	ok = confirm(msgUpdateProceed, true)
+	ok = confirm(os.Stdin, msgUpdateProceed, true)
 	if !ok {
 		return
 	}
@@ -444,14 +444,20 @@ func (env *Env) updateMissing(newPkg *Package) {
 // and checkout the latest tag or the latest commit.
 //
 func (env *Env) Sync(pkgName, importPath string) (err error) {
+	err = ErrPackageName
+
+	if len(pkgName) == 0 {
+		return
+	}
+
 	var (
 		ok      bool
 		version string
 	)
 
 	// (1)
-	pkgName, version, err = parsePkgVersion(pkgName)
-	if err != nil {
+	pkgName, version = parsePkgVersion(pkgName)
+	if len(pkgName) == 0 {
 		return
 	}
 
@@ -515,7 +521,7 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 	curPkg.isTag = newPkg.isTag
 
 	if Debug >= DebugL1 {
-		log.Printf("Package sync-ed:\n%s", curPkg)
+		log.Printf("Package installed:\n%s", curPkg)
 	}
 
 	return

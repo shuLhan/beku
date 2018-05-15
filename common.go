@@ -5,14 +5,17 @@
 package beku
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 )
 
 //
-// IsIgnoredDir will return true if directory `name` start with `_` or `.`, or
-// equal with `vendor` or `testdata`; otherwise it will return false.
+// IsIgnoredDir will return true if directory start with "_" or ".", or
+// equal with "vendor" or "testdata"; otherwise it will return false.
 //
 func IsIgnoredDir(name string) bool {
 	prefix := name[0]
@@ -27,8 +30,26 @@ func IsIgnoredDir(name string) bool {
 	return false
 }
 
-func confirm(msg string, defIsYes bool) bool {
-	var response string
+//
+// confirm display a question to standard output and read for answer
+// from "in" for simple "y" or "n" answer.
+// If "in" is nil, it will set to standard input.
+// If "defIsYes" is true and answer is empty (only new line), then it will
+// return true.
+//
+func confirm(in *os.File, msg string, defIsYes bool) bool {
+	var (
+		r         *bufio.Reader
+		b, answer byte
+		err       error
+	)
+
+	if in == nil {
+		r = bufio.NewReader(os.Stdin)
+	} else {
+		r = bufio.NewReader(in)
+	}
+
 	yon := "[y/N]"
 
 	if defIsYes {
@@ -37,26 +58,39 @@ func confirm(msg string, defIsYes bool) bool {
 
 	fmt.Printf("%s %s: ", msg, yon)
 
-	_, err := fmt.Scanln(&response)
-	if err != nil {
-		return defIsYes
+	for {
+		b, err = r.ReadByte()
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		if b == ' ' || b == '\t' {
+			continue
+		}
+		if b == '\n' {
+			break
+		}
+		if answer == 0 {
+			answer = b
+		}
 	}
 
-	response = strings.TrimSpace(response)
-
-	if response[0] == 'y' || response[0] == 'Y' {
+	if answer == 'y' || answer == 'Y' {
 		return true
 	}
-	if len(response) == 0 {
+	if answer == 0 {
 		return defIsYes
 	}
 
 	return false
 }
 
-func parsePkgVersion(pkgVersion string) (pkgName, version string, err error) {
+//
+// parsePkgVersion given the following package-version format "pkg@v1.0.0", it
+// will return "pkg" and "v1.0.0".
+//
+func parsePkgVersion(pkgVersion string) (pkgName, version string) {
 	if len(pkgVersion) == 0 {
-		err = ErrPackageName
 		return
 	}
 
@@ -67,14 +101,18 @@ func parsePkgVersion(pkgVersion string) (pkgName, version string, err error) {
 
 	for ; x < len(pkgVersion); x++ {
 		if pkgVersion[x] == sepImportVersion {
+			x++
 			break
 		}
 
 		buf.WriteByte(pkgVersion[x])
 	}
 
-	pkgName = buf.String()
-	buf.Reset()
+	if buf.Len() > 0 {
+		pkgName = buf.String()
+		pkgName = strings.TrimSpace(pkgName)
+		buf.Reset()
+	}
 
 	for ; x < len(pkgVersion); x++ {
 		buf.WriteByte(pkgVersion[x])
@@ -82,6 +120,7 @@ func parsePkgVersion(pkgVersion string) (pkgName, version string, err error) {
 
 	if buf.Len() > 0 {
 		version = buf.String()
+		version = strings.TrimSpace(version)
 	}
 
 	return
