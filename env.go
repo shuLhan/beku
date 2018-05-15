@@ -9,7 +9,6 @@ package beku
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"go/build"
 	"io/ioutil"
@@ -22,31 +21,6 @@ import (
 	"github.com/shuLhan/share/lib/ini"
 )
 
-const (
-	// DefDBName define default database name, where the dependencies will
-	// be saved and loaded.
-	DefDBName = "gopath.deps"
-)
-
-const (
-	envDEBUG = "BEKU_DEBUG"
-	gitDir   = ".git"
-	srcDir   = "src"
-	defDBDir = "/var/beku"
-)
-
-// List of error messages.
-var (
-	ErrGOPATH = errors.New("GOPATH is not defined")
-	ErrGOROOT = errors.New("GOROOT is not defined")
-
-	errDBPackageName = "missing package name, line %d at %s"
-)
-
-var (
-	sectionPackage = "package"
-)
-
 //
 // Env contains the environment of Go including GOROOT source directory,
 // GOPATH source directory, list of packages in GOPATH, list of standard
@@ -55,12 +29,12 @@ var (
 type Env struct {
 	srcDir      string
 	rootSrcDir  string
-	defDB       string
+	defDBFile   string
 	pkgs        []*Package
 	pkgsMissing []string
 	pkgsStd     []string
 	db          *ini.Ini
-	Debug       debugMode
+	dbFile      string
 }
 
 // NewEnvironment will gather all information in user system.
@@ -75,12 +49,12 @@ func NewEnvironment() (env *Env, err error) {
 	}
 
 	debug, _ := strconv.Atoi(os.Getenv(envDEBUG))
+	Debug = debugMode(debug)
 
 	env = &Env{
-		srcDir:     build.Default.GOPATH + "/" + srcDir,
-		rootSrcDir: build.Default.GOROOT + "/" + srcDir,
-		defDB:      build.Default.GOPATH + defDBDir + "/" + DefDBName,
-		Debug:      debugMode(debug),
+		srcDir:     build.Default.GOPATH + "/" + dirSrc,
+		rootSrcDir: build.Default.GOROOT + "/" + dirSrc,
+		defDBFile:  build.Default.GOPATH + dirDB + "/" + DefDBName,
 	}
 
 	err = env.scanStdPackages(env.rootSrcDir)
@@ -89,6 +63,23 @@ func NewEnvironment() (env *Env, err error) {
 	}
 
 	return
+}
+
+//
+// GetPackage will return installed package on system.
+// If no package found, it will return nil.
+//
+func (env *Env) GetPackage(importPath, remoteURL string) *Package {
+	for x := 0; x < len(env.pkgs); x++ {
+		if importPath == env.pkgs[x].ImportPath {
+			return env.pkgs[x]
+		}
+
+		if remoteURL == env.pkgs[x].RemoteURL {
+			return env.pkgs[x]
+		}
+	}
+	return nil
 }
 
 //
@@ -125,6 +116,7 @@ func (env *Env) Scan() (err error) {
 func (env *Env) scanStdPackages(srcPath string) error {
 	fis, err := ioutil.ReadDir(srcPath)
 	if err != nil {
+		err = fmt.Errorf("scanStdPackages: %s", err)
 		return err
 	}
 
@@ -158,12 +150,13 @@ func (env *Env) scanStdPackages(srcPath string) error {
 // (2) skip directory without `.git`
 //
 func (env *Env) scanPackages(rootPath string) (err error) {
-	if env.Debug >= DebugL2 {
+	if Debug >= DebugL2 {
 		log.Println("Scanning", rootPath)
 	}
 
 	fis, err := ioutil.ReadDir(rootPath)
 	if err != nil {
+		err = fmt.Errorf("scanPackages: %s", err)
 		return
 	}
 
@@ -209,19 +202,25 @@ func (env *Env) scanPackages(rootPath string) (err error) {
 }
 
 //
-// newPackage will append the directory at `fullPath` as a package only if its
-// contain version information.
+// newPackage will append the directory at path as a package only if
+// its contain version information.
 //
-func (env *Env) newPackage(fullPath string, vcs VCSMode) (err error) {
-	importPath := strings.TrimPrefix(fullPath, env.srcDir+"/")
+func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
+	pkgName := strings.TrimPrefix(fullPath, env.srcDir+"/")
 
-	pkg, err := NewPackage(env, importPath, fullPath, vcs)
+	pkg := NewPackage(pkgName, pkgName, vcsMode)
+
+	if Debug >= DebugL2 {
+		log.Println("Scanning package:", pkg.ImportPath)
+	}
+
+	err = pkg.Scan()
 	if err != nil {
 		if err == ErrVersion {
 			err = nil
 			return
 		}
-		return fmt.Errorf("%s: %s", importPath, err)
+		return fmt.Errorf("%s: %s", pkgName, err)
 	}
 
 	env.pkgs = append(env.pkgs, pkg)
@@ -256,14 +255,16 @@ func (env *Env) addPackageMissing(importPath string) {
 //
 func (env *Env) Load(file string) (err error) {
 	if len(file) == 0 {
-		file = env.defDB
+		env.dbFile = env.defDBFile
+	} else {
+		env.dbFile = file
 	}
 
-	if env.Debug >= DebugL1 {
-		log.Println("Env.Load:", file)
+	if Debug >= DebugL1 {
+		log.Println("Env.Load:", env.dbFile)
 	}
 
-	env.db, err = ini.Open(file)
+	env.db, err = ini.Open(env.dbFile)
 	if err != nil {
 		return
 	}
@@ -271,7 +272,7 @@ func (env *Env) Load(file string) (err error) {
 	sections := env.db.GetSections(sectionPackage)
 	for _, sec := range sections {
 		if len(sec.Sub) == 0 {
-			log.Println(errDBPackageName, sec.LineNum, file)
+			log.Println(errDBPackageName, sec.LineNum, env.dbFile)
 			continue
 		}
 
@@ -293,7 +294,11 @@ func (env *Env) Load(file string) (err error) {
 //
 func (env *Env) Save(file string) (err error) {
 	if len(file) == 0 {
-		file = env.defDB
+		if len(env.dbFile) == 0 {
+			file = env.defDBFile
+		} else {
+			file = env.dbFile
+		}
 	}
 
 	dir := filepath.Dir(file)
@@ -359,4 +364,159 @@ func (env *Env) String() string {
 	}
 
 	return buf.String()
+}
+
+func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
+	err = curPkg.Fetch()
+	if err != nil {
+		return
+	}
+
+	if len(newPkg.Version) == 0 {
+		newPkg.Version = curPkg.VersionNext
+		newPkg.isTag = curPkg.isTag
+	}
+
+	if Debug >= DebugL1 {
+		log.Println("Sync:\n", newPkg)
+	}
+
+	if curPkg.IsEqual(newPkg) {
+		fmt.Printf("Nothing to update.\n")
+		return
+	}
+
+	fmt.Printf("Updating package from,\n%s\nto,\n%s\n", curPkg, newPkg)
+
+	ok = confirm(msgUpdateView, false)
+	if ok {
+		err = curPkg.BrowseCompare(newPkg)
+		if err != nil {
+			return
+		}
+	}
+
+	ok = confirm(msgUpdateProceed, true)
+	if !ok {
+		return
+	}
+
+	err = curPkg.Update(newPkg)
+
+	return
+}
+
+func (env *Env) install(pkg *Package) (ok bool, err error) {
+	return
+}
+
+//
+// updateMissing will remove missing package if it's already provided by new
+// package and add it as one of package dependencies.
+//
+func (env *Env) updateMissing(newPkg *Package) {
+	for x := 0; x < len(env.pkgs); x++ {
+		env.pkgs[x].UpdateMissingDeps(newPkg)
+	}
+
+	var newMissings []string
+
+	for x := 0; x < len(env.pkgsMissing); x++ {
+		if strings.HasPrefix(env.pkgsMissing[x], newPkg.ImportPath) {
+			continue
+		}
+
+		newMissings = append(newMissings, env.pkgsMissing[x])
+	}
+
+	env.pkgsMissing = newMissings
+}
+
+//
+// Sync will download and install a package including their dependencies. If
+// the importPath is defined, it will be downloaded into that directory.
+//
+// (1) First, we check if pkgName contains version.
+// (2) And then we check if package already installed, by comparing with
+// database.
+// (2.1) If package already installed, do an update.
+// (2.2) If package is not installed, clone the repository into `importPath`,
+// and checkout the latest tag or the latest commit.
+//
+func (env *Env) Sync(pkgName, importPath string) (err error) {
+	var (
+		ok      bool
+		version string
+	)
+
+	// (1)
+	pkgName, version, err = parsePkgVersion(pkgName)
+	if err != nil {
+		return
+	}
+
+	if len(importPath) == 0 {
+		importPath = pkgName
+	}
+
+	newPkg := NewPackage(pkgName, importPath, VCSModeGit)
+
+	if len(version) > 0 {
+		newPkg.Version = version
+		newPkg.setIsTag()
+	}
+
+	// (2)
+	curPkg := env.GetPackage(newPkg.ImportPath, newPkg.RemoteURL)
+	if curPkg != nil {
+		ok, err = env.update(curPkg, newPkg)
+	} else {
+		ok, err = env.install(newPkg)
+	}
+	if err != nil {
+		return
+	}
+	if !ok {
+		return
+	}
+
+	err = env.postSync(curPkg, newPkg)
+
+	return
+}
+
+//
+// (1) Update missing packages.
+// (2) Re-scan package dependencies.
+// (3) Run `go install` only if no missing package.
+//
+func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
+	// (1)
+	env.updateMissing(newPkg)
+
+	// (2)
+	err = curPkg.ScanDeps(env)
+	if err != nil {
+		return
+	}
+
+	// (3)
+	if len(curPkg.DepsMissing) == 0 {
+		err = curPkg.RunGoInstall(true)
+		if err != nil {
+			return
+		}
+	}
+
+	curPkg.ImportPath = newPkg.ImportPath
+	curPkg.RemoteName = newPkg.RemoteName
+	curPkg.RemoteURL = newPkg.RemoteURL
+	curPkg.Version = newPkg.Version
+	curPkg.isTag = newPkg.isTag
+
+	if Debug >= DebugL1 {
+		log.Printf("Package sync-ed:\n%s", curPkg)
+	}
+
+	return
 }

@@ -4,7 +4,7 @@
 
 //
 // Beku is a command line program to manage packages in $GOPATH. Beku provide
-// syntax like `pacman` [1].
+// syntax like `pacman`.
 //
 // Beku read and write the package database into a file named "gopath.deps".
 //
@@ -14,67 +14,92 @@
 // package database, beku will scan entire "$GOPATH/src" and write the
 // package database into "$GOPATH/var/beku/gopath.deps".
 //
+// ## Sync Operation
+//
+//	-S, --sync <pkg[@version]>
+//
+// Synchronizes package. Given a package import path, beku will try to clone
+// the package into GOPATH source directory and set the package version to
+// latest the tag. If no tag found, it will use the latest commit on master
+// branch. A specific version can be set using "@version" suffix.
+//
+// If package already exist, it will reset the HEAD to the version that is set
+// on database file.
+//
+// Sync operation will not install missing dependencies.
+//
+// ### Options
+//
+//	[--into <destination>]
+//
+// This option will install the package import path into custom directory.
+// It is useful if you have the fork of the main package but want to install
+// it to the legacy directory.
+//
+// ### Examples
+//
+// 	beku -S golang.org/x/text
+//
+// Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`,
+// and set their version to the latest commit on branch master.
+//
+// 	beku -S github.com/golang/text --into golang.org/x/text
+//
+// Download package `github.com/golang/text` into
+// `$GOPATH/src/golang.org/x/text`, and set their version to the latest commit
+// on branch master.
+//
+//	beku -S golang.org/x/text@v0.3.0
+//
+// Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
+// and checkout the tag `v0.3.0` as the working version.
+//
+//	beku -S golang.org/x/text@5c1cf69
+//
+// Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
+// and checkout the commit `5c1cf69` as the working version.
+//
+//
+// # Known Limitations
+//
+// * Only work with package hosted with Git on HTTPS or SSH.
+//
+// * Tested only on package hosted on Github.
+//
+// # References
+//
 // [1] https://www.archlinux.org/pacman/
 //
 package main
 
 import (
 	"log"
-
-	"github.com/shuLhan/beku"
 )
 
 const (
-	logPrefix = "beku - "
+	emptyString = ""
 )
 
 var (
-	env *beku.Env
+	cmd *command
 )
 
 func main() {
-	var err error
-
-	log.SetPrefix(logPrefix)
-
-	env, err = beku.NewEnvironment()
+	err := newCommand()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = loadDatabase()
+	switch cmd.op {
+	case opSync:
+		err = cmd.env.Sync(cmd.syncPkg, "")
+	case opSync | opSyncInto:
+		err = cmd.env.Sync(cmd.syncPkg, cmd.syncInto)
+	}
+
 	if err != nil {
-		log.Println("No database found.")
-		log.Println("Initializing database for the first time...")
-		firstTime()
+		log.Fatal(err)
 	}
 
-	if env.Debug >= beku.DebugL1 {
-		log.Printf("Environment: %s", env)
-	}
-}
-
-func loadDatabase() (err error) {
-	err = env.Load(beku.DefDBName)
-	if err == nil {
-		return
-	}
-
-	err = env.Load("")
-
-	return
-}
-
-func firstTime() {
-	err := env.Scan()
-	if err != nil {
-		log.Fatal("Scan:", err)
-	}
-
-	err = env.Save("")
-	if err != nil {
-		log.Fatal("Save:", err)
-	}
-
-	log.Println("Initialization complete.")
+	cmd.env.Save("")
 }

@@ -6,48 +6,15 @@ package beku
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
+	"go/build"
 	"log"
+	"os"
 	"os/exec"
 	"sort"
 	"strings"
 
 	"github.com/shuLhan/share/lib/ini"
-)
-
-const (
-	tagPrefix  = 'v'
-	versionSep = '.'
-	importSep  = "/"
-
-	dbgSkipSelf = "skip self dep"
-	dbgSkipStd  = "skip std dep"
-	dbgMissDep  = "missing dep"
-	dbgLinkDep  = "linking dep"
-
-	gitCfgRemote    = "remote"
-	gitCfgRemoteURL = "url"
-	gitDefRemote    = "origin"
-)
-
-var (
-	// ErrVersion define an error when package have VCS metadata (e.g.
-	// `.git` directory, but did not found any tag or commit.
-	ErrVersion = errors.New("No tag or commit found")
-
-	// ErrRemote define an error when package does not have remote URL.
-	ErrRemote = errors.New("No remote URL found")
-)
-
-var (
-	keyVCSMode     = "vcs"
-	keyRemoteName  = "remote-name"
-	keyRemoteURL   = "remote-url"
-	keyVersion     = "version"
-	keyDeps        = "deps"
-	keyDepsMissing = "missing"
-	keyRequiredBy  = "required-by"
 )
 
 //
@@ -60,6 +27,7 @@ type Package struct {
 	RemoteName  string
 	RemoteURL   string
 	Version     string
+	VersionNext string
 	DepsMissing []string
 	Deps        []string
 	RequiredBy  []string
@@ -68,30 +36,78 @@ type Package struct {
 }
 
 //
-// NewPackage will set the package version, tag status, and dependencies.
+// NewPackage create a package set the package version, tag status, and dependencies.
 //
-func NewPackage(env *Env, importPath, fullPath string, vcs VCSMode) (
-	pkg *Package, err error,
+func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
+	pkg *Package,
 ) {
 	pkg = &Package{
 		ImportPath: importPath,
-		FullPath:   fullPath,
-		vcs:        vcs,
+		RemoteURL:  "https://" + pkgName,
+		FullPath:   build.Default.GOPATH + "/" + dirSrc + "/" + importPath,
+		vcs:        vcsMode,
 	}
 
-	err = pkg.Scan(env)
+	switch vcsMode {
+	case VCSModeGit:
+		pkg.RemoteName = gitDefRemoteName
+	}
 
 	return
 }
 
 //
-// Scan will set the package version, `isTag` status, and remote.
+// BrowseCompare will open a browser, using xdg-open, to compare package
+// version using current package as base.
 //
-func (pkg *Package) Scan(env *Env) (err error) {
-	if env.Debug >= DebugL2 {
-		log.Println("Scanning package:", pkg.ImportPath)
+func (pkg *Package) BrowseCompare(fork *Package) (err error) {
+	switch pkg.vcs {
+	case VCSModeGit:
+		err = pkg.gitBrowseCompare(fork)
 	}
 
+	return
+}
+
+//
+// Fetch will try to update the package and get the latest version (tag or
+// commit).
+//
+func (pkg *Package) Fetch() (err error) {
+	switch pkg.vcs {
+	case VCSModeGit:
+		err = pkg.gitFetch()
+	}
+
+	return
+}
+
+//
+// IsEqual will return true if current package have the same import path,
+// remote name, remote URL, and version with other package; otherwise it will
+// return false.
+//
+func (pkg *Package) IsEqual(other *Package) bool {
+	if pkg.ImportPath != other.ImportPath {
+		return false
+	}
+	if pkg.RemoteName != other.RemoteName {
+		return false
+	}
+	if pkg.RemoteURL != other.RemoteURL {
+		return false
+	}
+	if pkg.Version != other.Version {
+		return false
+	}
+
+	return true
+}
+
+//
+// Scan will set the package version, `isTag` status, and remote.
+//
+func (pkg *Package) Scan() (err error) {
 	switch pkg.vcs {
 	case VCSModeGit:
 		err = pkg.gitScan()
@@ -106,66 +122,6 @@ func (pkg *Package) Scan(env *Env) (err error) {
 	return
 }
 
-func (pkg *Package) gitScan() (err error) {
-	err = pkg.gitScanVersion()
-	if err != nil {
-		return
-	}
-
-	err = pkg.gitScanRemote()
-
-	return
-}
-
-//
-// gitScanVersion will try to,
-// (1) get latest tag from repository first, or
-// (2) if it's fail it will get the commit hash at HEAD.
-//
-// nolint: gas
-func (pkg *Package) gitScanVersion() (err error) {
-	// (1)
-	cmd := exec.Command("git", "-C", pkg.FullPath, "describe", "--tags",
-		"--exact-match")
-
-	ver, err := cmd.Output()
-	if err == nil {
-		goto out
-	}
-
-	// (2)
-	cmd = exec.Command("git", "-C", pkg.FullPath, "rev-parse", "--short",
-		"HEAD")
-
-	ver, err = cmd.Output()
-	if err != nil {
-		return ErrVersion
-	}
-out:
-	pkg.Version = string(bytes.TrimSpace(ver))
-
-	return
-}
-
-func (pkg *Package) gitScanRemote() (err error) {
-	gitConfig := pkg.FullPath + "/" + gitDir + "/config"
-
-	gitIni, err := ini.Open(gitConfig)
-	if err != nil {
-		return
-	}
-
-	url, ok := gitIni.Get(gitCfgRemote, gitDefRemote, gitCfgRemoteURL)
-	if !ok {
-		return ErrRemote
-	}
-
-	pkg.RemoteName = gitDefRemote
-	pkg.RemoteURL = url
-
-	return
-}
-
 //
 // setIsTag will set isTag to true if `Version` prefixed with `v` or contains
 // dot `.` character.
@@ -175,11 +131,11 @@ func (pkg *Package) setIsTag() {
 		pkg.isTag = false
 		return
 	}
-	if pkg.Version[0] == tagPrefix {
+	if pkg.Version[0] == prefixTag {
 		pkg.isTag = true
 		return
 	}
-	if strings.IndexByte(pkg.Version, versionSep) > 0 {
+	if strings.IndexByte(pkg.Version, sepVersion) > 0 {
 		pkg.isTag = true
 	}
 }
@@ -189,12 +145,12 @@ func (pkg *Package) setIsTag() {
 // only external dependencies.
 //
 func (pkg *Package) ScanDeps(env *Env) (err error) {
-	imports, err := pkg.GetRecursiveImports(env)
+	imports, err := pkg.GetRecursiveImports()
 	if err != nil {
 		return
 	}
 
-	if env.Debug >= DebugL2 && len(imports) > 0 {
+	if Debug >= DebugL2 && len(imports) > 0 {
 		log.Println("   imports recursive:", imports)
 	}
 
@@ -209,8 +165,7 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 // GetRecursiveImports will get all import path recursively using `go list`
 // and return it as slice of string without any duplication.
 //
-// nolint: gas
-func (pkg *Package) GetRecursiveImports(env *Env) (
+func (pkg *Package) GetRecursiveImports() (
 	imports []string, err error,
 ) {
 	cmd := exec.Command("go", "list", "-f", `{{ join .Deps "\n"}}`,
@@ -219,6 +174,7 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 
 	out, err := cmd.Output()
 	if err != nil {
+		err = fmt.Errorf("GetRecursiveImports: %s", err)
 		return
 	}
 
@@ -269,15 +225,15 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 
 	// (1)
 	if strings.HasPrefix(importPath, pkg.ImportPath) {
-		if env.Debug >= DebugL2 {
+		if Debug >= DebugL2 {
 			log.Printf("%15s >>> %s\n", dbgSkipSelf, importPath)
 		}
 		return false
 	}
 
 	// (2)
-	pkgs := strings.Split(importPath, importSep)
-	if pkgs[0] == vendorDir {
+	pkgs := strings.Split(importPath, sepImport)
+	if pkgs[0] == dirVendor {
 		return false
 	}
 
@@ -286,7 +242,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		if pkgs[0] != env.pkgsStd[x] {
 			continue
 		}
-		if env.Debug >= DebugL2 {
+		if Debug >= DebugL2 {
 			log.Printf("%15s >>> %s\n", dbgSkipStd, importPath)
 		}
 		return false
@@ -299,16 +255,16 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		}
 
 		// (4.1)
-		pkg.linkDep(env, env.pkgs[x])
-		env.pkgs[x].linkRequiredBy(env, pkg)
+		pkg.linkDep(env.pkgs[x])
+		env.pkgs[x].linkRequiredBy(pkg)
 		return true
 	}
 
-	if env.Debug >= DebugL2 {
+	if Debug >= DebugL2 {
 		log.Printf("%15s >>> %s\n", dbgMissDep, importPath)
 	}
 
-	pkg.DepsMissing = append(pkg.DepsMissing, importPath)
+	pkg.addMissing(importPath)
 	env.addPackageMissing(importPath)
 
 	return true
@@ -317,7 +273,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 //
 // linkDep will link the package `dep` only if it's not exist yet.
 //
-func (pkg *Package) linkDep(env *Env, dep *Package) bool {
+func (pkg *Package) linkDep(dep *Package) bool {
 	for x := 0; x < len(pkg.Deps); x++ {
 		if dep.ImportPath == pkg.Deps[x] {
 			return false
@@ -326,14 +282,14 @@ func (pkg *Package) linkDep(env *Env, dep *Package) bool {
 
 	pkg.Deps = append(pkg.Deps, dep.ImportPath)
 
-	if env.Debug >= DebugL2 {
+	if Debug >= DebugL2 {
 		log.Printf("%15s >>> %s\n", dbgLinkDep, dep.ImportPath)
 	}
 
 	return true
 }
 
-func (pkg *Package) linkRequiredBy(env *Env, parentPkg *Package) bool {
+func (pkg *Package) linkRequiredBy(parentPkg *Package) bool {
 	for x := 0; x < len(pkg.RequiredBy); x++ {
 		if parentPkg.ImportPath == pkg.RequiredBy[x] {
 			return false
@@ -371,6 +327,31 @@ func (pkg *Package) load(sec *ini.Section) {
 }
 
 //
+// RunGoInstall will run go install recursively on package directory.
+//
+func (pkg *Package) RunGoInstall(isVerbose bool) (err error) {
+	log.Println(">>> Running go install ...")
+
+	var opts []string
+
+	if isVerbose {
+		opts = append(opts, "-v")
+	}
+
+	opts = append(opts, "./...")
+
+	cmd := exec.Command("go", "install")
+	cmd.Args = append(cmd.Args, opts...)
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+
+	return
+}
+
+//
 // String return formatted output of the package instance.
 //
 func (pkg *Package) String() string {
@@ -390,4 +371,48 @@ func (pkg *Package) String() string {
 		pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
 
 	return buf.String()
+}
+
+//
+// Update the current package to the new package remote or version.
+//
+func (pkg *Package) Update(newPkg *Package) (err error) {
+	switch pkg.vcs {
+	case VCSModeGit:
+		err = pkg.gitUpdate(newPkg)
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+//
+// UpdateMissingDeps will remove missing package if it's already provided by
+// new package, and add it as one of package dependencies.
+//
+func (pkg *Package) UpdateMissingDeps(newPkg *Package) {
+	var missing []string
+	for x := 0; x < len(pkg.DepsMissing); x++ {
+		if !strings.HasPrefix(pkg.DepsMissing[x], newPkg.ImportPath) {
+			missing = append(missing, pkg.DepsMissing[x])
+			continue
+		}
+
+		pkg.linkDep(newPkg)
+		newPkg.linkRequiredBy(pkg)
+	}
+
+	pkg.DepsMissing = missing
+}
+
+func (pkg *Package) addMissing(importPath string) {
+	for x := 0; x < len(pkg.DepsMissing); x++ {
+		if pkg.DepsMissing[x] == importPath {
+			return
+		}
+	}
+
+	pkg.DepsMissing = append(pkg.DepsMissing, importPath)
 }
