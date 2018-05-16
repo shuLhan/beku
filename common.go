@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -37,7 +38,7 @@ func IsIgnoredDir(name string) bool {
 // If "defIsYes" is true and answer is empty (only new line), then it will
 // return true.
 //
-func confirm(in *os.File, msg string, defIsYes bool) bool {
+func confirm(in io.Reader, msg string, defIsYes bool) bool {
 	var (
 		r         *bufio.Reader
 		b, answer byte

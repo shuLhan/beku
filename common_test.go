@@ -1,8 +1,8 @@
 package beku
 
 import (
+	"io"
 	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/shuLhan/share/lib/test"
@@ -111,7 +111,7 @@ func TestConfirm(t *testing.T) {
 
 		in.WriteString(c.answer + "\n")
 
-		_, err = in.Seek(0, os.SEEK_SET)
+		_, err = in.Seek(0, io.SeekStart)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -125,7 +125,7 @@ func TestConfirm(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = in.Seek(0, os.SEEK_SET)
+		_, err = in.Seek(0, io.SeekStart)
 		if err != nil {
 			t.Fatal(err)
 		}
