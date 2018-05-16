@@ -10,7 +10,12 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
+const (
+	testGitRepo = "github.com/shuLhan/beku_test"
+)
+
 var (
+	testEnv    *Env
 	gitCurPkg  *Package
 	gitNewPkg  *Package
 	testStdout *os.File
@@ -244,6 +249,40 @@ func testGitScan(t *testing.T) {
 	}
 }
 
+func testGitScanDeps(t *testing.T) {
+	cases := []struct {
+		expErr         string
+		expDeps        []string
+		expDepsMissing []string
+		expPkgsMissing []string
+	}{{
+		expDepsMissing: []string{
+			"github.com/shuLhan/share/lib/text",
+		},
+		expPkgsMissing: []string{
+			"github.com/shuLhan/share/lib/text",
+		},
+	}}
+
+	var err error
+
+	for _, c := range cases {
+		gitCurPkg.Deps = nil
+		gitCurPkg.DepsMissing = nil
+
+		err = gitCurPkg.ScanDeps(testEnv)
+		if err != nil {
+			test.Assert(t, "err", c.expErr, err.Error(), true)
+		}
+
+		test.Assert(t, "Deps", c.expDeps, gitCurPkg.Deps, true)
+		test.Assert(t, "DepsMissing", c.expDepsMissing,
+			gitCurPkg.DepsMissing, true)
+		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing,
+			testEnv.pkgsMissing, true)
+	}
+}
+
 func TestGit(t *testing.T) {
 	orgGOPATH := build.Default.GOPATH
 
@@ -264,13 +303,20 @@ func TestGit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	gitCurPkg = NewPackage("git", "git", VCSModeGit)
-	gitNewPkg = NewPackage("git", "git", VCSModeGit)
+	testEnv, err = NewEnvironment()
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	gitCurPkg = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
+	gitNewPkg = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
+
+	t.Logf("test env : %+v\n", *testEnv)
 	t.Logf("gitCurPkg: %+v\n", *gitCurPkg)
 	t.Logf("gitNewPkg: %+v\n", *gitNewPkg)
 
 	t.Run("CompareVersion", testGitCompareVersion)
 	t.Run("Fetch", testGitFetch)
 	t.Run("Scan", testGitScan)
+	t.Run("ScanDeps", testGitScanDeps)
 }
