@@ -89,21 +89,27 @@ Use '--' to separate paths from revisions, like this:
 	}, {
 		desc:       "With empty on new version",
 		curVersion: "v0.1.0",
-		expStdout: `582b912 Add feature B.
+		expStdout: `c9f69fb Rename test to main.go
+582b912 Add feature B.
 ec65455 Add feature A.
 `,
 	}, {
 		desc:       "With empty on current version #1",
 		newVersion: "v0.1.0",
-		expStdout: `582b912 Add feature B.
+		expStdout: `c9f69fb Rename test to main.go
+582b912 Add feature B.
 ec65455 Add feature A.
 `,
 	}, {
 		desc:       "With empty on current version #2",
 		newVersion: "v0.2.0",
+		expStdout: `c9f69fb Rename test to main.go
+`,
 	}, {
 		desc:       "With empty on new version (latest tag)",
 		curVersion: "v0.2.0",
+		expStdout: `c9f69fb Rename test to main.go
+`,
 	}, {
 		desc:       "With valid versions",
 		curVersion: "v0.1.0",
@@ -176,7 +182,7 @@ func testGitFetch(t *testing.T) {
 		desc:           "With commit hash",
 		curVersion:     "d6ad9da",
 		expErr:         "gitGetCommit: exit status 128",
-		expVersionNext: "582b912",
+		expVersionNext: "c9f69fb",
 		expStdout: `Fetching origin
 `,
 	}}
@@ -208,6 +214,36 @@ func testGitFetch(t *testing.T) {
 	}
 }
 
+func testGitScan(t *testing.T) {
+	cases := []struct {
+		desc       string
+		expErr     string
+		expVersion string
+		expIsTag   bool
+	}{{
+		desc:       "Using current package",
+		expVersion: "c9f69fb",
+		expIsTag:   false,
+	}}
+
+	var err error
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		gitCurPkg.Version = ""
+		gitCurPkg.isTag = false
+
+		err = gitCurPkg.Scan()
+		if err != nil {
+			test.Assert(t, "err", c.expErr, err, true)
+			continue
+		}
+
+		test.Assert(t, "Version", c.expVersion, gitCurPkg.Version, true)
+		test.Assert(t, "isTag", c.expIsTag, gitCurPkg.isTag, true)
+	}
+}
+
 func TestGit(t *testing.T) {
 	orgGOPATH := build.Default.GOPATH
 
@@ -236,4 +272,5 @@ func TestGit(t *testing.T) {
 
 	t.Run("CompareVersion", testGitCompareVersion)
 	t.Run("Fetch", testGitFetch)
+	t.Run("Scan", testGitScan)
 }

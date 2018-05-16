@@ -55,6 +55,10 @@ func (pkg *Package) gitFetch() (err error) {
 	return
 }
 
+//
+// gitGetCommit will try to get the latest commit hash from "ref"
+// (origin/master).
+//
 func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
 	cmd := exec.Command("git", "rev-parse", "--short", ref)
 	cmd.Dir = pkg.FullPath
@@ -70,6 +74,9 @@ func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
 	return
 }
 
+//
+// gitGetTag will try to get the current tag from HEAD.
+//
 func (pkg *Package) gitGetTag() (tag string, err error) {
 	cmd := exec.Command("git", "describe", "--tags", "--exact-match")
 	cmd.Dir = pkg.FullPath
@@ -136,6 +143,9 @@ func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 	return
 }
 
+//
+// gitScan will scan the package version and remote URL.
+//
 func (pkg *Package) gitScan() (err error) {
 	pkg.Version, err = pkg.gitScanVersion()
 	if err != nil {

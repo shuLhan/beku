@@ -107,7 +107,8 @@ func (pkg *Package) IsEqual(other *Package) bool {
 }
 
 //
-// Scan will set the package version, `isTag` status, and remote.
+// Scan will set the package version, `isTag` status, and remote URL using
+// metadata in package repository.
 //
 func (pkg *Package) Scan() (err error) {
 	switch pkg.vcs {
