@@ -6,33 +6,22 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/shuLhan/share/lib/ini"
 )
 
-func (pkg *Package) gitBrowseCompare(fork *Package) (err error) {
-	forkRemoteURL := strings.Split(fork.RemoteURL, "/")
-	if len(forkRemoteURL) < 4 {
-		err = fmt.Errorf("gitBrowseCompare: %s", ErrRemote)
-		return
-	}
-
-	cmpURL := pkg.RemoteURL + "/compare/" + pkg.Version + "..."
-
-	if pkg.RemoteURL != fork.RemoteURL {
-		cmpURL += forkRemoteURL[3] + ":" + fork.Version
-	} else {
-		cmpURL += fork.Version
-	}
-
-	cmd := exec.Command("xdg-open", cmpURL)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+//
+// gitCompareVersion compare the version of current package with new package.
+//
+func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
+	cmd := exec.Command("git", "log", "--oneline", pkg.Version+"..."+newPkg.Version)
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
 
 	err = cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("gitBrowseCompare: %s", err)
+		err = fmt.Errorf("gitCompareVersion: %s", err)
 		return
 	}
 

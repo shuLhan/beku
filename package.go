@@ -57,13 +57,12 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 }
 
 //
-// BrowseCompare will open a browser, using xdg-open, to compare package
-// version using current package as base.
+// CompareVersion will compare package version using current package as base.
 //
-func (pkg *Package) BrowseCompare(fork *Package) (err error) {
+func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 	switch pkg.vcs {
 	case VCSModeGit:
-		err = pkg.gitBrowseCompare(fork)
+		err = pkg.gitCompareVersion(newPkg)
 	}
 
 	return

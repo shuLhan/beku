@@ -390,7 +390,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 
 	ok = confirm(os.Stdin, msgUpdateView, false)
 	if ok {
-		err = curPkg.BrowseCompare(newPkg)
+		err = curPkg.CompareVersion(newPkg)
 		if err != nil {
 			return
 		}

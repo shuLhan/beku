@@ -2,6 +2,7 @@ package beku
 
 import (
 	"errors"
+	"os"
 )
 
 const (
@@ -24,7 +25,7 @@ const (
 	envDEBUG = "BEKU_DEBUG"
 
 	msgUpdateProceed = "Proceed with update?"
-	msgUpdateView    = "Compare changes on browser?"
+	msgUpdateView    = "View commit logs?"
 
 	prefixTag = 'v'
 
@@ -59,6 +60,9 @@ var (
 )
 
 var (
+	defStdout = os.Stdout
+	defStderr = os.Stderr
+
 	sectionPackage = "package"
 
 	keyDeps        = "deps"
