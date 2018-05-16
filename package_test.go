@@ -183,3 +183,45 @@ func TestAddDep(t *testing.T) {
 	gitCurPkg.Deps = nil
 	gitCurPkg.DepsMissing = nil
 }
+
+func TestLinkRequiredBy(t *testing.T) {
+	cases := []struct {
+		desc          string
+		parentPkg     *Package
+		exp           bool
+		expRequiredBy []string
+	}{{
+		desc: "Not exist yet",
+		parentPkg: &Package{
+			ImportPath: "github.com/shuLhan/share",
+		},
+		exp: true,
+		expRequiredBy: []string{
+			"github.com/shuLhan/share",
+		},
+	}, {
+		desc: "Already exist",
+		parentPkg: &Package{
+			ImportPath: "github.com/shuLhan/share",
+		},
+		expRequiredBy: []string{
+			"github.com/shuLhan/share",
+		},
+	}}
+
+	gitCurPkg.RequiredBy = nil
+
+	var got bool
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got = gitCurPkg.linkRequiredBy(c.parentPkg)
+
+		test.Assert(t, "return value", c.exp, got, true)
+		test.Assert(t, "RequiredBy", c.expRequiredBy,
+			gitCurPkg.RequiredBy, true)
+	}
+
+	gitCurPkg.RequiredBy = nil
+}

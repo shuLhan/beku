@@ -274,6 +274,10 @@ func (pkg *Package) linkDep(dep *Package) bool {
 	return true
 }
 
+//
+// linkRequiredBy add the parent package as requirement by current package,
+// only if it's exist yet.
+//
 func (pkg *Package) linkRequiredBy(parentPkg *Package) bool {
 	for x := 0; x < len(pkg.RequiredBy); x++ {
 		if parentPkg.ImportPath == pkg.RequiredBy[x] {
