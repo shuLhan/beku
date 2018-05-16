@@ -469,7 +469,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 
 	if len(version) > 0 {
 		newPkg.Version = version
-		newPkg.setIsTag()
+		newPkg.isTag = IsTagVersion(version)
 	}
 
 	// (2)

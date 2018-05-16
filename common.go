@@ -32,6 +32,24 @@ func IsIgnoredDir(name string) bool {
 }
 
 //
+// IsTagVersion return true if "version" prefixed with "v" or contains at
+// least one dot "." character.
+//
+func IsTagVersion(version string) bool {
+	version = strings.TrimSpace(version)
+	if len(version) == 0 {
+		return false
+	}
+	if version[0] == prefixTag && len(version) > 1 {
+		return true
+	}
+	if strings.IndexByte(version, sepVersion) > 0 {
+		return true
+	}
+	return false
+}
+
+//
 // confirm display a question to standard output and read for answer
 // from "in" for simple "y" or "n" answer.
 // If "in" is nil, it will set to standard input.

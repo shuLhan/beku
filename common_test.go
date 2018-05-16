@@ -55,6 +55,41 @@ func TestIsIgnoredDir(t *testing.T) {
 	}
 }
 
+func TestIsTagVersion(t *testing.T) {
+	cases := []struct {
+		ver string
+		exp bool
+	}{{
+		ver: "",
+	}, {
+		ver: " v",
+	}, {
+		ver: "v1",
+		exp: true,
+	}, {
+		ver: "1",
+		exp: false,
+	}, {
+		ver: "1.0",
+		exp: true,
+	}, {
+		ver: "alpha",
+		exp: false,
+	}, {
+		ver: "abcdef1",
+		exp: false,
+	}}
+
+	var got bool
+	for _, c := range cases {
+		t.Log(c)
+
+		got = IsTagVersion(c.ver)
+
+		test.Assert(t, "", c.exp, got, true)
+	}
+}
+
 func TestConfirm(t *testing.T) {
 	cases := []struct {
 		defIsYes bool

@@ -120,27 +120,9 @@ func (pkg *Package) Scan() (err error) {
 		return
 	}
 
-	pkg.setIsTag()
+	pkg.isTag = IsTagVersion(pkg.Version)
 
 	return
-}
-
-//
-// setIsTag will set isTag to true if `Version` prefixed with `v` or contains
-// dot `.` character.
-//
-func (pkg *Package) setIsTag() {
-	if len(pkg.Version) == 0 {
-		pkg.isTag = false
-		return
-	}
-	if pkg.Version[0] == prefixTag {
-		pkg.isTag = true
-		return
-	}
-	if strings.IndexByte(pkg.Version, sepVersion) > 0 {
-		pkg.isTag = true
-	}
 }
 
 //
@@ -318,7 +300,7 @@ func (pkg *Package) load(sec *ini.Section) {
 			pkg.RemoteURL = v.Value
 		case keyVersion:
 			pkg.Version = v.Value
-			pkg.setIsTag()
+			pkg.isTag = IsTagVersion(pkg.Version)
 		case keyDeps:
 			pkg.Deps = append(pkg.Deps, v.Value)
 		case keyDepsMissing:
