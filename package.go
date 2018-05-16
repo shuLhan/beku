@@ -199,8 +199,8 @@ func (pkg *Package) GetRecursiveImports() (
 // (4.1) if match found, link the package deps to existing package instance.
 // (4.2) If no match found, add to `depsMissing` as string
 //
-// It will return true if import path is added as link or missing; otherwise
-// it will return false.
+// It will return true if import path is added as dependencies or as missing
+// one; otherwise it will return false.
 //
 func (pkg *Package) addDep(env *Env, importPath string) bool {
 	// (0)
