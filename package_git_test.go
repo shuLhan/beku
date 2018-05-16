@@ -34,6 +34,22 @@ func testInitOutput() (err error) {
 	return
 }
 
+func testGetOutput(t *testing.T) (stdout, stderr string) {
+	bout, err := ioutil.ReadAll(defStdout)
+	if err != nil {
+		t.Fatal(err)
+	}
+	berr, err := ioutil.ReadAll(testStderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stdout = string(bout)
+	stderr = string(berr)
+
+	return
+}
+
 func testResetOutput(t *testing.T, truncate bool) {
 	_, err := testStdout.Seek(0, io.SeekStart)
 	if err != nil {
@@ -106,7 +122,6 @@ ec65455 Add feature A.
 
 	var (
 		err            error
-		bout, berr     []byte
 		stdout, stderr string
 	)
 
@@ -122,19 +137,70 @@ ec65455 Add feature A.
 		}
 
 		testResetOutput(t, false)
+		stdout, stderr = testGetOutput(t)
 
-		bout, err = ioutil.ReadAll(defStdout)
+		test.Assert(t, "stdout", c.expStdout, stdout, true)
+		test.Assert(t, "stderr", c.expStderr, stderr, true)
+
+		testResetOutput(t, true)
+	}
+}
+
+//
+// WARNING: This test require internet connection.
+//
+func testGitFetch(t *testing.T) {
+	cases := []struct {
+		desc           string
+		curVersion     string
+		isTag          bool
+		expErr         string
+		expVersionNext string
+		expStdout      string
+		expStderr      string
+	}{{
+		desc:           "With tag #1",
+		curVersion:     "v0.1.0",
+		isTag:          true,
+		expVersionNext: "v0.2.0",
+		expStdout: `Fetching origin
+`,
+	}, {
+		desc:           "With tag #2",
+		curVersion:     "v0.2.0",
+		isTag:          true,
+		expVersionNext: "v0.2.0",
+		expStdout: `Fetching origin
+`,
+	}, {
+		desc:           "With commit hash",
+		curVersion:     "d6ad9da",
+		expErr:         "gitGetCommit: exit status 128",
+		expVersionNext: "582b912",
+		expStdout: `Fetching origin
+`,
+	}}
+
+	var (
+		err            error
+		stdout, stderr string
+	)
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		gitCurPkg.Version = c.curVersion
+		gitCurPkg.isTag = c.isTag
+
+		err = gitCurPkg.Fetch()
 		if err != nil {
-			t.Fatal(err)
-		}
-		berr, err = ioutil.ReadAll(testStderr)
-		if err != nil {
-			t.Fatal(err)
+			test.Assert(t, "err", c.expErr, err.Error(), true)
 		}
 
-		stdout = string(bout)
-		stderr = string(berr)
+		testResetOutput(t, false)
+		stdout, stderr = testGetOutput(t)
 
+		test.Assert(t, "VersionNext", c.expVersionNext, gitCurPkg.VersionNext, true)
 		test.Assert(t, "stdout", c.expStdout, stdout, true)
 		test.Assert(t, "stderr", c.expStderr, stderr, true)
 
@@ -169,4 +235,5 @@ func TestGit(t *testing.T) {
 	t.Logf("gitNewPkg: %+v\n", *gitNewPkg)
 
 	t.Run("CompareVersion", testGitCompareVersion)
+	t.Run("Fetch", testGitFetch)
 }

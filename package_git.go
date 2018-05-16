@@ -28,11 +28,16 @@ func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
 	return
 }
 
+//
+// gitFetch will fetch the latest commit from remote. On success, it will set
+// the package next version to latest tag (if current package is using tag) or
+// to latest commit otherwise.
+//
 func (pkg *Package) gitFetch() (err error) {
 	cmd := exec.Command("git", "fetch", "--all")
 	cmd.Dir = pkg.FullPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
 
 	err = cmd.Run()
 	if err != nil {
