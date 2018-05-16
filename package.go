@@ -87,6 +87,9 @@ func (pkg *Package) Fetch() (err error) {
 // return false.
 //
 func (pkg *Package) IsEqual(other *Package) bool {
+	if other == nil {
+		return false
+	}
 	if pkg.ImportPath != other.ImportPath {
 		return false
 	}
