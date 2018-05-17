@@ -3,6 +3,7 @@ package beku
 import (
 	"testing"
 
+	"github.com/shuLhan/share/lib/ini"
 	"github.com/shuLhan/share/lib/test"
 )
 
@@ -224,4 +225,114 @@ func TestPushRequiredBy(t *testing.T) {
 	}
 
 	gitCurPkg.RequiredBy = nil
+}
+
+func TestPackageLoad(t *testing.T) {
+	cases := []struct {
+		desc    string
+		pkgName string
+		exp     *Package
+	}{{
+		desc:    "With invalid vcs mode",
+		pkgName: "test_vcs",
+		exp: &Package{
+			vcs: VCSModeGit,
+		},
+	}, {
+		desc:    "Duplicate remote name",
+		pkgName: "dup_remote_name",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+		},
+	}, {
+		desc:    "Duplicate remote URL",
+		pkgName: "dup_remote_url",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+			RemoteURL:  "remote url 2",
+		},
+	}, {
+		desc:    "Duplicate version",
+		pkgName: "dup_version",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+			RemoteURL:  "remote url 2",
+			Version:    "v1.1.0",
+			isTag:      true,
+		},
+	}, {
+		desc:    "Version not tag",
+		pkgName: "version_not_tag",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+			RemoteURL:  "remote url 2",
+			Version:    "12345678",
+			isTag:      false,
+		},
+	}, {
+		desc:    "With deps",
+		pkgName: "deps",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+			RemoteURL:  "remote url 2",
+			Version:    "12345678",
+			isTag:      false,
+			Deps: []string{
+				"dep/1",
+				"dep/2",
+				"dep/3",
+			},
+		},
+	}, {
+		desc:    "With missing deps",
+		pkgName: "deps_missing",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+			RemoteURL:  "remote url 2",
+			Version:    "12345678",
+			isTag:      false,
+			DepsMissing: []string{
+				"missing/1",
+				"missing/2",
+				"missing/3",
+			},
+		},
+	}, {
+		desc:    "With required-by",
+		pkgName: "required-by",
+		exp: &Package{
+			vcs:        VCSModeGit,
+			RemoteName: "last",
+			RemoteURL:  "remote url 2",
+			Version:    "12345678",
+			isTag:      false,
+			RequiredBy: []string{
+				"required-by/3",
+				"required-by/2",
+				"required-by/1",
+			},
+		},
+	}}
+
+	cfg, err := ini.Open("testdata/package_load.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		pkg := new(Package)
+		sec := cfg.GetSection(sectionPackage, c.pkgName)
+
+		pkg.load(sec)
+
+		test.Assert(t, "", c.exp, pkg, true)
+	}
 }
