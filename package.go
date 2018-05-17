@@ -240,8 +240,8 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		}
 
 		// (4.1)
-		pkg.linkDep(env.pkgs[x])
-		env.pkgs[x].linkRequiredBy(pkg)
+		pkg.pushDep(env.pkgs[x].ImportPath)
+		env.pkgs[x].pushRequiredBy(pkg.ImportPath)
 		return true
 	}
 
@@ -249,53 +249,23 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		log.Printf("%15s >>> %s\n", dbgMissDep, importPath)
 	}
 
-	pkg.addMissing(importPath)
+	pkg.pushMissing(importPath)
 	env.addPackageMissing(importPath)
 
 	return true
 }
 
 //
-// linkDep will link the package `dep` only if it's not exist yet.
+// load package metadata from database (INI Section).
 //
-func (pkg *Package) linkDep(dep *Package) bool {
-	for x := 0; x < len(pkg.Deps); x++ {
-		if dep.ImportPath == pkg.Deps[x] {
-			return false
-		}
-	}
-
-	pkg.Deps = append(pkg.Deps, dep.ImportPath)
-
-	if Debug >= DebugL2 {
-		log.Printf("%15s >>> %s\n", dbgLinkDep, dep.ImportPath)
-	}
-
-	return true
-}
-
-//
-// linkRequiredBy add the parent package as requirement by current package,
-// only if it's exist yet.
-//
-func (pkg *Package) linkRequiredBy(parentPkg *Package) bool {
-	for x := 0; x < len(pkg.RequiredBy); x++ {
-		if parentPkg.ImportPath == pkg.RequiredBy[x] {
-			return false
-		}
-	}
-
-	pkg.RequiredBy = append(pkg.RequiredBy, parentPkg.ImportPath)
-
-	return true
-}
-
 func (pkg *Package) load(sec *ini.Section) {
 	for _, v := range sec.Vars {
 		switch v.KeyLower {
 		case keyVCSMode:
 			switch v.Value {
 			case valVCSModeGit:
+				pkg.vcs = VCSModeGit
+			default:
 				pkg.vcs = VCSModeGit
 			}
 		case keyRemoteName:
@@ -306,11 +276,11 @@ func (pkg *Package) load(sec *ini.Section) {
 			pkg.Version = v.Value
 			pkg.isTag = IsTagVersion(pkg.Version)
 		case keyDeps:
-			pkg.Deps = append(pkg.Deps, v.Value)
+			pkg.pushDep(v.Value)
 		case keyDepsMissing:
-			pkg.DepsMissing = append(pkg.DepsMissing, v.Value)
+			pkg.pushMissing(v.Value)
 		case keyRequiredBy:
-			pkg.RequiredBy = append(pkg.RequiredBy, v.Value)
+			pkg.pushRequiredBy(v.Value)
 		}
 	}
 }
@@ -389,19 +359,59 @@ func (pkg *Package) UpdateMissingDeps(newPkg *Package) {
 			continue
 		}
 
-		pkg.linkDep(newPkg)
-		newPkg.linkRequiredBy(pkg)
+		pkg.pushDep(newPkg.ImportPath)
+		newPkg.pushRequiredBy(pkg.ImportPath)
 	}
 
 	pkg.DepsMissing = missing
 }
 
-func (pkg *Package) addMissing(importPath string) {
+//
+// pushDep will append import path into list of dependencies only if it's not
+// exist. If import path exist it will return false.
+//
+func (pkg *Package) pushDep(importPath string) bool {
+	for x := 0; x < len(pkg.Deps); x++ {
+		if importPath == pkg.Deps[x] {
+			return false
+		}
+	}
+
+	pkg.Deps = append(pkg.Deps, importPath)
+
+	if Debug >= DebugL2 {
+		log.Printf("%15s >>> %s\n", dbgLinkDep, importPath)
+	}
+
+	return true
+}
+
+//
+// pushMissing import path only if not exist yet.
+//
+func (pkg *Package) pushMissing(importPath string) bool {
 	for x := 0; x < len(pkg.DepsMissing); x++ {
 		if pkg.DepsMissing[x] == importPath {
-			return
+			return false
 		}
 	}
 
 	pkg.DepsMissing = append(pkg.DepsMissing, importPath)
+
+	return true
+}
+
+//
+// pushRequiredBy add the import path as required by current package.
+//
+func (pkg *Package) pushRequiredBy(importPath string) bool {
+	for x := 0; x < len(pkg.RequiredBy); x++ {
+		if importPath == pkg.RequiredBy[x] {
+			return false
+		}
+	}
+
+	pkg.RequiredBy = append(pkg.RequiredBy, importPath)
+
+	return true
 }

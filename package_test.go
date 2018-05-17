@@ -184,7 +184,7 @@ func TestAddDep(t *testing.T) {
 	gitCurPkg.DepsMissing = nil
 }
 
-func TestLinkRequiredBy(t *testing.T) {
+func TestPushRequiredBy(t *testing.T) {
 	cases := []struct {
 		desc          string
 		parentPkg     *Package
@@ -216,7 +216,7 @@ func TestLinkRequiredBy(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got = gitCurPkg.linkRequiredBy(c.parentPkg)
+		got = gitCurPkg.pushRequiredBy(c.parentPkg.ImportPath)
 
 		test.Assert(t, "return value", c.exp, got, true)
 		test.Assert(t, "RequiredBy", c.expRequiredBy,
