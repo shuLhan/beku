@@ -9,10 +9,21 @@ import (
 	"github.com/shuLhan/beku"
 )
 
+const (
+	emptyString = ""
+
+	flagHelpUsage     = "Show the short usage."
+	flagQueryUsage    = "Query the package database."
+	flagSyncUsage     = "Synchronize `package`."
+	flagSyncIntoUsage = "Package download `directory`."
+)
+
 type command struct {
 	op       operation
 	env      *beku.Env
 	help     bool
+	query    bool
+	queryPkg []string
 	syncPkg  string
 	syncInto string
 }
@@ -21,9 +32,11 @@ func (cmd *command) usage() {
 	help := `usage: beku <operation> [...]
 operations:
 	beku {-h|--help}
-		Show the short usage.
+		` + flagHelpUsage + `
+	beku {-Q|--query} [pkg ...]
+		` + flagQueryUsage + `
 	beku {-S|--sync} <pkg@version> [--into <directory>]
-		Synchronize package. Install a package into "$GOPATH/src".
+		` + flagSyncUsage + `
 `
 
 	fmt.Print(help)
@@ -34,13 +47,16 @@ operations:
 func (cmd *command) setFlags() {
 	flag.Usage = cmd.usage
 
-	flag.BoolVar(&cmd.help, "h", false, "Show the short usage.")
-	flag.BoolVar(&cmd.help, "help", false, "Show the short usage.")
+	flag.BoolVar(&cmd.help, "h", false, flagHelpUsage)
+	flag.BoolVar(&cmd.help, "help", false, flagHelpUsage)
 
-	flag.StringVar(&cmd.syncPkg, "sync", emptyString, "Synchronize `package`.")
-	flag.StringVar(&cmd.syncPkg, "S", emptyString, "Synchronize `package`.")
+	flag.BoolVar(&cmd.query, "Q", false, flagQueryUsage)
+	flag.BoolVar(&cmd.query, "query", false, flagQueryUsage)
 
-	flag.StringVar(&cmd.syncInto, "into", emptyString, "Package download `directory`.")
+	flag.StringVar(&cmd.syncPkg, "S", emptyString, flagSyncUsage)
+	flag.StringVar(&cmd.syncPkg, "sync", emptyString, flagSyncUsage)
+
+	flag.StringVar(&cmd.syncInto, "into", emptyString, flagSyncIntoUsage)
 
 	flag.Parse()
 }
@@ -54,6 +70,14 @@ func (cmd *command) checkFlags() {
 	// (0)
 	if cmd.help {
 		cmd.usage()
+	}
+
+	args := flag.Args()
+
+	if cmd.query {
+		cmd.op = opQuery
+		cmd.queryPkg = args
+		return
 	}
 
 	if len(cmd.syncPkg) > 0 {

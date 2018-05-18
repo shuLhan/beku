@@ -2,8 +2,10 @@ package main
 
 type operation uint
 
+const opNone operation = 0
+
 const (
-	opNone operation = 0
-	opSync operation = 1 << iota
+	opQuery operation = 1 << iota
+	opSync
 	opSyncInto
 )

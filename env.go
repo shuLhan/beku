@@ -295,6 +295,25 @@ func (env *Env) Load(file string) (err error) {
 }
 
 //
+// Query the package database. If package is not empty, it will only show the
+// information about that package.
+//
+func (env *Env) Query(pkgs []string) {
+	for x := 0; x < len(env.pkgs); x++ {
+		if len(pkgs) == 0 {
+			fmt.Println(env.pkgs[x].ImportPath, env.pkgs[x].Version)
+			continue
+		}
+
+		for y := 0; y < len(pkgs); y++ {
+			if env.pkgs[x].ImportPath == pkgs[y] {
+				fmt.Println(env.pkgs[x].ImportPath, env.pkgs[x].Version)
+			}
+		}
+	}
+}
+
+//
 // Save the dependencies to `file`.
 //
 func (env *Env) Save(file string) (err error) {
@@ -306,7 +325,9 @@ func (env *Env) Save(file string) (err error) {
 		}
 	}
 
-	fmt.Println(">>> Saving db", file)
+	if Debug >= DebugL1 {
+		fmt.Println(">>> Saving db", file)
+	}
 
 	dir := filepath.Dir(file)
 

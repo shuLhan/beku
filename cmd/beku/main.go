@@ -14,6 +14,13 @@
 // package database, beku will scan entire "$GOPATH/src" and write the
 // package database into "$GOPATH/var/beku/gopath.deps".
 //
+// ## Query Operation
+//
+//	-Q, --query [pkg ...]
+//
+// Query the package database.
+//
+//
 // ## Sync Operation
 //
 //	-S, --sync <pkg[@version]>
@@ -38,12 +45,12 @@
 //
 // ### Examples
 //
-// 	beku -S golang.org/x/text
+//	beku -S golang.org/x/text
 //
 // Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`,
 // and set their version to the latest commit on branch master.
 //
-// 	beku -S github.com/golang/text --into golang.org/x/text
+//	beku -S github.com/golang/text --into golang.org/x/text
 //
 // Download package `github.com/golang/text` into
 // `$GOPATH/src/golang.org/x/text`, and set their version to the latest commit
@@ -76,10 +83,6 @@ import (
 	"log"
 )
 
-const (
-	emptyString = ""
-)
-
 var (
 	cmd *command
 )
@@ -91,6 +94,8 @@ func main() {
 	}
 
 	switch cmd.op {
+	case opQuery:
+		cmd.env.Query(cmd.queryPkg)
 	case opSync:
 		err = cmd.env.Sync(cmd.syncPkg, "")
 	case opSync | opSyncInto:

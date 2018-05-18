@@ -22,9 +22,16 @@ directory. If no file found, it will try to open
 package database, beku will scan entire "$GOPATH/src" and write the
 package database into "$GOPATH/var/beku/gopath.deps".
 
+## Query Operation
+
+	-Q, --query [pkg ...]
+
+Query the package database.
+
+
 ## Sync Operation
 
-     -S, --sync <pkg[@version]>
+	-S, --sync <pkg[@version]>
 
 Synchronizes package. Given a package import path, beku will try to clone
 the package into GOPATH source directory and set the package version to
@@ -38,7 +45,7 @@ Sync operation will not install missing dependencies.
 
 ### Options
 
-     [--into <destination>]
+	[--into <destination>]
 
 This option will install the package import path into custom directory.
 It is useful if you have the fork of the main package but want to install
@@ -57,12 +64,12 @@ Download package `github.com/golang/text` into
 `$GOPATH/src/golang.org/x/text`, and set their version to the latest commit
 on branch master.
 
-     beku -S golang.org/x/text@v0.3.0
+	beku -S golang.org/x/text@v0.3.0
 
 Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 and checkout the tag `v0.3.0` as the working version.
 
-     beku -S golang.org/x/text@5c1cf69
+	beku -S golang.org/x/text@5c1cf69
 
 Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 and checkout the commit `5c1cf69` as the working version.
