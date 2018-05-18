@@ -11,7 +11,8 @@ CPU_PROF:=cpu.prof
 MEM_PROF:=mem.prof
 
 .PHONY: all install lint
-.PHONE: test test.prof coverbrowse
+.PHONY: test test.prof coverbrowse
+.PHONY: clean distclean
 
 all: install
 
@@ -34,3 +35,11 @@ coverbrowse: $(COVER_HTML)
 
 lint:
 	gometalinter ./...
+
+clean:
+	rm -rf $(COVER_OUT) $(COVER_HTML)
+	rm -f ./**/${CPU_PROF}
+	rm -f ./**/${MEM_PROF}
+
+distclean: clean
+	go clean -i ./...
