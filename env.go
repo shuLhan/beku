@@ -421,7 +421,7 @@ func (env *Env) install(pkg *Package) (ok bool, err error) {
 //
 func (env *Env) updateMissing(newPkg *Package) {
 	for x := 0; x < len(env.pkgs); x++ {
-		env.pkgs[x].UpdateMissingDeps(newPkg)
+		env.pkgs[x].UpdateMissingDep(newPkg)
 	}
 
 	var newMissings []string
@@ -518,12 +518,6 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 			return
 		}
 	}
-
-	curPkg.ImportPath = newPkg.ImportPath
-	curPkg.RemoteName = newPkg.RemoteName
-	curPkg.RemoteURL = newPkg.RemoteURL
-	curPkg.Version = newPkg.Version
-	curPkg.isTag = newPkg.isTag
 
 	if Debug >= DebugL1 {
 		log.Printf("Package installed:\n%s", curPkg)

@@ -332,7 +332,8 @@ func (pkg *Package) String() string {
 }
 
 //
-// Update the current package to the new package remote or version.
+// Update the current package to the new package. The new package may contain
+// new remote or new version.
 //
 func (pkg *Package) Update(newPkg *Package) (err error) {
 	switch pkg.vcs {
@@ -343,14 +344,22 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 		return
 	}
 
+	pkg.RemoteName = newPkg.RemoteName
+	pkg.RemoteURL = newPkg.RemoteURL
+	pkg.Version = newPkg.Version
+	pkg.isTag = IsTagVersion(newPkg.Version)
+
 	return
 }
 
 //
-// UpdateMissingDeps will remove missing package if it's already provided by
-// new package, and add it as one of package dependencies.
+// UpdateMissingDep will,
+// (1) remove missing package if it's already provided by new package
+// import-path,
+// (2) add it as one of package dependencies of current package, and,
+// (3) add current package as required by new package.
 //
-func (pkg *Package) UpdateMissingDeps(newPkg *Package) {
+func (pkg *Package) UpdateMissingDep(newPkg *Package) {
 	var missing []string
 	for x := 0; x < len(pkg.DepsMissing); x++ {
 		if !strings.HasPrefix(pkg.DepsMissing[x], newPkg.ImportPath) {

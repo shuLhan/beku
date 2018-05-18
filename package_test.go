@@ -392,3 +392,207 @@ func TestRunGoInstall(t *testing.T) {
 		}
 	}
 }
+
+func TestString(t *testing.T) {
+	cases := []struct {
+		pkg *Package
+		exp string
+	}{{
+		pkg: gitCurPkg,
+		exp: `
+[package "github.com/shuLhan/beku_test"]
+          VCS = 1
+   RemoteName = origin
+    RemoteURL = git@github.com:shuLhan/beku_test.git
+      Version = c9f69fb
+        IsTag = false
+         Deps = []
+   RequiredBy = []
+  DepsMissing = []
+`,
+	}}
+
+	for _, c := range cases {
+		got := c.pkg.String()
+		test.Assert(t, "string", c.exp, got, true)
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	cases := []struct {
+		desc   string
+		curPkg *Package
+		newPkg *Package
+		expErr error
+		expPkg *Package
+	}{{
+		desc: "Update remote URL",
+		curPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "https://" + testGitRepo,
+		},
+		newPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+		},
+		expPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+		},
+	}, {
+		desc: "Update version",
+		curPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "https://" + testGitRepo,
+		},
+		newPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			Version:    "v0.1.0",
+			isTag:      true,
+		},
+		expPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			Version:    "v0.1.0",
+			isTag:      true,
+		},
+	}, {
+		desc: "Update version back",
+		curPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "https://" + testGitRepo,
+		},
+		newPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			Version:    "c9f69fb",
+			isTag:      true,
+		},
+		expPkg: &Package{
+			vcs:        VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			Version:    "c9f69fb",
+			isTag:      false,
+		},
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		testResetOutput(t, false)
+
+		err := c.curPkg.Update(c.newPkg)
+
+		testResetOutput(t, false)
+		stdout, stderr := testGetOutput(t)
+
+		if err != nil {
+			t.Log("stderr:", stderr)
+			test.Assert(t, "err", c.expErr, err.Error(), true)
+			continue
+		}
+
+		if len(stdout) > 0 {
+			t.Log("stdout:", stdout)
+		}
+
+		test.Assert(t, "current pkg", c.expPkg, c.curPkg, true)
+	}
+}
+
+func TestUpdateMissingDep(t *testing.T) {
+	cases := []struct {
+		desc      string
+		curPkg    *Package
+		misPkg    *Package
+		expCurPkg *Package
+		expMisPkg *Package
+	}{{
+		desc: "No missing found",
+		curPkg: &Package{
+			ImportPath: "curpkg",
+			DepsMissing: []string{
+				"a",
+				"b",
+			},
+		},
+		misPkg: &Package{
+			ImportPath: "c",
+		},
+		expCurPkg: &Package{
+			ImportPath: "curpkg",
+			DepsMissing: []string{
+				"a",
+				"b",
+			},
+		},
+		expMisPkg: &Package{
+			ImportPath: "c",
+		},
+	}, {
+		desc: "Missing package found",
+		curPkg: &Package{
+			ImportPath: "curpkg",
+			DepsMissing: []string{
+				"a",
+				"b",
+				"c",
+			},
+		},
+		misPkg: &Package{
+			ImportPath: "c",
+		},
+		expCurPkg: &Package{
+			ImportPath: "curpkg",
+			DepsMissing: []string{
+				"a",
+				"b",
+			},
+			Deps: []string{
+				"c",
+			},
+		},
+		expMisPkg: &Package{
+			ImportPath: "c",
+			RequiredBy: []string{
+				"curpkg",
+			},
+		},
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		c.curPkg.UpdateMissingDep(c.misPkg)
+
+		test.Assert(t, "", c.expCurPkg, c.curPkg, true)
+	}
+}

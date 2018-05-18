@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 
 	"github.com/shuLhan/share/lib/ini"
@@ -118,21 +117,27 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 	return
 }
 
+//
+// gitRemoteChange current package remote name (e.g. "origin") or URL to new
+// package remote-name or url.
+//
 func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
+	fmt.Println(">>> git remote remove", pkg.RemoteName)
 	cmd := exec.Command("git", "remote", "remove", pkg.RemoteName)
 	cmd.Dir = pkg.FullPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
 
 	err = cmd.Run()
 	if err != nil {
 		log.Println("gitRemoteChange:", err)
 	}
 
+	fmt.Println(">>> git remote add", newPkg.RemoteName, newPkg.RemoteURL)
 	cmd = exec.Command("git", "remote", "add", newPkg.RemoteName, newPkg.RemoteURL)
 	cmd.Dir = pkg.FullPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
 
 	err = cmd.Run()
 	if err != nil {
@@ -199,6 +204,10 @@ func (pkg *Package) gitScanVersion() (version string, err error) {
 	return
 }
 
+//
+// gitUpdate will change the currrent package remote name, URL, or version
+// based on new package information.
+//
 func (pkg *Package) gitUpdate(newPkg *Package) (err error) {
 	if pkg.RemoteName != newPkg.RemoteName || pkg.RemoteURL != newPkg.RemoteURL {
 		err = pkg.gitRemoteChange(newPkg)
@@ -207,10 +216,15 @@ func (pkg *Package) gitUpdate(newPkg *Package) (err error) {
 		}
 	}
 
+	if pkg.Version == newPkg.Version {
+		return
+	}
+
+	fmt.Println(">>> git checkout -q", newPkg.Version)
 	cmd := exec.Command("git", "checkout", "-q", newPkg.Version)
 	cmd.Dir = newPkg.FullPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
 
 	err = cmd.Run()
 	if err != nil {
