@@ -4,16 +4,65 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/shuLhan/share/lib/ini"
 )
 
 //
+// gitCheckoutVersion will set the HEAD to version stated in package.
+//
+func (pkg *Package) gitCheckoutVersion(version string) (err error) {
+	//nolint:gas
+	cmd := exec.Command("git", "checkout", "-q", version)
+	fmt.Println(">>>", cmd.Args)
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("gitCheckoutVersion: %s", err)
+		return
+	}
+
+	return
+}
+
+//
+// gitClone the package into "$GOPATH/src/{ImportPath}".
+//
+func (pkg *Package) gitClone() (err error) {
+	err = os.MkdirAll(pkg.FullPath, 0700)
+	if err != nil {
+		err = fmt.Errorf("gitClone: %s", err)
+		return
+	}
+
+	//nolint:gas
+	cmd := exec.Command("git", "clone", pkg.RemoteURL, ".")
+	fmt.Println(">>>", cmd.Args)
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("gitClone: %s", err)
+		return
+	}
+
+	return
+}
+
+//
 // gitCompareVersion compare the version of current package with new package.
 //
 func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
+	//nolint:gas
 	cmd := exec.Command("git", "log", "--oneline", pkg.Version+"..."+newPkg.Version)
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -33,7 +82,9 @@ func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
 // to latest commit otherwise.
 //
 func (pkg *Package) gitFetch() (err error) {
+	//nolint:gas
 	cmd := exec.Command("git", "fetch", "--all")
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -59,7 +110,9 @@ func (pkg *Package) gitFetch() (err error) {
 // (origin/master).
 //
 func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
+	//nolint:gas
 	cmd := exec.Command("git", "rev-parse", "--short", ref)
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 
 	bcommit, err := cmd.Output()
@@ -77,7 +130,9 @@ func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
 // gitGetTag will try to get the current tag from HEAD.
 //
 func (pkg *Package) gitGetTag() (tag string, err error) {
+	//nolint:gas
 	cmd := exec.Command("git", "describe", "--tags", "--exact-match")
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 
 	btag, err := cmd.Output()
@@ -92,7 +147,9 @@ func (pkg *Package) gitGetTag() (tag string, err error) {
 }
 
 func (pkg *Package) gitGetTagLatest() (tag string, err error) {
+	//nolint:gas
 	cmd := exec.Command("git", "rev-list", "--tags", "--max-count=1")
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 
 	bout, err := cmd.Output()
@@ -103,7 +160,9 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 
 	out := string(bytes.TrimSpace(bout))
 
+	//nolint:gas
 	cmd = exec.Command("git", "describe", "--tags", "--abbrev=0", out)
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 
 	bout, err = cmd.Output()
@@ -118,12 +177,49 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 }
 
 //
+// gitInstall the package into GOPATH source directory.
+//
+func (pkg *Package) gitInstall() (err error) {
+	err = pkg.gitClone()
+	if err != nil {
+		err = fmt.Errorf("gitInstall: %s", err)
+		return
+	}
+
+	var rev string
+	if len(pkg.Version) == 0 {
+		rev, err = pkg.gitGetTagLatest()
+		if err == nil {
+			pkg.Version = rev
+			pkg.isTag = IsTagVersion(rev)
+		} else {
+			rev, err = pkg.gitGetCommit(gitRefHEAD)
+			if err != nil {
+				err = fmt.Errorf("gitInstall: %s", err)
+				return
+			}
+
+			pkg.Version = rev
+		}
+	}
+
+	err = pkg.gitCheckoutVersion(pkg.Version)
+	if err != nil {
+		err = fmt.Errorf("gitInstall: %s", err)
+		return
+	}
+
+	return
+}
+
+//
 // gitRemoteChange current package remote name (e.g. "origin") or URL to new
 // package remote-name or url.
 //
 func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
-	fmt.Println(">>> git remote remove", pkg.RemoteName)
+	//nolint:gas
 	cmd := exec.Command("git", "remote", "remove", pkg.RemoteName)
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -133,8 +229,9 @@ func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 		log.Println("gitRemoteChange:", err)
 	}
 
-	fmt.Println(">>> git remote add", newPkg.RemoteName, newPkg.RemoteURL)
+	//nolint:gas
 	cmd = exec.Command("git", "remote", "add", newPkg.RemoteName, newPkg.RemoteURL)
+	fmt.Println(">>>", cmd.Args)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -220,13 +317,7 @@ func (pkg *Package) gitUpdate(newPkg *Package) (err error) {
 		return
 	}
 
-	fmt.Println(">>> git checkout -q", newPkg.Version)
-	cmd := exec.Command("git", "checkout", "-q", newPkg.Version)
-	cmd.Dir = newPkg.FullPath
-	cmd.Stdout = defStdout
-	cmd.Stderr = defStderr
-
-	err = cmd.Run()
+	err = pkg.gitCheckoutVersion(newPkg.Version)
 	if err != nil {
 		err = fmt.Errorf("gitUpdate: %s", err)
 		return

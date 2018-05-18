@@ -81,6 +81,23 @@ func (pkg *Package) Fetch() (err error) {
 }
 
 //
+// Install a package. Clone package to GOPATH/src, set to the latest tag if
+// exist or to the latest commit, and scan dependencies.
+//
+func (pkg *Package) Install() (err error) {
+	switch pkg.vcs {
+	case VCSModeGit:
+		err = pkg.gitInstall()
+	}
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+//
 // IsEqual will return true if current package have the same import path,
 // remote name, remote URL, and version with other package; otherwise it will
 // return false.
@@ -129,6 +146,8 @@ func (pkg *Package) Scan() (err error) {
 // only external dependencies.
 //
 func (pkg *Package) ScanDeps(env *Env) (err error) {
+	fmt.Println(">>> Scanning dependencies ...")
+
 	imports, err := pkg.GetRecursiveImports()
 	if err != nil {
 		return
@@ -152,9 +171,12 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 func (pkg *Package) GetRecursiveImports() (
 	imports []string, err error,
 ) {
-	cmd := exec.Command("go", "list", "-f", `{{ join .Deps "\n"}}`,
-		"./...")
+	//nolint: gas
+	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Deps "\n"}}`, "./...")
+	fmt.Println(">>>", cmd.Args)
+
 	cmd.Dir = pkg.FullPath
+	cmd.Stderr = defStderr
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -291,6 +313,7 @@ func (pkg *Package) load(sec *ini.Section) {
 func (pkg *Package) RunGoInstall(isVerbose bool) (err error) {
 	fmt.Println(">>> Running go install ...")
 
+	//nolint:gas
 	cmd := exec.Command("go", "install")
 
 	if isVerbose {
@@ -298,8 +321,9 @@ func (pkg *Package) RunGoInstall(isVerbose bool) (err error) {
 	}
 
 	cmd.Args = append(cmd.Args, "./...")
-	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
+	fmt.Println(">>>", cmd.Args)
 
+	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr

@@ -306,6 +306,8 @@ func (env *Env) Save(file string) (err error) {
 		}
 	}
 
+	fmt.Println(">>> Saving db", file)
+
 	dir := filepath.Dir(file)
 
 	err = os.MkdirAll(dir, 0700)
@@ -371,6 +373,20 @@ func (env *Env) String() string {
 	return buf.String()
 }
 
+//
+// install a package.
+//
+func (env *Env) install(pkg *Package) (ok bool, err error) {
+	err = pkg.Install()
+	if err != nil {
+		return
+	}
+
+	ok = true
+
+	return
+}
+
 func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	err = curPkg.Fetch()
 	if err != nil {
@@ -388,6 +404,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 
 	if curPkg.IsEqual(newPkg) {
 		fmt.Printf("Nothing to update.\n")
+		ok = true
 		return
 	}
 
@@ -411,15 +428,13 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	return
 }
 
-func (env *Env) install(pkg *Package) (ok bool, err error) {
-	return
-}
-
 //
 // updateMissing will remove missing package if it's already provided by new
 // package and add it as one of package dependencies.
 //
 func (env *Env) updateMissing(newPkg *Package) {
+	fmt.Println(">>> Update missing ...")
+
 	for x := 0; x < len(env.pkgs); x++ {
 		env.pkgs[x].UpdateMissingDep(newPkg)
 	}
@@ -490,6 +505,10 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	if !ok {
 		return
 	}
+	if curPkg == nil {
+		curPkg = newPkg
+		env.addPackage(newPkg)
+	}
 
 	err = env.postSync(curPkg, newPkg)
 
@@ -519,9 +538,7 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 		}
 	}
 
-	if Debug >= DebugL1 {
-		log.Printf("Package installed:\n%s", curPkg)
-	}
+	fmt.Println(">>> Package installed:\n", curPkg)
 
 	return
 }
