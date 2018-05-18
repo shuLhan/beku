@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go/build"
 	"log"
+	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -360,6 +361,17 @@ func (pkg *Package) String() string {
 // new remote or new version.
 //
 func (pkg *Package) Update(newPkg *Package) (err error) {
+	if pkg.ImportPath != newPkg.ImportPath {
+		err = os.Rename(pkg.FullPath, newPkg.FullPath)
+		if err != nil {
+			err = fmt.Errorf("Update: %s", err)
+			return
+		}
+
+		pkg.ImportPath = newPkg.ImportPath
+		pkg.FullPath = newPkg.FullPath
+	}
+
 	switch pkg.vcs {
 	case VCSModeGit:
 		err = pkg.gitUpdate(newPkg)
