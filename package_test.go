@@ -1,6 +1,8 @@
 package beku
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/shuLhan/share/lib/ini"
@@ -334,5 +336,59 @@ func TestPackageLoad(t *testing.T) {
 		pkg.load(sec)
 
 		test.Assert(t, "", c.exp, pkg, true)
+	}
+}
+
+func TestRunGoInstall(t *testing.T) {
+	cases := []struct {
+		desc       string
+		pkg        *Package
+		isVerbose  bool
+		expBin     string
+		expArchive string
+		expStdout  string
+		expStderr  string
+	}{{
+		desc:      "Running #1",
+		pkg:       gitCurPkg,
+		expStderr: `main.go:6:2: cannot find package "github.com/shuLhan/share/lib/text" in any of:`,
+	}, {
+		desc:      "Running with verbose",
+		pkg:       gitCurPkg,
+		isVerbose: true,
+		expStderr: `main.go:6:2: cannot find package "github.com/shuLhan/share/lib/text" in any of:`,
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		testResetOutput(t, false)
+
+		err := c.pkg.RunGoInstall(c.isVerbose)
+
+		testResetOutput(t, false)
+		stdout, stderr := testGetOutput(t)
+
+		if err != nil {
+			errLines := strings.Split(stderr, "\n")
+			test.Assert(t, "stderr", c.expStderr, errLines[0], true)
+		} else {
+			outLines := strings.Split(stdout, "\n")
+			test.Assert(t, "stdout", c.expStdout, outLines[0], true)
+		}
+
+		if len(c.expBin) > 0 {
+			_, err = os.Stat(c.expBin)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		if len(c.expArchive) > 0 {
+			_, err = os.Stat(c.expArchive)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 }

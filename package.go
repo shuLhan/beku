@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"go/build"
 	"log"
-	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -286,24 +285,24 @@ func (pkg *Package) load(sec *ini.Section) {
 }
 
 //
-// RunGoInstall will run go install recursively on package directory.
+// RunGoInstall package directory. If isVerbose is true, it will go install
+// recursively ("./...").
 //
 func (pkg *Package) RunGoInstall(isVerbose bool) (err error) {
-	log.Println(">>> Running go install ...")
-
-	var opts []string
-
-	if isVerbose {
-		opts = append(opts, "-v")
-	}
-
-	opts = append(opts, "./...")
+	fmt.Println(">>> Running go install ...")
 
 	cmd := exec.Command("go", "install")
-	cmd.Args = append(cmd.Args, opts...)
+
+	if isVerbose {
+		cmd.Args = append(cmd.Args, "-v")
+	}
+
+	cmd.Args = append(cmd.Args, "./...")
+	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
+
 	cmd.Dir = pkg.FullPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
 
 	err = cmd.Run()
 
