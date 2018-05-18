@@ -29,6 +29,8 @@ import (
 type Env struct {
 	srcDir      string
 	rootSrcDir  string
+	binDir      string
+	pkgDir      string
 	defDBFile   string
 	pkgs        []*Package
 	pkgsMissing []string
@@ -54,7 +56,10 @@ func NewEnvironment() (env *Env, err error) {
 	env = &Env{
 		srcDir:     build.Default.GOPATH + "/" + dirSrc,
 		rootSrcDir: build.Default.GOROOT + "/" + dirSrc,
-		defDBFile:  build.Default.GOPATH + dirDB + "/" + DefDBName,
+		binDir:     build.Default.GOPATH + "/" + dirBin,
+		pkgDir: build.Default.GOPATH + "/" + dirPkg + "/" +
+			build.Default.GOOS + "_" + build.Default.GOARCH,
+		defDBFile: build.Default.GOPATH + dirDB + "/" + DefDBName,
 	}
 
 	err = env.scanStdPackages(env.rootSrcDir)

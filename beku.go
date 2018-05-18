@@ -18,6 +18,8 @@ const (
 	dbgSkipStd  = "skip std dep"
 
 	dirDB       = "/var/beku"
+	dirBin      = "bin"
+	dirPkg      = "pkg"
 	dirSrc      = "src"
 	dirTestdata = "testdata"
 	dirVendor   = "vendor"
