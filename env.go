@@ -37,6 +37,7 @@ type Env struct {
 	pkgsStd     []string
 	db          *ini.Ini
 	dbFile      string
+	dirty       bool
 }
 
 // NewEnvironment will gather all information in user system.
@@ -314,9 +315,92 @@ func (env *Env) Query(pkgs []string) {
 }
 
 //
-// Save the dependencies to `file`.
+// Remove package from GOPATH. If recursive is true, it will also remove their
+// dependencies, as long as they are not required by other package.
+//
+func (env *Env) Remove(rmPkg string, recursive bool) (err error) {
+	pkg := env.GetPackage(rmPkg, "")
+	if pkg == nil {
+		fmt.Println("Package", rmPkg, "not installed")
+		return
+	}
+
+	if len(pkg.RequiredBy) > 0 {
+		fmt.Fprintln(os.Stderr, `Can't remove package.
+This package is required by,
+`,
+			pkg.RequiredBy)
+		return
+	}
+
+	fmt.Println("The following package will be removed,\n", pkg)
+
+	ok := confirm(os.Stdin, msgContinue, false)
+	if !ok {
+		return
+	}
+
+	if !recursive {
+		err = pkg.Remove()
+		if err != nil {
+			err = fmt.Errorf("Remove: %s", err)
+			return
+		}
+
+		env.removePackage(pkg)
+	}
+
+	pkgImportPath := filepath.Join(env.pkgDir, pkg.ImportPath)
+
+	if Debug >= DebugL1 {
+		fmt.Println(">>> Remove $GOPATH/pkg:", pkgImportPath)
+	}
+
+	err = os.RemoveAll(pkgImportPath)
+	if err != nil {
+		err = fmt.Errorf("Remove: %s", err)
+	}
+
+	return
+}
+
+//
+// removePackage from list of packages, also remove in other packages
+// "RequiredBy" if exist.
+//
+func (env *Env) removePackage(pkg *Package) {
+	idx := -1
+	for x := 0; x < len(env.pkgs); x++ {
+		if env.pkgs[x].ImportPath == pkg.ImportPath {
+			idx = x
+			continue
+		}
+
+		ok := env.pkgs[x].RemoveRequiredBy(pkg.ImportPath)
+		if ok {
+			env.dirty = true
+		}
+	}
+
+	if idx >= 0 {
+		lenpkgs := len(env.pkgs)
+
+		copy(env.pkgs[idx:], env.pkgs[idx+1:])
+		env.pkgs[lenpkgs-1] = nil
+		env.pkgs = env.pkgs[:lenpkgs-1]
+
+		env.dirty = true
+	}
+}
+
+//
+// Save the dependencies to `file` only if it's dirty flag is true.
 //
 func (env *Env) Save(file string) (err error) {
+	if !env.dirty {
+		return
+	}
+
 	if len(file) == 0 {
 		if len(env.dbFile) == 0 {
 			file = env.defDBFile

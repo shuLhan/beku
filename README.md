@@ -28,6 +28,12 @@ package database into "$GOPATH/var/beku/gopath.deps".
 
 Query the package database.
 
+## Remove Operation
+
+	-R, --remove [pkg]
+
+Remove package from GOPATH.
+
 
 ## Sync Operation
 

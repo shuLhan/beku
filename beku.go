@@ -28,6 +28,7 @@ const (
 
 	msgUpdateProceed = "Proceed with update?"
 	msgUpdateView    = "View commit logs?"
+	msgContinue      = "Continue?"
 
 	prefixTag = 'v'
 

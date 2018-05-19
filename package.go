@@ -82,6 +82,28 @@ func (pkg *Package) Fetch() (err error) {
 }
 
 //
+// GoClean will remove the package binaries and archives.
+//
+func (pkg *Package) GoClean() (err error) {
+	//nolint:gas
+	cmd := exec.Command("go", "clean", "-i", "-cache", "-testcache", "./...")
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("GoClean: %s", err)
+		return
+	}
+
+	return
+}
+
+//
 // Install a package. Clone package to GOPATH/src, set to the latest tag if
 // exist or to the latest commit, and scan dependencies.
 //
@@ -121,6 +143,51 @@ func (pkg *Package) IsEqual(other *Package) bool {
 	}
 
 	return true
+}
+
+//
+// Remove package installed binaries, archives, and source from GOPATH.
+//
+func (pkg *Package) Remove() (err error) {
+	err = pkg.GoClean()
+	if err != nil {
+		err = fmt.Errorf("Remove: %s", err)
+		return
+	}
+
+	if Debug >= DebugL1 {
+		fmt.Println(">>> Remove source:", pkg.FullPath)
+	}
+
+	err = os.RemoveAll(pkg.FullPath)
+	if err != nil {
+		err = fmt.Errorf("Remove: %s", err)
+		return
+	}
+
+	return
+}
+
+//
+// RemoveRequiredBy will remove package import path from current
+// package list of required-by.
+// If import-path found as required-by, it will return true, otherwise it will
+// return false.
+//
+func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
+	var requiredBy []string
+
+	for x := 0; x < len(pkg.RequiredBy); x++ {
+		if pkg.RequiredBy[x] == importPath {
+			ok = true
+			continue
+		}
+		requiredBy = append(requiredBy, pkg.RequiredBy[x])
+	}
+	if ok {
+		pkg.RequiredBy = requiredBy
+	}
+	return
 }
 
 //
@@ -172,7 +239,7 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 func (pkg *Package) GetRecursiveImports() (
 	imports []string, err error,
 ) {
-	//nolint: gas
+	//nolint:gas
 	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Deps "\n"}}`, "./...")
 	fmt.Println(">>>", cmd.Args)
 

@@ -20,6 +20,12 @@
 //
 // Query the package database.
 //
+// ## Remove Operation
+//
+//	-R, --remove [pkg]
+//
+// Remove package from GOPATH.
+//
 //
 // ## Sync Operation
 //
@@ -80,7 +86,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 )
 
 var (
@@ -96,15 +104,23 @@ func main() {
 	switch cmd.op {
 	case opQuery:
 		cmd.env.Query(cmd.queryPkg)
+	case opRemove:
+		err = cmd.env.Remove(cmd.rmPkg, false)
 	case opSync:
 		err = cmd.env.Sync(cmd.syncPkg, "")
 	case opSync | opSyncInto:
 		err = cmd.env.Sync(cmd.syncPkg, cmd.syncInto)
+	default:
+		fmt.Fprintln(os.Stderr, "Invalid operations or options")
+		os.Exit(1)
 	}
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmd.env.Save("")
+	err = cmd.env.Save("")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

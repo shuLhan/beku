@@ -14,6 +14,7 @@ const (
 
 	flagHelpUsage     = "Show the short usage."
 	flagQueryUsage    = "Query the package database."
+	flagRemoveUsage   = "Remove package from GOPATH."
 	flagSyncUsage     = "Synchronize `package`."
 	flagSyncIntoUsage = "Package download `directory`."
 )
@@ -24,6 +25,7 @@ type command struct {
 	help     bool
 	query    bool
 	queryPkg []string
+	rmPkg    string
 	syncPkg  string
 	syncInto string
 }
@@ -35,6 +37,8 @@ operations:
 		` + flagHelpUsage + `
 	beku {-Q|--query} [pkg ...]
 		` + flagQueryUsage + `
+	beku {-R|--remove} [pkg ...]
+		` + flagRemoveUsage + `
 	beku {-S|--sync} <pkg@version> [--into <directory>]
 		` + flagSyncUsage + `
 `
@@ -53,9 +57,11 @@ func (cmd *command) setFlags() {
 	flag.BoolVar(&cmd.query, "Q", false, flagQueryUsage)
 	flag.BoolVar(&cmd.query, "query", false, flagQueryUsage)
 
+	flag.StringVar(&cmd.rmPkg, "R", emptyString, flagRemoveUsage)
+	flag.StringVar(&cmd.rmPkg, "remove", emptyString, flagRemoveUsage)
+
 	flag.StringVar(&cmd.syncPkg, "S", emptyString, flagSyncUsage)
 	flag.StringVar(&cmd.syncPkg, "sync", emptyString, flagSyncUsage)
-
 	flag.StringVar(&cmd.syncInto, "into", emptyString, flagSyncIntoUsage)
 
 	flag.Parse()
@@ -86,6 +92,10 @@ func (cmd *command) checkFlags() {
 		if len(cmd.syncInto) > 0 {
 			cmd.op |= opSyncInto
 		}
+	}
+
+	if len(cmd.rmPkg) > 0 {
+		cmd.op |= opRemove
 	}
 
 	// Invalid command parameters
