@@ -467,7 +467,10 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 // (2) add it as one of package dependencies of current package, and,
 // (3) add current package as required by new package.
 //
-func (pkg *Package) UpdateMissingDep(newPkg *Package) {
+// It will return true if new package solve the missing deps on current
+// package, otherwise it will return false.
+//
+func (pkg *Package) UpdateMissingDep(newPkg *Package) (updated bool) {
 	var missing []string
 	for x := 0; x < len(pkg.DepsMissing); x++ {
 		if !strings.HasPrefix(pkg.DepsMissing[x], newPkg.ImportPath) {
@@ -477,9 +480,14 @@ func (pkg *Package) UpdateMissingDep(newPkg *Package) {
 
 		pkg.pushDep(newPkg.ImportPath)
 		newPkg.pushRequiredBy(pkg.ImportPath)
+		updated = true
 	}
 
-	pkg.DepsMissing = missing
+	if updated {
+		pkg.DepsMissing = missing
+	}
+
+	return
 }
 
 //

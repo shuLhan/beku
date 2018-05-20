@@ -529,6 +529,11 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	}
 
 	err = curPkg.Update(newPkg)
+	if err != nil {
+		return
+	}
+
+	env.dirty = true
 
 	return
 }
@@ -538,10 +543,14 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 // package and add it as one of package dependencies.
 //
 func (env *Env) updateMissing(newPkg *Package) {
+	var updated bool
 	fmt.Println(">>> Update missing ...")
 
 	for x := 0; x < len(env.pkgs); x++ {
-		env.pkgs[x].UpdateMissingDep(newPkg)
+		updated = env.pkgs[x].UpdateMissingDep(newPkg)
+		if updated {
+			env.dirty = true
+		}
 	}
 
 	var newMissings []string
@@ -613,6 +622,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	if curPkg == nil {
 		curPkg = newPkg
 		env.addPackage(newPkg)
+		env.dirty = true
 	}
 
 	err = env.postSync(curPkg, newPkg)

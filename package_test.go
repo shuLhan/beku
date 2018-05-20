@@ -633,6 +633,7 @@ func testUpdateMissingDep(t *testing.T) {
 		desc      string
 		curPkg    *Package
 		misPkg    *Package
+		exp       bool
 		expCurPkg *Package
 		expMisPkg *Package
 	}{{
@@ -670,6 +671,7 @@ func testUpdateMissingDep(t *testing.T) {
 		misPkg: &Package{
 			ImportPath: "c",
 		},
+		exp: true,
 		expCurPkg: &Package{
 			ImportPath: "curpkg",
 			DepsMissing: []string{
@@ -691,9 +693,10 @@ func testUpdateMissingDep(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		c.curPkg.UpdateMissingDep(c.misPkg)
+		got := c.curPkg.UpdateMissingDep(c.misPkg)
 
-		test.Assert(t, "", c.expCurPkg, c.curPkg, true)
+		test.Assert(t, "return value", c.exp, got, true)
+		test.Assert(t, "package", c.expCurPkg, c.curPkg, true)
 	}
 }
 
