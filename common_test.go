@@ -8,6 +8,33 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
+func TestIsDirEmpty(t *testing.T) {
+	cases := []struct {
+		desc string
+		path string
+		exp  bool
+	}{{
+		desc: `With dir not exist`,
+		path: `testdata/notexist`,
+		exp:  true,
+	}, {
+		desc: `With dir exist and not empty`,
+		path: `testdata`,
+	}, {
+		desc: `With dir exist and empty`,
+		path: `testdata/dirempty`,
+		exp:  true,
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got := IsDirEmpty(c.path)
+
+		test.Assert(t, "", c.exp, got, true)
+	}
+}
+
 func TestIsIgnoredDir(t *testing.T) {
 	cases := []struct {
 		name string

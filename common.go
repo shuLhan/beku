@@ -15,6 +15,29 @@ import (
 )
 
 //
+// IsDirEmpty will return true if directory is not exist or empty; otherwise
+// it will return false.
+//
+func IsDirEmpty(dir string) (ok bool) {
+	d, err := os.Open(dir)
+	if err != nil {
+		ok = true
+		return
+	}
+
+	_, err = d.Readdirnames(1)
+	if err != nil {
+		if err == io.EOF {
+			ok = true
+		}
+	}
+
+	_ = d.Close()
+
+	return
+}
+
+//
 // IsIgnoredDir will return true if directory start with "_" or ".", or
 // equal with "vendor" or "testdata"; otherwise it will return false.
 //
