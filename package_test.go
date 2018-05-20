@@ -364,7 +364,7 @@ func TestRunGoInstall(t *testing.T) {
 
 		testResetOutput(t, false)
 
-		err := c.pkg.RunGoInstall(c.isVerbose)
+		err := c.pkg.GoInstall(c.isVerbose)
 
 		testResetOutput(t, false)
 		stdout, stderr := testGetOutput(t)

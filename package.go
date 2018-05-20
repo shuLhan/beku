@@ -375,10 +375,9 @@ func (pkg *Package) load(sec *ini.Section) {
 }
 
 //
-// RunGoInstall package directory. If isVerbose is true, it will go install
-// recursively ("./...").
+// GoInstall a package recursively ("./...").
 //
-func (pkg *Package) RunGoInstall(isVerbose bool) (err error) {
+func (pkg *Package) GoInstall(isVerbose bool) (err error) {
 	fmt.Println(">>> Running go install ...")
 
 	//nolint:gas

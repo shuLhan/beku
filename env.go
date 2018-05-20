@@ -637,7 +637,7 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 
 	// (3)
 	if len(curPkg.DepsMissing) == 0 {
-		err = curPkg.RunGoInstall(true)
+		err = curPkg.GoInstall(true)
 		if err != nil {
 			return
 		}
