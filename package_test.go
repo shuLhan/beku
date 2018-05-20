@@ -263,25 +263,21 @@ func testAddDep(t *testing.T) {
 func testPushRequiredBy(t *testing.T) {
 	cases := []struct {
 		desc          string
-		parentPkg     *Package
+		importPath    string
 		exp           bool
 		expRequiredBy []string
 	}{{
-		desc: "Not exist yet",
-		parentPkg: &Package{
-			ImportPath: "github.com/shuLhan/share",
-		},
-		exp: true,
+		desc:       "Not exist yet",
+		importPath: testGitRepoShare,
+		exp:        true,
 		expRequiredBy: []string{
-			"github.com/shuLhan/share",
+			testGitRepoShare,
 		},
 	}, {
-		desc: "Already exist",
-		parentPkg: &Package{
-			ImportPath: "github.com/shuLhan/share",
-		},
+		desc:       "Already exist",
+		importPath: testGitRepoShare,
 		expRequiredBy: []string{
-			"github.com/shuLhan/share",
+			testGitRepoShare,
 		},
 	}}
 
@@ -292,14 +288,45 @@ func testPushRequiredBy(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got = gitCurPkg.pushRequiredBy(c.parentPkg.ImportPath)
+		got = gitCurPkg.pushRequiredBy(c.importPath)
 
 		test.Assert(t, "return value", c.exp, got, true)
 		test.Assert(t, "RequiredBy", c.expRequiredBy,
 			gitCurPkg.RequiredBy, true)
 	}
+}
 
-	gitCurPkg.RequiredBy = nil
+func testPackageRemoveRequiredBy(t *testing.T) {
+	cases := []struct {
+		desc          string
+		pkg           *Package
+		importPath    string
+		exp           bool
+		expRequiredBy []string
+	}{{
+		desc:       `With importPath not found`,
+		pkg:        gitCurPkg,
+		importPath: testPkgNotExist,
+		exp:        false,
+		expRequiredBy: []string{
+			testGitRepoShare,
+		},
+	}, {
+		desc:       `With importPath found`,
+		pkg:        gitCurPkg,
+		importPath: testGitRepoShare,
+		exp:        true,
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+		t.Log(">>> RequiredBy:", c.pkg.RequiredBy)
+
+		got := c.pkg.RemoveRequiredBy(c.importPath)
+
+		test.Assert(t, "return value", c.exp, got, true)
+		test.Assert(t, "RequiredBy", c.expRequiredBy, c.pkg.RequiredBy, true)
+	}
 }
 
 func testPackageLoad(t *testing.T) {
@@ -721,6 +748,7 @@ func TestPackage(t *testing.T) {
 	t.Run("IsEqual", testIsEqual)
 	t.Run("addDep", testAddDep)
 	t.Run("pushRequiredBy", testPushRequiredBy)
+	t.Run("RemoveRequiredBy", testPackageRemoveRequiredBy)
 	t.Run("load", testPackageLoad)
 	t.Run("String", testPackageString)
 	t.Run("Update", testUpdate)

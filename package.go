@@ -176,9 +176,8 @@ func (pkg *Package) Remove() (err error) {
 }
 
 //
-// RemoveRequiredBy will remove package import path from current
-// package list of required-by.
-// If import-path found as required-by, it will return true, otherwise it will
+// RemoveRequiredBy will remove package importPath from list of required-by.
+// It will return true if importPath is removed from list, otherwise it will
 // return false.
 //
 func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
