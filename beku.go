@@ -54,6 +54,7 @@ var (
 	ErrPackageName = errors.New("Empty or invalid package name")
 
 	errDBPackageName = "missing package name, line %d at %s"
+	errDirNotEmpty   = "directory %s is not empty"
 )
 
 var (

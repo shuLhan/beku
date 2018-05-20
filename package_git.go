@@ -32,11 +32,18 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 
 //
 // gitClone the package into "$GOPATH/src/{ImportPath}".
+// If destination directory is not empty it will return an error.
 //
 func (pkg *Package) gitClone() (err error) {
 	err = os.MkdirAll(pkg.FullPath, 0700)
 	if err != nil {
 		err = fmt.Errorf("gitClone: %s", err)
+		return
+	}
+
+	empty := IsDirEmpty(pkg.FullPath)
+	if !empty {
+		err = fmt.Errorf("gitClone: "+errDirNotEmpty, pkg.FullPath)
 		return
 	}
 
