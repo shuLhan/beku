@@ -85,12 +85,19 @@ func (pkg *Package) Fetch() (err error) {
 // GoClean will remove the package binaries and archives.
 //
 func (pkg *Package) GoClean() (err error) {
+	_, err = os.Stat(pkg.FullPath)
+	if err != nil {
+		err = nil
+		return
+	}
+
 	//nolint:gas
 	cmd := exec.Command("go", "clean", "-i", "-cache", "-testcache", "./...")
 	if Debug >= DebugL1 {
 		fmt.Println(">>>", cmd.Args)
 	}
 	cmd.Dir = pkg.FullPath
+	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
