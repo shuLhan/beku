@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -44,7 +45,7 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 	pkg = &Package{
 		ImportPath: importPath,
 		RemoteURL:  "https://" + pkgName,
-		FullPath:   build.Default.GOPATH + "/" + dirSrc + "/" + importPath,
+		FullPath:   filepath.Join(build.Default.GOPATH, dirSrc, importPath),
 		vcs:        vcsMode,
 	}
 

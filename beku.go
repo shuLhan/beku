@@ -17,7 +17,7 @@ const (
 	dbgSkipSelf = "skip self dep"
 	dbgSkipStd  = "skip std dep"
 
-	dirDB       = "/var/beku"
+	dirDB       = "var/beku"
 	dirBin      = "bin"
 	dirPkg      = "pkg"
 	dirSrc      = "src"

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/shuLhan/share/lib/ini"
 )
@@ -105,7 +106,7 @@ func (pkg *Package) gitFetch() (err error) {
 	if pkg.isTag {
 		pkg.VersionNext, err = pkg.gitGetTagLatest()
 	} else {
-		ref := pkg.RemoteName + "/" + gitDefBranch
+		ref := filepath.Join(pkg.RemoteName, gitDefBranch)
 		pkg.VersionNext, err = pkg.gitGetCommit(ref)
 	}
 
@@ -267,7 +268,7 @@ func (pkg *Package) gitScan() (err error) {
 }
 
 func (pkg *Package) gitScanRemote() (err error) {
-	gitConfig := pkg.FullPath + "/" + gitDir + "/config"
+	gitConfig := filepath.Join(pkg.FullPath, gitDir, "config")
 
 	gitIni, err := ini.Open(gitConfig)
 	if err != nil {

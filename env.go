@@ -55,12 +55,12 @@ func NewEnvironment() (env *Env, err error) {
 	Debug = debugMode(debug)
 
 	env = &Env{
-		dirSrc:     build.Default.GOPATH + "/" + dirSrc,
-		dirRootSrc: build.Default.GOROOT + "/" + dirSrc,
-		dirBin:     build.Default.GOPATH + "/" + dirBin,
-		dirPkg: build.Default.GOPATH + "/" + dirPkg + "/" +
-			build.Default.GOOS + "_" + build.Default.GOARCH,
-		dbDefFile: build.Default.GOPATH + dirDB + "/" + DefDBName,
+		dirSrc:     filepath.Join(build.Default.GOPATH, dirSrc),
+		dirRootSrc: filepath.Join(build.Default.GOROOT, dirSrc),
+		dirBin:     filepath.Join(build.Default.GOPATH, dirBin),
+		dirPkg: filepath.Join(build.Default.GOPATH, dirPkg,
+			build.Default.GOOS+"_"+build.Default.GOARCH),
+		dbDefFile: filepath.Join(build.Default.GOPATH, dirDB, DefDBName),
 	}
 
 	err = env.scanStdPackages(env.dirRootSrc)
@@ -133,7 +133,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 		}
 
 		dirName := fi.Name()
-		fullPath := srcPath + "/" + dirName
+		fullPath := filepath.Join(srcPath, dirName)
 
 		// (1)
 		if IsIgnoredDir(dirName) {
@@ -175,8 +175,8 @@ func (env *Env) scanPackages(rootPath string) (err error) {
 		}
 
 		dirName := fi.Name()
-		fullPath := rootPath + "/" + dirName
-		dirGit := fullPath + "/" + gitDir
+		fullPath := filepath.Join(rootPath, dirName)
+		dirGit := filepath.Join(fullPath, gitDir)
 
 		// (1)
 		if IsIgnoredDir(dirName) {
@@ -284,7 +284,7 @@ func (env *Env) Load(file string) (err error) {
 
 		pkg := &Package{
 			ImportPath: sec.Sub,
-			FullPath:   env.dirSrc + "/" + sec.Sub,
+			FullPath:   filepath.Join(env.dirSrc, sec.Sub),
 		}
 
 		pkg.load(sec)
