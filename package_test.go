@@ -1,7 +1,9 @@
 package beku
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -9,7 +11,78 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-func TestIsEqual(t *testing.T) {
+func testPackageRemove(t *testing.T) {
+	cases := []struct {
+		desc   string
+		pkg    *Package
+		expErr string
+	}{{
+		desc: `Package is not exist`,
+		pkg:  NewPackage(testPkgNotExist, testPkgNotExist, VCSModeGit),
+	}, {
+		desc: `Package exist`,
+		pkg:  gitPkgShare,
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		err := c.pkg.Remove()
+		if err != nil {
+			test.Assert(t, "err", c.expErr, err, true)
+			continue
+		}
+
+		expErr := fmt.Sprintf("stat %s: no such file or directory", c.pkg.FullPath)
+		_, err = os.Stat(c.pkg.FullPath)
+
+		test.Assert(t, "src dir should not exist", expErr, err.Error(), true)
+
+		pkg := filepath.Join(testEnv.pkgDir, c.pkg.ImportPath)
+
+		expErr = fmt.Sprintf("stat %s: no such file or directory", pkg)
+		_, err = os.Stat(pkg)
+		test.Assert(t, "pkg dir should not exist", expErr, err.Error(), true)
+	}
+}
+
+func testPackageInstall(t *testing.T) {
+	cases := []struct {
+		desc   string
+		pkg    *Package
+		expErr string
+		expPkg *Package
+	}{{
+		desc: `Without version`,
+		pkg:  gitPkgShare,
+		expPkg: &Package{
+			ImportPath: testGitRepoShare,
+			FullPath:   gitPkgShare.FullPath,
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "https://" + testGitRepoShare,
+			Version:    "9337967",
+			vcs:        VCSModeGit,
+		},
+	}, {
+		desc:   `Install again`,
+		pkg:    gitPkgShare,
+		expErr: fmt.Sprintf("gitInstall: gitClone: "+errDirNotEmpty, gitPkgShare.FullPath),
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		err := c.pkg.Install()
+		if err != nil {
+			test.Assert(t, "err", c.expErr, err.Error(), true)
+			continue
+		}
+
+		test.Assert(t, "pkg", *c.expPkg, *c.pkg, true)
+	}
+}
+
+func testIsEqual(t *testing.T) {
 	cases := []struct {
 		desc  string
 		pkg   *Package
@@ -89,7 +162,7 @@ func TestIsEqual(t *testing.T) {
 	}
 }
 
-func TestAddDep(t *testing.T) {
+func testAddDep(t *testing.T) {
 	cases := []struct {
 		desc           string
 		envPkgs        []*Package
@@ -187,7 +260,7 @@ func TestAddDep(t *testing.T) {
 	gitCurPkg.DepsMissing = nil
 }
 
-func TestPushRequiredBy(t *testing.T) {
+func testPushRequiredBy(t *testing.T) {
 	cases := []struct {
 		desc          string
 		parentPkg     *Package
@@ -229,7 +302,7 @@ func TestPushRequiredBy(t *testing.T) {
 	gitCurPkg.RequiredBy = nil
 }
 
-func TestPackageLoad(t *testing.T) {
+func testPackageLoad(t *testing.T) {
 	cases := []struct {
 		desc    string
 		pkgName string
@@ -339,7 +412,7 @@ func TestPackageLoad(t *testing.T) {
 	}
 }
 
-func TestRunGoInstall(t *testing.T) {
+func testGoInstall(t *testing.T) {
 	cases := []struct {
 		desc       string
 		pkg        *Package
@@ -393,7 +466,7 @@ func TestRunGoInstall(t *testing.T) {
 	}
 }
 
-func TestString(t *testing.T) {
+func testPackageString(t *testing.T) {
 	cases := []struct {
 		pkg *Package
 		exp string
@@ -418,7 +491,7 @@ func TestString(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func testUpdate(t *testing.T) {
 	cases := []struct {
 		desc   string
 		curPkg *Package
@@ -528,7 +601,7 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestUpdateMissingDep(t *testing.T) {
+func testUpdateMissingDep(t *testing.T) {
 	cases := []struct {
 		desc      string
 		curPkg    *Package
@@ -595,4 +668,65 @@ func TestUpdateMissingDep(t *testing.T) {
 
 		test.Assert(t, "", c.expCurPkg, c.curPkg, true)
 	}
+}
+
+func testPackageGoClean(t *testing.T) {
+	cases := []struct {
+		desc      string
+		pkg       *Package
+		pkgBin    string
+		expErr    string
+		expBinErr string
+	}{{
+		desc: `With package not exist`,
+		pkg:  NewPackage(testPkgNotExist, testPkgNotExist, VCSModeGit),
+	}, {
+		desc:      `With package exist`,
+		pkg:       gitCurPkg,
+		pkgBin:    filepath.Join(testEnv.binDir, "beku_test"),
+		expBinErr: "stat %s: no such file or directory",
+	}}
+
+	var err error
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		err = c.pkg.GoClean()
+		if err != nil {
+			test.Assert(t, "err", c.expErr, err, true)
+			continue
+		}
+
+		if len(c.pkgBin) > 0 {
+			_, err = os.Stat(c.pkgBin)
+			exp := fmt.Sprintf(c.expBinErr, c.pkgBin)
+
+			test.Assert(t, "pkgBin", exp, err.Error(), true)
+		}
+	}
+}
+
+func testPackagePost(t *testing.T) {
+	err := gitPkgShare.Remove()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPackage(t *testing.T) {
+	t.Run("Remove", testPackageRemove)
+	t.Run("Install", testPackageInstall)
+
+	t.Run("GoInstall", testGoInstall)
+	t.Run("IsEqual", testIsEqual)
+	t.Run("addDep", testAddDep)
+	t.Run("pushRequiredBy", testPushRequiredBy)
+	t.Run("load", testPackageLoad)
+	t.Run("String", testPackageString)
+	t.Run("Update", testUpdate)
+	t.Run("UpdateMissingDep", testUpdateMissingDep)
+
+	t.Run("GoClean", testPackageGoClean)
+
+	t.Run("Post", testPackagePost)
 }

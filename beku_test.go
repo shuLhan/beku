@@ -10,15 +10,18 @@ import (
 )
 
 const (
-	testGitRepo = "github.com/shuLhan/beku_test"
+	testGitRepo      = "github.com/shuLhan/beku_test"
+	testGitRepoShare = "github.com/shuLhan/share"
+	testPkgNotExist  = "github.com/shuLhan/notexist"
 )
 
 var (
-	testEnv    *Env
-	gitCurPkg  *Package
-	gitNewPkg  *Package
-	testStdout *os.File
-	testStderr *os.File
+	testEnv     *Env
+	gitCurPkg   *Package
+	gitNewPkg   *Package
+	gitPkgShare *Package
+	testStdout  *os.File
+	testStderr  *os.File
 )
 
 func testInitOutput() (err error) {
@@ -98,6 +101,7 @@ func TestMain(t *testing.M) {
 
 	gitCurPkg = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
 	gitNewPkg = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
+	gitPkgShare = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
 
 	log.Printf("test env : %+v\n", *testEnv)
 	log.Printf("gitCurPkg: %+v\n", *gitCurPkg)
