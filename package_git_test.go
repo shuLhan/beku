@@ -73,10 +73,10 @@ ec65455 Add feature A.
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		gitCurPkg.Version = c.curVersion
-		gitNewPkg.Version = c.newVersion
+		testGitPkgCur.Version = c.curVersion
+		testGitPkgNew.Version = c.newVersion
 
-		err = gitCurPkg.CompareVersion(gitNewPkg)
+		err = testGitPkgCur.CompareVersion(testGitPkgNew)
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
 		}
@@ -137,10 +137,10 @@ func testGitFetch(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		gitCurPkg.Version = c.curVersion
-		gitCurPkg.isTag = c.isTag
+		testGitPkgCur.Version = c.curVersion
+		testGitPkgCur.isTag = c.isTag
 
-		err = gitCurPkg.Fetch()
+		err = testGitPkgCur.Fetch()
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
 		}
@@ -148,7 +148,7 @@ func testGitFetch(t *testing.T) {
 		testResetOutput(t, false)
 		stdout, stderr = testGetOutput(t)
 
-		test.Assert(t, "VersionNext", c.expVersionNext, gitCurPkg.VersionNext, true)
+		test.Assert(t, "VersionNext", c.expVersionNext, testGitPkgCur.VersionNext, true)
 		test.Assert(t, "stdout", c.expStdout, stdout, true)
 		test.Assert(t, "stderr", c.expStderr, stderr, true)
 
@@ -172,17 +172,17 @@ func testGitScan(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		gitCurPkg.Version = ""
-		gitCurPkg.isTag = false
+		testGitPkgCur.Version = ""
+		testGitPkgCur.isTag = false
 
-		err = gitCurPkg.Scan()
+		err = testGitPkgCur.Scan()
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err, true)
 			continue
 		}
 
-		test.Assert(t, "Version", c.expVersion, gitCurPkg.Version, true)
-		test.Assert(t, "isTag", c.expIsTag, gitCurPkg.isTag, true)
+		test.Assert(t, "Version", c.expVersion, testGitPkgCur.Version, true)
+		test.Assert(t, "isTag", c.expIsTag, testGitPkgCur.isTag, true)
 	}
 }
 
@@ -204,17 +204,17 @@ func testGitScanDeps(t *testing.T) {
 	var err error
 
 	for _, c := range cases {
-		gitCurPkg.Deps = nil
-		gitCurPkg.DepsMissing = nil
+		testGitPkgCur.Deps = nil
+		testGitPkgCur.DepsMissing = nil
 
-		err = gitCurPkg.ScanDeps(testEnv)
+		err = testGitPkgCur.ScanDeps(testEnv)
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
 		}
 
-		test.Assert(t, "Deps", c.expDeps, gitCurPkg.Deps, true)
+		test.Assert(t, "Deps", c.expDeps, testGitPkgCur.Deps, true)
 		test.Assert(t, "DepsMissing", c.expDepsMissing,
-			gitCurPkg.DepsMissing, true)
+			testGitPkgCur.DepsMissing, true)
 		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing,
 			testEnv.pkgsMissing, true)
 	}

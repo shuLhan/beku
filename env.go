@@ -27,15 +27,15 @@ import (
 // packages, and list of missing packages.
 //
 type Env struct {
-	srcDir      string
-	rootSrcDir  string
-	binDir      string
-	pkgDir      string
-	defDBFile   string
+	dirBin      string
+	dirPkg      string
+	dirRootSrc  string
+	dirSrc      string
 	pkgs        []*Package
 	pkgsMissing []string
 	pkgsStd     []string
 	db          *ini.Ini
+	dbDefFile   string
 	dbFile      string
 	dirty       bool
 }
@@ -55,15 +55,15 @@ func NewEnvironment() (env *Env, err error) {
 	Debug = debugMode(debug)
 
 	env = &Env{
-		srcDir:     build.Default.GOPATH + "/" + dirSrc,
-		rootSrcDir: build.Default.GOROOT + "/" + dirSrc,
-		binDir:     build.Default.GOPATH + "/" + dirBin,
-		pkgDir: build.Default.GOPATH + "/" + dirPkg + "/" +
+		dirSrc:     build.Default.GOPATH + "/" + dirSrc,
+		dirRootSrc: build.Default.GOROOT + "/" + dirSrc,
+		dirBin:     build.Default.GOPATH + "/" + dirBin,
+		dirPkg: build.Default.GOPATH + "/" + dirPkg + "/" +
 			build.Default.GOOS + "_" + build.Default.GOARCH,
-		defDBFile: build.Default.GOPATH + dirDB + "/" + DefDBName,
+		dbDefFile: build.Default.GOPATH + dirDB + "/" + DefDBName,
 	}
 
-	err = env.scanStdPackages(env.rootSrcDir)
+	err = env.scanStdPackages(env.dirRootSrc)
 	if err != nil {
 		return
 	}
@@ -96,7 +96,7 @@ func (env *Env) GetPackage(importPath, remoteURL string) *Package {
 // (3) Scan package dependencies and link them
 //
 func (env *Env) Scan() (err error) {
-	err = env.scanPackages(env.srcDir)
+	err = env.scanPackages(env.dirSrc)
 	if err != nil {
 		return
 	}
@@ -140,7 +140,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 			continue
 		}
 
-		stdPkg := strings.TrimPrefix(fullPath, env.rootSrcDir+"/")
+		stdPkg := strings.TrimPrefix(fullPath, env.dirRootSrc+"/")
 		env.pkgsStd = append(env.pkgsStd, stdPkg)
 	}
 
@@ -212,7 +212,7 @@ func (env *Env) scanPackages(rootPath string) (err error) {
 // its contain version information.
 //
 func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
-	pkgName := strings.TrimPrefix(fullPath, env.srcDir+"/")
+	pkgName := strings.TrimPrefix(fullPath, env.dirSrc+"/")
 
 	pkg := NewPackage(pkgName, pkgName, vcsMode)
 
@@ -261,7 +261,7 @@ func (env *Env) addPackageMissing(importPath string) {
 //
 func (env *Env) Load(file string) (err error) {
 	if len(file) == 0 {
-		env.dbFile = env.defDBFile
+		env.dbFile = env.dbDefFile
 	} else {
 		env.dbFile = file
 	}
@@ -284,7 +284,7 @@ func (env *Env) Load(file string) (err error) {
 
 		pkg := &Package{
 			ImportPath: sec.Sub,
-			FullPath:   env.srcDir + "/" + sec.Sub,
+			FullPath:   env.dirSrc + "/" + sec.Sub,
 		}
 
 		pkg.load(sec)
@@ -350,7 +350,7 @@ This package is required by,
 		env.removePackage(pkg)
 	}
 
-	pkgImportPath := filepath.Join(env.pkgDir, pkg.ImportPath)
+	pkgImportPath := filepath.Join(env.dirPkg, pkg.ImportPath)
 
 	if Debug >= DebugL1 {
 		fmt.Println(">>> Remove $GOPATH/pkg:", pkgImportPath)
@@ -403,7 +403,7 @@ func (env *Env) Save(file string) (err error) {
 
 	if len(file) == 0 {
 		if len(env.dbFile) == 0 {
-			file = env.defDBFile
+			file = env.dbDefFile
 		} else {
 			file = env.dbFile
 		}
@@ -463,7 +463,7 @@ func (env *Env) String() string {
 	fmt.Fprintf(&buf, `
          GOPATH src: %s
   Standard Packages: %s
-`, env.srcDir, env.pkgsStd)
+`, env.dirSrc, env.pkgsStd)
 
 	for x := 0; x < len(env.pkgs); x++ {
 		fmt.Fprintf(&buf, "%s", env.pkgs[x])

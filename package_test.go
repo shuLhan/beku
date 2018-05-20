@@ -21,7 +21,7 @@ func testPackageRemove(t *testing.T) {
 		pkg:  NewPackage(testPkgNotExist, testPkgNotExist, VCSModeGit),
 	}, {
 		desc: `Package exist`,
-		pkg:  gitPkgShare,
+		pkg:  testGitPkgShare,
 	}}
 
 	for _, c := range cases {
@@ -38,7 +38,7 @@ func testPackageRemove(t *testing.T) {
 
 		test.Assert(t, "src dir should not exist", expErr, err.Error(), true)
 
-		pkg := filepath.Join(testEnv.pkgDir, c.pkg.ImportPath)
+		pkg := filepath.Join(testEnv.dirPkg, c.pkg.ImportPath)
 
 		expErr = fmt.Sprintf("stat %s: no such file or directory", pkg)
 		_, err = os.Stat(pkg)
@@ -54,10 +54,10 @@ func testPackageInstall(t *testing.T) {
 		expPkg *Package
 	}{{
 		desc: `Without version`,
-		pkg:  gitPkgShare,
+		pkg:  testGitPkgShare,
 		expPkg: &Package{
 			ImportPath: testGitRepoShare,
-			FullPath:   gitPkgShare.FullPath,
+			FullPath:   testGitPkgShare.FullPath,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepoShare,
 			Version:    "9337967",
@@ -65,8 +65,8 @@ func testPackageInstall(t *testing.T) {
 		},
 	}, {
 		desc:   `Install again`,
-		pkg:    gitPkgShare,
-		expErr: fmt.Sprintf("gitInstall: gitClone: "+errDirNotEmpty, gitPkgShare.FullPath),
+		pkg:    testGitPkgShare,
+		expErr: fmt.Sprintf("gitInstall: gitClone: "+errDirNotEmpty, testGitPkgShare.FullPath),
 	}}
 
 	for _, c := range cases {
@@ -234,15 +234,15 @@ func testAddDep(t *testing.T) {
 
 	var got bool
 
-	gitCurPkg.Deps = nil
-	gitCurPkg.DepsMissing = nil
+	testGitPkgCur.Deps = nil
+	testGitPkgCur.DepsMissing = nil
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
 		testEnv.pkgs = c.envPkgs
 		testEnv.pkgsMissing = nil
-		got = gitCurPkg.addDep(testEnv, c.importPath)
+		got = testGitPkgCur.addDep(testEnv, c.importPath)
 
 		test.Assert(t, "return", c.exp, got, true)
 
@@ -250,14 +250,14 @@ func testAddDep(t *testing.T) {
 			continue
 		}
 
-		test.Assert(t, "Deps", c.expDeps, gitCurPkg.Deps, true)
-		test.Assert(t, "DepsMissing", c.expDepsMissing, gitCurPkg.DepsMissing, true)
+		test.Assert(t, "Deps", c.expDeps, testGitPkgCur.Deps, true)
+		test.Assert(t, "DepsMissing", c.expDepsMissing, testGitPkgCur.DepsMissing, true)
 		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing,
 			testEnv.pkgsMissing, true)
 	}
 
-	gitCurPkg.Deps = nil
-	gitCurPkg.DepsMissing = nil
+	testGitPkgCur.Deps = nil
+	testGitPkgCur.DepsMissing = nil
 }
 
 func testPushRequiredBy(t *testing.T) {
@@ -281,18 +281,18 @@ func testPushRequiredBy(t *testing.T) {
 		},
 	}}
 
-	gitCurPkg.RequiredBy = nil
+	testGitPkgCur.RequiredBy = nil
 
 	var got bool
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got = gitCurPkg.pushRequiredBy(c.importPath)
+		got = testGitPkgCur.pushRequiredBy(c.importPath)
 
 		test.Assert(t, "return value", c.exp, got, true)
 		test.Assert(t, "RequiredBy", c.expRequiredBy,
-			gitCurPkg.RequiredBy, true)
+			testGitPkgCur.RequiredBy, true)
 	}
 }
 
@@ -305,7 +305,7 @@ func testPackageRemoveRequiredBy(t *testing.T) {
 		expRequiredBy []string
 	}{{
 		desc:       `With importPath not found`,
-		pkg:        gitCurPkg,
+		pkg:        testGitPkgCur,
 		importPath: testPkgNotExist,
 		exp:        false,
 		expRequiredBy: []string{
@@ -313,7 +313,7 @@ func testPackageRemoveRequiredBy(t *testing.T) {
 		},
 	}, {
 		desc:       `With importPath found`,
-		pkg:        gitCurPkg,
+		pkg:        testGitPkgCur,
 		importPath: testGitRepoShare,
 		exp:        true,
 	}}
@@ -450,11 +450,11 @@ func testGoInstall(t *testing.T) {
 		expStderr  string
 	}{{
 		desc:      "Running #1",
-		pkg:       gitCurPkg,
+		pkg:       testGitPkgCur,
 		expStderr: `main.go:6:2: cannot find package "github.com/shuLhan/share/lib/text" in any of:`,
 	}, {
 		desc:      "Running with verbose",
-		pkg:       gitCurPkg,
+		pkg:       testGitPkgCur,
 		isVerbose: true,
 		expStderr: `main.go:6:2: cannot find package "github.com/shuLhan/share/lib/text" in any of:`,
 	}}
@@ -498,7 +498,7 @@ func testPackageString(t *testing.T) {
 		pkg *Package
 		exp string
 	}{{
-		pkg: gitCurPkg,
+		pkg: testGitPkgCur,
 		exp: `
 [package "github.com/shuLhan/beku_test"]
           VCS = 1
@@ -530,21 +530,21 @@ func testUpdate(t *testing.T) {
 		curPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepo,
 		},
 		newPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 		},
 		expPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 		},
@@ -553,14 +553,14 @@ func testUpdate(t *testing.T) {
 		curPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepo,
 		},
 		newPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 			Version:    "v0.1.0",
@@ -569,7 +569,7 @@ func testUpdate(t *testing.T) {
 		expPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 			Version:    "v0.1.0",
@@ -580,14 +580,14 @@ func testUpdate(t *testing.T) {
 		curPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepo,
 		},
 		newPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 			Version:    "c9f69fb",
@@ -596,7 +596,7 @@ func testUpdate(t *testing.T) {
 		expPkg: &Package{
 			vcs:        VCSModeGit,
 			ImportPath: testGitRepo,
-			FullPath:   testEnv.srcDir + "/" + testGitRepo,
+			FullPath:   testEnv.dirSrc + "/" + testGitRepo,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 			Version:    "c9f69fb",
@@ -709,8 +709,8 @@ func testPackageGoClean(t *testing.T) {
 		pkg:  NewPackage(testPkgNotExist, testPkgNotExist, VCSModeGit),
 	}, {
 		desc:      `With package exist`,
-		pkg:       gitCurPkg,
-		pkgBin:    filepath.Join(testEnv.binDir, "beku_test"),
+		pkg:       testGitPkgCur,
+		pkgBin:    filepath.Join(testEnv.dirBin, "beku_test"),
 		expBinErr: "stat %s: no such file or directory",
 	}}
 
@@ -734,7 +734,7 @@ func testPackageGoClean(t *testing.T) {
 }
 
 func testPackagePost(t *testing.T) {
-	err := gitPkgShare.Remove()
+	err := testGitPkgShare.Remove()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -16,12 +16,12 @@ const (
 )
 
 var (
-	testEnv     *Env
-	gitCurPkg   *Package
-	gitNewPkg   *Package
-	gitPkgShare *Package
-	testStdout  *os.File
-	testStderr  *os.File
+	testEnv         *Env
+	testGitPkgCur   *Package
+	testGitPkgNew   *Package
+	testGitPkgShare *Package
+	testStdout      *os.File
+	testStderr      *os.File
 )
 
 func testInitOutput() (err error) {
@@ -99,13 +99,13 @@ func TestMain(t *testing.M) {
 		log.Fatal(err)
 	}
 
-	gitCurPkg = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
-	gitNewPkg = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
-	gitPkgShare = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
+	testGitPkgCur = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
+	testGitPkgNew = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
+	testGitPkgShare = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
 
 	log.Printf("test env : %+v\n", *testEnv)
-	log.Printf("gitCurPkg: %+v\n", *gitCurPkg)
-	log.Printf("gitNewPkg: %+v\n", *gitNewPkg)
+	log.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)
+	log.Printf("testGitPkgNew: %+v\n", *testGitPkgNew)
 
 	os.Exit(t.Run())
 }
