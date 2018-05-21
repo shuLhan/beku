@@ -12,22 +12,24 @@ import (
 const (
 	emptyString = ""
 
-	flagHelpUsage     = "Show the short usage."
-	flagQueryUsage    = "Query the package database."
-	flagRemoveUsage   = "Remove package from GOPATH."
-	flagSyncUsage     = "Synchronize `package`."
-	flagSyncIntoUsage = "Package download `directory`."
+	flagHelpUsage      = "Show the short usage."
+	flagQueryUsage     = "Query the package database."
+	flagRecursiveUsage = "Remove target include their dependencies."
+	flagRemoveUsage    = "Remove package from GOPATH."
+	flagSyncUsage      = "Synchronize `package`."
+	flagSyncIntoUsage  = "Package download `directory`."
 )
 
 type command struct {
-	op       operation
-	env      *beku.Env
-	help     bool
-	query    bool
-	queryPkg []string
-	rmPkg    string
-	syncPkg  string
-	syncInto string
+	op        operation
+	env       *beku.Env
+	help      bool
+	query     bool
+	recursive bool
+	queryPkg  []string
+	rmPkg     string
+	syncPkg   string
+	syncInto  string
 }
 
 func (cmd *command) usage() {
@@ -37,7 +39,7 @@ operations:
 		` + flagHelpUsage + `
 	beku {-Q|--query} [pkg ...]
 		` + flagQueryUsage + `
-	beku {-R|--remove} [pkg ...]
+	beku {-R|--remove} [pkg ...] [-s|--recursive]
 		` + flagRemoveUsage + `
 	beku {-S|--sync} <pkg@version> [--into <directory>]
 		` + flagSyncUsage + `
@@ -60,6 +62,9 @@ func (cmd *command) setFlags() {
 	flag.StringVar(&cmd.rmPkg, "R", emptyString, flagRemoveUsage)
 	flag.StringVar(&cmd.rmPkg, "remove", emptyString, flagRemoveUsage)
 
+	flag.BoolVar(&cmd.recursive, "s", false, flagRecursiveUsage)
+	flag.BoolVar(&cmd.recursive, "recursive", false, flagRecursiveUsage)
+
 	flag.StringVar(&cmd.syncPkg, "S", emptyString, flagSyncUsage)
 	flag.StringVar(&cmd.syncPkg, "sync", emptyString, flagSyncUsage)
 	flag.StringVar(&cmd.syncInto, "into", emptyString, flagSyncIntoUsage)
@@ -80,8 +85,12 @@ func (cmd *command) checkFlags() {
 
 	args := flag.Args()
 
+	if cmd.recursive {
+		cmd.op |= opRecursive
+	}
+
 	if cmd.query {
-		cmd.op = opQuery
+		cmd.op |= opQuery
 		cmd.queryPkg = args
 		return
 	}
@@ -99,7 +108,7 @@ func (cmd *command) checkFlags() {
 	}
 
 	// Invalid command parameters
-	if cmd.op == opNone || cmd.op == opSyncInto {
+	if cmd.op == opNone || cmd.op == opRecursive || cmd.op == opSyncInto {
 		cmd.usage()
 	}
 }

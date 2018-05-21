@@ -32,7 +32,29 @@ Query the package database.
 
 	-R, --remove [pkg]
 
-Remove package from GOPATH.
+Remove package from GOPATH, including source and installed binaries and
+archives.
+
+### Options
+
+	[-s,--recursive]
+
+Also remove all target dependencies, as long as is not required by other
+packages.
+
+### Examples
+
+	$ beku -R github.com/shuLhan/beku
+
+Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
+their installed binaries in "$GOPATH/bin", and their installed archives on
+"$GOPATH/pkg/{GOOS}_{GOARCH}".
+
+	$ beku -Rs github.com/shuLhan/beku --recursive
+
+Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
+their installed binaries in "$GOPATH/bin", their installed archives on
+"$GOPATH/pkg/{GOOS}_{GOARCH}", and all their dependencies.
 
 
 ## Sync Operation

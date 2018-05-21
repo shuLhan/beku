@@ -24,7 +24,29 @@
 //
 //	-R, --remove [pkg]
 //
-// Remove package from GOPATH.
+// Remove package from GOPATH, including source and installed binaries and
+// archives.
+//
+// ### Options
+//
+//	[-s,--recursive]
+//
+// Also remove all target dependencies, as long as is not required by other
+// packages.
+//
+// ### Examples
+//
+// 	$ beku -R github.com/shuLhan/beku
+//
+// Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
+// their installed binaries in "$GOPATH/bin", and their installed archives on
+// "$GOPATH/pkg/{GOOS}_{GOARCH}".
+//
+//	$ beku -Rs github.com/shuLhan/beku --recursive
+//
+// Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
+// their installed binaries in "$GOPATH/bin", their installed archives on
+// "$GOPATH/pkg/{GOOS}_{GOARCH}", and all their dependencies.
 //
 //
 // ## Sync Operation
@@ -51,23 +73,23 @@
 //
 // ### Examples
 //
-//	beku -S golang.org/x/text
+//	$ beku -S golang.org/x/text
 //
 // Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`,
 // and set their version to the latest commit on branch master.
 //
-//	beku -S github.com/golang/text --into golang.org/x/text
+//	$ beku -S github.com/golang/text --into golang.org/x/text
 //
 // Download package `github.com/golang/text` into
 // `$GOPATH/src/golang.org/x/text`, and set their version to the latest commit
 // on branch master.
 //
-//	beku -S golang.org/x/text@v0.3.0
+//	$ beku -S golang.org/x/text@v0.3.0
 //
 // Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 // and checkout the tag `v0.3.0` as the working version.
 //
-//	beku -S golang.org/x/text@5c1cf69
+//	$ beku -S golang.org/x/text@5c1cf69
 //
 // Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 // and checkout the commit `5c1cf69` as the working version.
@@ -106,6 +128,8 @@ func main() {
 		cmd.env.Query(cmd.queryPkg)
 	case opRemove:
 		err = cmd.env.Remove(cmd.rmPkg, false)
+	case opRemove | opRecursive:
+		err = cmd.env.Remove(cmd.rmPkg, true)
 	case opSync:
 		err = cmd.env.Sync(cmd.syncPkg, "")
 	case opSync | opSyncInto:

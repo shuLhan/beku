@@ -333,64 +333,137 @@ This package is required by,
 		return
 	}
 
-	fmt.Println("The following package will be removed,\n", pkg)
+	var listRemoved []string
+	tobeRemoved := make(map[string]bool)
+
+	if recursive {
+		env.filterUnusedDeps(pkg, tobeRemoved)
+	}
+
+	for k, v := range tobeRemoved {
+		if v {
+			if k == pkg.ImportPath {
+				continue
+			}
+			listRemoved = append(listRemoved, k)
+		}
+	}
+	listRemoved = append(listRemoved, pkg.ImportPath)
+
+	fmt.Println("The following package will be removed,")
+	for _, importPath := range listRemoved {
+		fmt.Println(" *", importPath)
+	}
 
 	ok := confirm(os.Stdin, msgContinue, false)
 	if !ok {
 		return
 	}
 
-	if !recursive {
-		err = pkg.Remove()
+	for _, importPath := range listRemoved {
+		err = env.removePackage(importPath)
 		if err != nil {
 			err = fmt.Errorf("Remove: %s", err)
 			return
 		}
 
-		env.removePackage(pkg)
-	}
+		pkgImportPath := filepath.Join(env.dirPkg, importPath)
 
-	pkgImportPath := filepath.Join(env.dirPkg, pkg.ImportPath)
+		if Debug >= DebugL1 {
+			fmt.Println(">>> Removing", pkgImportPath)
+		}
 
-	if Debug >= DebugL1 {
-		fmt.Println(">>> Remove $GOPATH/pkg:", pkgImportPath)
-	}
-
-	err = os.RemoveAll(pkgImportPath)
-	if err != nil {
-		err = fmt.Errorf("Remove: %s", err)
+		err = os.RemoveAll(pkgImportPath)
+		if err != nil {
+			err = fmt.Errorf("Remove: %s", err)
+			return
+		}
 	}
 
 	return
 }
 
+func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
+	var dep *Package
+	var nfound int
+
+	_, ok := tobeRemoved[pkg.ImportPath]
+	if ok {
+		return
+	}
+
+	tobeRemoved[pkg.ImportPath] = true
+	for x := 0; x < len(pkg.Deps); x++ {
+		tobeRemoved[pkg.Deps[x]] = true
+	}
+
+	for x := 0; x < len(pkg.Deps); x++ {
+		dep = env.GetPackage(pkg.Deps[x], "")
+
+		if len(dep.Deps) > 0 {
+			env.filterUnusedDeps(dep, tobeRemoved)
+		}
+
+		if len(dep.RequiredBy) == 1 {
+			continue
+		}
+
+		nfound = 0
+		for y := 0; y < len(dep.RequiredBy); y++ {
+			found, ok := tobeRemoved[dep.RequiredBy[y]]
+			if ok && found {
+				nfound++
+			}
+		}
+		if nfound == len(dep.RequiredBy) {
+			continue
+		}
+
+		tobeRemoved[pkg.Deps[x]] = false
+	}
+}
+
 //
-// removePackage from list of packages, also remove in other packages
-// "RequiredBy" if exist.
+// removePackage from list environment (including source and installed archive
+// or binary). This also remove in other packages "RequiredBy" if exist.
 //
-func (env *Env) removePackage(pkg *Package) {
+func (env *Env) removePackage(importPath string) (err error) {
+	pkg := env.GetPackage(importPath, "")
+	if pkg == nil {
+		return
+	}
+
+	err = pkg.Remove()
+	if err != nil {
+		return
+	}
+
 	idx := -1
 	for x := 0; x < len(env.pkgs); x++ {
-		if env.pkgs[x].ImportPath == pkg.ImportPath {
+		if env.pkgs[x].ImportPath == importPath {
 			idx = x
 			continue
 		}
 
-		ok := env.pkgs[x].RemoveRequiredBy(pkg.ImportPath)
+		ok := env.pkgs[x].RemoveRequiredBy(importPath)
 		if ok {
 			env.dirty = true
 		}
 	}
 
-	if idx >= 0 {
-		lenpkgs := len(env.pkgs)
-
-		copy(env.pkgs[idx:], env.pkgs[idx+1:])
-		env.pkgs[lenpkgs-1] = nil
-		env.pkgs = env.pkgs[:lenpkgs-1]
-
-		env.dirty = true
+	if idx == 0 {
+		return
 	}
+
+	lenpkgs := len(env.pkgs)
+
+	copy(env.pkgs[idx:], env.pkgs[idx+1:])
+	env.pkgs[lenpkgs-1] = nil
+	env.pkgs = env.pkgs[:lenpkgs-1]
+
+	env.dirty = true
+
+	return
 }
 
 //
