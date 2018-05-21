@@ -12,12 +12,12 @@ import (
 const (
 	emptyString = ""
 
-	flagHelpUsage      = "Show the short usage."
-	flagQueryUsage     = "Query the package database."
-	flagRecursiveUsage = "Remove target include their dependencies."
-	flagRemoveUsage    = "Remove package from GOPATH."
-	flagSyncUsage      = "Synchronize `package`."
-	flagSyncIntoUsage  = "Package download `directory`."
+	flagUsageHelp      = "Show the short usage."
+	flagUsageQuery     = "Query the package database."
+	flagUsageRecursive = "Remove target include their dependencies."
+	flagUsageRemove    = "Remove package from GOPATH."
+	flagUsageSync      = "Synchronize `package`."
+	flagUsageSyncInto  = "Package download `directory`."
 )
 
 type command struct {
@@ -36,13 +36,13 @@ func (cmd *command) usage() {
 	help := `usage: beku <operation> [...]
 operations:
 	beku {-h|--help}
-		` + flagHelpUsage + `
+		` + flagUsageHelp + `
 	beku {-Q|--query} [pkg ...]
-		` + flagQueryUsage + `
+		` + flagUsageQuery + `
 	beku {-R|--remove} [pkg ...] [-s|--recursive]
-		` + flagRemoveUsage + `
+		` + flagUsageRemove + `
 	beku {-S|--sync} <pkg@version> [--into <directory>]
-		` + flagSyncUsage + `
+		` + flagUsageSync + `
 `
 
 	fmt.Print(help)
@@ -53,21 +53,21 @@ operations:
 func (cmd *command) setFlags() {
 	flag.Usage = cmd.usage
 
-	flag.BoolVar(&cmd.help, "h", false, flagHelpUsage)
-	flag.BoolVar(&cmd.help, "help", false, flagHelpUsage)
+	flag.BoolVar(&cmd.help, "h", false, flagUsageHelp)
+	flag.BoolVar(&cmd.help, "help", false, flagUsageHelp)
 
-	flag.BoolVar(&cmd.query, "Q", false, flagQueryUsage)
-	flag.BoolVar(&cmd.query, "query", false, flagQueryUsage)
+	flag.BoolVar(&cmd.query, "Q", false, flagUsageQuery)
+	flag.BoolVar(&cmd.query, "query", false, flagUsageQuery)
 
-	flag.StringVar(&cmd.rmPkg, "R", emptyString, flagRemoveUsage)
-	flag.StringVar(&cmd.rmPkg, "remove", emptyString, flagRemoveUsage)
+	flag.StringVar(&cmd.rmPkg, "R", emptyString, flagUsageRemove)
+	flag.StringVar(&cmd.rmPkg, "remove", emptyString, flagUsageRemove)
 
-	flag.BoolVar(&cmd.recursive, "s", false, flagRecursiveUsage)
-	flag.BoolVar(&cmd.recursive, "recursive", false, flagRecursiveUsage)
+	flag.BoolVar(&cmd.recursive, "s", false, flagUsageRecursive)
+	flag.BoolVar(&cmd.recursive, "recursive", false, flagUsageRecursive)
 
-	flag.StringVar(&cmd.syncPkg, "S", emptyString, flagSyncUsage)
-	flag.StringVar(&cmd.syncPkg, "sync", emptyString, flagSyncUsage)
-	flag.StringVar(&cmd.syncInto, "into", emptyString, flagSyncIntoUsage)
+	flag.StringVar(&cmd.syncPkg, "S", emptyString, flagUsageSync)
+	flag.StringVar(&cmd.syncPkg, "sync", emptyString, flagUsageSync)
+	flag.StringVar(&cmd.syncInto, "into", emptyString, flagUsageSyncInto)
 
 	flag.Parse()
 }
