@@ -1,0 +1,385 @@
+[package "github.com/alecthomas/gometalinter"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/alecthomas/gometalinter
+version = 0725fc6
+deps = github.com/stretchr/testify
+deps = gotest.tools
+deps = github.com/pkg/errors
+deps = github.com/google/go-cmp
+
+[package "github.com/codegangsta/cli"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/codegangsta/cli
+version = 8e01ec4
+required-by = github.com/ksubedi/gomove
+missing = github.com/BurntSushi/toml
+missing = gopkg.in/urfave/cli.v1
+missing = gopkg.in/yaml.v2
+
+[package "github.com/go-fsnotify/fsnotify"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/go-fsnotify/fsnotify
+version = v1.4.7
+deps = golang.org/x/sys
+
+[package "github.com/go-log/log"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/go-log/log
+version = v0.1.0
+deps = github.com/sirupsen/logrus
+deps = golang.org/x/net
+missing = google.golang.org/appengine/log
+
+[package "github.com/golang/lint"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/golang/lint
+version = c5fb716
+deps = golang.org/x/tools
+
+[package "github.com/golang/protobuf"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/golang/protobuf
+version = bbd03ef
+
+[package "github.com/google/go-github"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/google/go-github
+version = 08e68b5
+deps = github.com/google/go-querystring
+deps = golang.org/x/net
+deps = golang.org/x/oauth2
+missing = golang.org/x/crypto/ssh/terminal
+missing = google.golang.org/appengine
+missing = google.golang.org/appengine/log
+
+[package "github.com/google/go-querystring"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/google/go-querystring
+version = 53e6ce1
+required-by = github.com/google/go-github
+
+[package "github.com/hashicorp/consul"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/hashicorp/consul
+version = v1.1.0
+
+[package "github.com/influxdata/chronograf"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/influxdata/chronograf
+version = 0204873d5
+
+[package "github.com/jguer/go-alpm"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/jguer/go-alpm
+version = 6150b61
+
+[package "github.com/json-iterator/go"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/json-iterator/go
+version = 1.1.3
+required-by = github.com/shuLhan/gontacts
+missing = github.com/modern-go/concurrent
+missing = github.com/modern-go/reflect2
+
+[package "github.com/kevinburke/go-bindata"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/kevinburke/go-bindata
+version = 2197b05
+
+[package "github.com/kisielk/errcheck"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/kisielk/errcheck
+version = 23699b7
+deps = github.com/kisielk/gotool
+deps = golang.org/x/tools
+
+[package "github.com/kisielk/gotool"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/kisielk/gotool
+version = d6ce626
+required-by = github.com/kisielk/errcheck
+
+[package "github.com/loadimpact/k6"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/loadimpact/k6
+version = 1ddf285
+
+[package "github.com/mattn/go-colorable"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/mattn/go-colorable
+version = efa5899
+deps = github.com/mattn/go-isatty
+required-by = github.com/mgutz/ansi
+required-by = github.com/ksubedi/gomove
+
+[package "github.com/mattn/go-isatty"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/mattn/go-isatty
+version = 6ca4dbf
+required-by = github.com/mattn/go-colorable
+required-by = github.com/mgutz/ansi
+required-by = github.com/ksubedi/gomove
+
+[package "github.com/mgutz/ansi"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/mgutz/ansi
+version = 9520e82
+deps = github.com/mattn/go-colorable
+deps = github.com/mattn/go-isatty
+required-by = github.com/ksubedi/gomove
+
+[package "github.com/miekg/dns"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/miekg/dns
+version = 906238e
+
+[package "github.com/mikkeloscar/aur"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/mikkeloscar/aur
+version = 9050804
+
+[package "github.com/mikkeloscar/gopkgbuild"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/mikkeloscar/gopkgbuild
+version = 32274fc
+
+[package "github.com/mitchellh/hashstructure"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/mitchellh/hashstructure
+version = 2bca23e
+
+[package "github.com/naoina/denco"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/naoina/denco
+version = a2656d3
+
+[package "github.com/pborman/uuid"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/pborman/uuid
+version = c65b2f8
+
+[package "github.com/pkg/errors"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/pkg/errors
+version = 816c908
+required-by = gotest.tools
+required-by = github.com/alecthomas/gometalinter
+
+[package "github.com/shuLhan/beku"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/beku.git
+version = 3fb3f96
+deps = github.com/shuLhan/share
+
+[package "github.com/shuLhan/dsv"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/dsv.git
+version = bbe8681
+deps = github.com/shuLhan/numerus
+deps = github.com/shuLhan/tabula
+deps = github.com/shuLhan/tekstus
+
+[package "github.com/shuLhan/go-bindata"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/go-bindata.git
+version = eb5746d
+
+[package "github.com/shuLhan/gontacts"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/gontacts.git
+version = d4786e8
+deps = github.com/json-iterator/go
+
+[package "github.com/shuLhan/haminer"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/haminer.git
+version = 42be4cb
+
+[package "github.com/shuLhan/numerus"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/numerus.git
+version = 104dd6b
+required-by = github.com/shuLhan/dsv
+required-by = github.com/shuLhan/tabula
+required-by = github.com/shuLhan/tekstus
+
+[package "github.com/shuLhan/share"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/share.git
+version = b2c8fd7
+required-by = github.com/shuLhan/beku
+
+[package "github.com/shuLhan/tabula"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/tabula.git
+version = 14d5c16
+deps = github.com/shuLhan/numerus
+deps = github.com/shuLhan/tekstus
+required-by = github.com/shuLhan/dsv
+
+[package "github.com/shuLhan/tekstus"]
+vcs = git
+remote-name = origin
+remote-url = git@github.com:shuLhan/tekstus.git
+version = 651065d
+deps = github.com/shuLhan/numerus
+required-by = github.com/shuLhan/dsv
+required-by = github.com/shuLhan/tabula
+
+[package "github.com/sirupsen/logrus"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/sirupsen/logrus
+version = 68cec9f
+required-by = github.com/go-log/log
+missing = gopkg.in/gemnasium/logrus-airbrake-hook.v2
+
+[package "github.com/skratchdot/open-golang"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/skratchdot/open-golang
+version = 75fb7ed
+
+[package "github.com/yosssi/ace"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/yosssi/ace
+version = v0.0.5
+missing = github.com/yosssi/gohtml
+
+[package "github.com/zyedidia/micro"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/zyedidia/micro
+version = nightly
+
+[package "golang.org/x/net"]
+vcs = git
+remote-name = origin
+remote-url = https://golang.org/x/net
+version = 2491c5d
+deps = golang.org/x/text
+required-by = github.com/go-log/log
+required-by = github.com/google/go-github
+required-by = golang.org/x/oauth2
+required-by = golang.org/x/tools
+required-by = golang.org/x/tour
+missing = golang.org/x/crypto/ssh/terminal
+
+[package "golang.org/x/oauth2"]
+vcs = git
+remote-name = origin
+remote-url = https://go.googlesource.com/oauth2
+version = cdc340f
+deps = golang.org/x/net
+required-by = github.com/google/go-github
+missing = cloud.google.com/go/compute/metadata
+
+[package "golang.org/x/sys"]
+vcs = git
+remote-name = origin
+remote-url = https://go.googlesource.com/sys
+version = 37707fd
+required-by = github.com/go-fsnotify/fsnotify
+
+[package "golang.org/x/tools"]
+vcs = git
+remote-name = origin
+remote-url = https://go.googlesource.com/tools
+version = c1547a3f
+deps = golang.org/x/net
+required-by = github.com/golang/lint
+required-by = github.com/kisielk/errcheck
+required-by = golang.org/x/tour
+required-by = gotest.tools
+required-by = github.com/golang/text
+required-by = golang.org/x/text
+required-by = github.com/ksubedi/gomove
+
+[package "golang.org/x/tour"]
+vcs = git
+remote-name = origin
+remote-url = https://go.googlesource.com/tour
+version = 65fff99
+deps = golang.org/x/net
+deps = golang.org/x/tools
+
+[package "github.com/stretchr/testify"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/stretchr/testify
+version = v1.2.1
+required-by = github.com/alecthomas/gometalinter
+
+[package "gotest.tools"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/gotestyourself/gotestyourself
+version = v2.0.0
+deps = github.com/pkg/errors
+deps = golang.org/x/tools
+deps = github.com/google/go-cmp
+required-by = github.com/alecthomas/gometalinter
+missing = github.com/spf13/pflag
+
+[package "github.com/google/go-cmp"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/google/go-cmp
+version = v0.2.0
+required-by = github.com/alecthomas/gometalinter
+required-by = gotest.tools
+
+[package "golang.org/x/text"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/golang/text
+version = v0.3.0
+deps = golang.org/x/tools
+deps = golang.org/x/text
+
+[package "github.com/ksubedi/gomove"]
+vcs = git
+remote-name = origin
+remote-url = https://github.com/ksubedi/gomove
+version = 0.2.17
+deps = github.com/codegangsta/cli
+deps = github.com/mattn/go-colorable
+deps = github.com/mattn/go-isatty
+deps = github.com/mgutz/ansi
+deps = golang.org/x/tools
+

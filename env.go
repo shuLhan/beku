@@ -302,13 +302,13 @@ func (env *Env) Load(file string) (err error) {
 func (env *Env) Query(pkgs []string) {
 	for x := 0; x < len(env.pkgs); x++ {
 		if len(pkgs) == 0 {
-			fmt.Println(env.pkgs[x].ImportPath, env.pkgs[x].Version)
+			fmt.Fprintln(defStdout, env.pkgs[x].ImportPath, env.pkgs[x].Version)
 			continue
-		}
-
-		for y := 0; y < len(pkgs); y++ {
-			if env.pkgs[x].ImportPath == pkgs[y] {
-				fmt.Println(env.pkgs[x].ImportPath, env.pkgs[x].Version)
+		} else {
+			for y := 0; y < len(pkgs); y++ {
+				if env.pkgs[x].ImportPath == pkgs[y] {
+					fmt.Fprintln(defStdout, env.pkgs[x].ImportPath, env.pkgs[x].Version)
+				}
 			}
 		}
 	}

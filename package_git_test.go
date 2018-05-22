@@ -76,6 +76,8 @@ ec65455 Add feature A.
 		testGitPkgCur.Version = c.curVersion
 		testGitPkgNew.Version = c.newVersion
 
+		testResetOutput(t, true)
+
 		err = testGitPkgCur.CompareVersion(testGitPkgNew)
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
@@ -86,8 +88,6 @@ ec65455 Add feature A.
 
 		test.Assert(t, "stdout", c.expStdout, stdout, true)
 		test.Assert(t, "stderr", c.expStderr, stderr, true)
-
-		testResetOutput(t, true)
 	}
 }
 
@@ -140,6 +140,8 @@ func testGitFetch(t *testing.T) {
 		testGitPkgCur.Version = c.curVersion
 		testGitPkgCur.isTag = c.isTag
 
+		testResetOutput(t, true)
+
 		err = testGitPkgCur.Fetch()
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
@@ -151,8 +153,6 @@ func testGitFetch(t *testing.T) {
 		test.Assert(t, "VersionNext", c.expVersionNext, testGitPkgCur.VersionNext, true)
 		test.Assert(t, "stdout", c.expStdout, stdout, true)
 		test.Assert(t, "stderr", c.expStderr, stderr, true)
-
-		testResetOutput(t, true)
 	}
 }
 
@@ -220,7 +220,7 @@ func testGitScanDeps(t *testing.T) {
 	}
 }
 
-func TestGit(t *testing.T) {
+func TestPackageGit(t *testing.T) {
 	t.Run("CompareVersion", testGitCompareVersion)
 	t.Run("Fetch", testGitFetch)
 	t.Run("Scan", testGitScan)

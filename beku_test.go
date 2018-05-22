@@ -74,7 +74,7 @@ func testResetOutput(t *testing.T, truncate bool) {
 	}
 }
 
-func TestMain(t *testing.M) {
+func TestMain(m *testing.M) {
 	orgGOPATH := build.Default.GOPATH
 
 	testGOPATH, err := os.Getwd()
@@ -107,5 +107,5 @@ func TestMain(t *testing.M) {
 	log.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)
 	log.Printf("testGitPkgNew: %+v\n", *testGitPkgNew)
 
-	os.Exit(t.Run())
+	os.Exit(m.Run())
 }

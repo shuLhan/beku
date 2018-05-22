@@ -462,7 +462,7 @@ func testGoInstall(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		testResetOutput(t, false)
+		testResetOutput(t, true)
 
 		err := c.pkg.GoInstall(c.isVerbose)
 
@@ -607,7 +607,7 @@ func testUpdate(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		testResetOutput(t, false)
+		testResetOutput(t, true)
 
 		err := c.curPkg.Update(c.newPkg)
 
