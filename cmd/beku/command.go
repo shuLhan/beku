@@ -1,7 +1,7 @@
 package main
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -9,8 +9,15 @@ import (
 	"github.com/shuLhan/beku"
 )
 
+var (
+	errInvalidOptions  = errors.New("error: invalid options")
+	errMultiOperations = errors.New("error: only at operation may be used at a time")
+	errNoOperation     = errors.New("error: no operation specified")
+	errNoTarget        = errors.New("error: no targets specified")
+)
+
 const (
-	emptyString = ""
+	emptyValue = ""
 
 	flagUsageHelp      = "Show the short usage."
 	flagUsageQuery     = "Query the package database."
@@ -21,15 +28,10 @@ const (
 )
 
 type command struct {
-	op        operation
-	env       *beku.Env
-	help      bool
-	query     bool
-	recursive bool
-	queryPkg  []string
-	rmPkg     string
-	syncPkg   string
-	syncInto  string
+	op       operation
+	env      *beku.Env
+	pkgs     []string
+	syncInto string
 }
 
 func (cmd *command) usage() {
@@ -39,78 +41,180 @@ operations:
 		` + flagUsageHelp + `
 	beku {-Q|--query} [pkg ...]
 		` + flagUsageQuery + `
-	beku {-R|--remove} [pkg ...] [-s|--recursive]
+	beku {-R|--remove} <pkg> [-s|--recursive]
 		` + flagUsageRemove + `
-	beku {-S|--sync} <pkg@version> [--into <directory>]
+	beku {-S|--sync} <pkg[@version]> [--into <directory>]
 		` + flagUsageSync + `
 `
 
-	fmt.Print(help)
-
-	os.Exit(1)
+	fmt.Fprint(os.Stderr, help)
 }
 
-func (cmd *command) setFlags() {
-	flag.Usage = cmd.usage
+func (cmd *command) parseRemoveFlags(arg string) (operation, error) {
+	if len(arg) == 0 {
+		return opNone, nil
+	}
 
-	flag.BoolVar(&cmd.help, "h", false, flagUsageHelp)
-	flag.BoolVar(&cmd.help, "help", false, flagUsageHelp)
+	var op operation
 
-	flag.BoolVar(&cmd.query, "Q", false, flagUsageQuery)
-	flag.BoolVar(&cmd.query, "query", false, flagUsageQuery)
+	switch arg[0] {
+	case 's':
+		op = opRecursive
+		return op, nil
+	}
 
-	flag.StringVar(&cmd.rmPkg, "R", emptyString, flagUsageRemove)
-	flag.StringVar(&cmd.rmPkg, "remove", emptyString, flagUsageRemove)
+	return opNone, errInvalidOptions
+}
 
-	flag.BoolVar(&cmd.recursive, "s", false, flagUsageRecursive)
-	flag.BoolVar(&cmd.recursive, "recursive", false, flagUsageRecursive)
+func (cmd *command) parseShortFlags(arg string) (operation, error) {
+	if len(arg) == 0 {
+		return opNone, errInvalidOptions
+	}
 
-	flag.StringVar(&cmd.syncPkg, "S", emptyString, flagUsageSync)
-	flag.StringVar(&cmd.syncPkg, "sync", emptyString, flagUsageSync)
-	flag.StringVar(&cmd.syncInto, "into", emptyString, flagUsageSyncInto)
+	var (
+		op  operation
+		err error
+	)
 
-	flag.Parse()
+	switch arg[0] {
+	case 's':
+		op = opRecursive
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
+	case 'h':
+		op = opHelp
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
+	case 'Q':
+		op = opQuery
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
+	case 'S':
+		op = opSync
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
+	case 'R':
+		op, err = cmd.parseRemoveFlags(arg[1:])
+		if err != nil {
+			return opNone, err
+		}
+		op |= opRemove
+	default:
+		return opNone, errInvalidOptions
+	}
+
+	cmd.op |= op
+
+	return op, nil
+}
+
+func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
+	if len(arg) == 0 {
+		return opNone, errInvalidOptions
+	}
+	switch arg {
+	case "help":
+		op = opHelp
+	case "into":
+		op = opSyncInto
+	case "query":
+		op = opQuery
+	case "recursive":
+		op = opRecursive
+	case "remove":
+		op = opRemove
+	case "sync":
+		op = opSync
+	default:
+		return opNone, errInvalidOptions
+	}
+
+	cmd.op |= op
+
+	return
 }
 
 //
-// checkFlags
+// parseFlags for multiple operations, invalid options, or empty targets.
 //
-// (0) "-h" or "--help" is always the primary flag.
+// (0) "-h" or "--help" flag is a stopper.
+// (1) Only one operation is allowed.
+// (2) "-R" or "-S" must have target
 //
-func (cmd *command) checkFlags() {
-	// (0)
-	if cmd.help {
-		cmd.usage()
+func (cmd *command) parseFlags(args []string) (err error) {
+	if len(args) == 0 {
+		return errNoOperation
 	}
 
-	args := flag.Args()
+	var (
+		fl int
+		op operation
+	)
+	for _, arg := range args {
+		fl = 0
+		for y, r := range arg {
+			if fl == 1 {
+				if r == '-' {
+					fl++
+					continue
+				}
+				op, err = cmd.parseShortFlags(arg[y:])
+				if err != nil {
+					return
+				}
+				break
+			}
+			if fl == 2 {
+				op, err = cmd.parseLongFlags(arg[y:])
+				if err != nil {
+					return
+				}
+				break
+			}
+			if y == 0 && r == '-' {
+				fl++
+				continue
+			}
 
-	if cmd.recursive {
-		cmd.op |= opRecursive
+			if op == opSyncInto {
+				cmd.syncInto = arg
+			} else {
+				cmd.pkgs = append(cmd.pkgs, arg)
+			}
+			break
+		}
+		// (0)
+		if op == opHelp {
+			return
+		}
 	}
-
-	if cmd.query {
-		cmd.op |= opQuery
-		cmd.queryPkg = args
-		return
+	if cmd.op == opRecursive || cmd.op == opSyncInto {
+		return errInvalidOptions
 	}
-
-	if len(cmd.syncPkg) > 0 {
-		cmd.op = opSync
-
-		if len(cmd.syncInto) > 0 {
-			cmd.op |= opSyncInto
+	if cmd.op&opSyncInto == opSyncInto {
+		if cmd.op&opSync != opSync {
+			return errInvalidOptions
 		}
 	}
 
-	if len(cmd.rmPkg) > 0 {
-		cmd.op |= opRemove
+	// (1)
+	op = cmd.op & (opQuery | opRemove | opSync)
+	if op == opQuery|opRemove || op == opQuery|opSync || op == opRemove|opSync {
+		return errMultiOperations
 	}
 
-	// Invalid command parameters
-	if cmd.op == opNone || cmd.op == opRecursive || cmd.op == opSyncInto {
-		cmd.usage()
+	// (2)
+	if op == opSync || op == opRemove {
+		if len(cmd.pkgs) == 0 {
+			return errNoTarget
+		}
 	}
+
+	return nil
 }
 
 func (cmd *command) loadDatabase() (err error) {
@@ -141,8 +245,10 @@ func (cmd *command) firstTime() {
 func newCommand() (err error) {
 	cmd = &command{}
 
-	cmd.setFlags()
-	cmd.checkFlags()
+	err = cmd.parseFlags(os.Args[1:])
+	if err != nil {
+		return
+	}
 
 	cmd.env, err = beku.NewEnvironment()
 	if err != nil {

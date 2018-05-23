@@ -42,7 +42,8 @@
 // their installed binaries in "$GOPATH/bin", and their installed archives on
 // "$GOPATH/pkg/{GOOS}_{GOARCH}".
 //
-//	$ beku -Rs github.com/shuLhan/beku --recursive
+//	$ beku -R github.com/shuLhan/beku --recursive
+//	$ beku -Rs github.com/shuLhan/beku
 //
 // Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
 // their installed binaries in "$GOPATH/bin", their installed archives on
@@ -109,7 +110,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -120,31 +120,37 @@ var (
 func main() {
 	err := newCommand()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	switch cmd.op {
+	case opHelp:
+		cmd.usage()
+		os.Exit(1)
 	case opQuery:
-		cmd.env.Query(cmd.queryPkg)
+		cmd.env.Query(cmd.pkgs)
 	case opRemove:
-		err = cmd.env.Remove(cmd.rmPkg, false)
+		err = cmd.env.Remove(cmd.pkgs[0], false)
 	case opRemove | opRecursive:
-		err = cmd.env.Remove(cmd.rmPkg, true)
+		err = cmd.env.Remove(cmd.pkgs[0], true)
 	case opSync:
-		err = cmd.env.Sync(cmd.syncPkg, "")
+		err = cmd.env.Sync(cmd.pkgs[0], "")
 	case opSync | opSyncInto:
-		err = cmd.env.Sync(cmd.syncPkg, cmd.syncInto)
+		err = cmd.env.Sync(cmd.pkgs[0], cmd.syncInto)
 	default:
 		fmt.Fprintln(os.Stderr, "Invalid operations or options")
 		os.Exit(1)
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	err = cmd.env.Save("")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }

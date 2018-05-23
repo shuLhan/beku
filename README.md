@@ -50,7 +50,8 @@ Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
 their installed binaries in "$GOPATH/bin", and their installed archives on
 "$GOPATH/pkg/{GOOS}_{GOARCH}".
 
-	$ beku -Rs github.com/shuLhan/beku --recursive
+	$ beku -R github.com/shuLhan/beku --recursive
+	$ beku -Rs github.com/shuLhan/beku
 
 Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
 their installed binaries in "$GOPATH/bin", their installed archives on
