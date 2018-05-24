@@ -57,6 +57,7 @@ func testEnvGetPackage(t *testing.T) {
 			RemoteURL:  "https://github.com/alecthomas/gometalinter",
 			Version:    "0725fc6",
 			vcs:        VCSModeGit,
+			state:      packageStateLoad,
 			Deps: []string{
 				"github.com/stretchr/testify",
 				"gotest.tools",
@@ -75,6 +76,7 @@ func testEnvGetPackage(t *testing.T) {
 			Version:    "v2.0.0",
 			isTag:      true,
 			vcs:        VCSModeGit,
+			state:      packageStateLoad,
 			Deps: []string{
 				"github.com/pkg/errors",
 				"golang.org/x/tools",
@@ -317,6 +319,7 @@ func testEnvScan(t *testing.T) {
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 			Version:    "c9f69fb",
 			vcs:        VCSModeGit,
+			state:      packageStateNew,
 			DepsMissing: []string{
 				"github.com/shuLhan/share/lib/text",
 			},

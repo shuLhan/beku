@@ -64,6 +64,9 @@
 //
 // Sync operation will not install missing dependencies.
 //
+// If no parameter is given, beku will rescan GOPATH, checking for new
+// packages.
+//
 // ### Options
 //
 //	[--into <destination>]
@@ -135,7 +138,11 @@ func main() {
 	case opRemove | opRecursive:
 		err = cmd.env.Remove(cmd.pkgs[0], true)
 	case opSync:
-		err = cmd.env.Sync(cmd.pkgs[0], "")
+		if len(cmd.pkgs) > 0 {
+			err = cmd.env.Sync(cmd.pkgs[0], "")
+		} else {
+			err = cmd.env.Rescan()
+		}
 	case opSync | opSyncInto:
 		err = cmd.env.Sync(cmd.pkgs[0], cmd.syncInto)
 	default:

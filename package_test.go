@@ -62,6 +62,7 @@ func testPackageInstall(t *testing.T) {
 			RemoteURL:  "https://" + testGitRepoShare,
 			Version:    "9337967",
 			vcs:        VCSModeGit,
+			state:      packageStateNew,
 		},
 	}, {
 		desc:   `Install again`,

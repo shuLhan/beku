@@ -207,7 +207,7 @@ func (cmd *command) parseFlags(args []string) (err error) {
 	}
 
 	// (2)
-	if op == opSync || op == opRemove {
+	if op == opRemove {
 		if len(cmd.pkgs) == 0 {
 			return errNoTarget
 		}

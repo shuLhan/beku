@@ -78,11 +78,15 @@ func TestParseFlags(t *testing.T) {
 			pkgs: []string{"A", "B"},
 		},
 	}, {
-		args:   []string{"-S"},
-		expErr: errNoTarget.Error(),
+		args: []string{"-S"},
+		expCmd: &command{
+			op: opSync,
+		},
 	}, {
-		args:   []string{"--sync"},
-		expErr: errNoTarget.Error(),
+		args: []string{"--sync"},
+		expCmd: &command{
+			op: opSync,
+		},
 	}, {
 		args: []string{"-S", "package", "another"},
 		expCmd: &command{

@@ -36,6 +36,8 @@ type Env struct {
 	db          *ini.Ini
 	dbDefFile   string
 	dbFile      string
+	countNew    int
+	countUpdate int
 	dirty       bool
 }
 
@@ -228,7 +230,17 @@ func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 		return fmt.Errorf("%s: %s", pkgName, err)
 	}
 
-	env.pkgs = append(env.pkgs, pkg)
+	curPkg := env.GetPackage(pkg.ImportPath, pkg.RemoteURL)
+	if curPkg == nil {
+		env.pkgs = append(env.pkgs, pkg)
+		env.countNew++
+	} else {
+		if curPkg.Version != pkg.Version {
+			curPkg.VersionNext = pkg.Version
+			curPkg.state = packageStateChange
+			env.countUpdate++
+		}
+	}
 
 	return nil
 }
@@ -284,6 +296,7 @@ func (env *Env) Load(file string) (err error) {
 		pkg := &Package{
 			ImportPath: sec.Sub,
 			FullPath:   filepath.Join(env.dirSrc, sec.Sub),
+			state:      packageStateLoad,
 		}
 
 		pkg.load(sec)
@@ -311,6 +324,78 @@ func (env *Env) Query(pkgs []string) {
 			}
 		}
 	}
+}
+
+//
+// Rescan GOPATH for new packages.
+//
+func (env *Env) Rescan() (err error) {
+	err = env.Scan()
+	if err != nil {
+		return
+	}
+
+	if env.countUpdate > 0 {
+		fmt.Printf(">>> The following packages will be updated,\n\n")
+		fmt.Printf("ImportPath\tOld Version\tNew Version\n\n")
+
+		for _, pkg := range env.pkgs {
+			if pkg.state&packageStateChange == 0 {
+				continue
+			}
+
+			fmt.Printf("%s\t%s\t%s\n", pkg.ImportPath,
+				pkg.Version, pkg.VersionNext)
+		}
+	}
+	if env.countNew > 0 {
+		fmt.Printf("\n>>> New packages,\n\n")
+		fmt.Printf("ImportPath\tVersion\n\n")
+
+		for _, pkg := range env.pkgs {
+			if pkg.state&packageStateNew == 0 {
+				continue
+			}
+
+			fmt.Printf("%s\t%s\n", pkg.ImportPath, pkg.Version)
+		}
+	}
+
+	if env.countUpdate == 0 && env.countNew == 0 {
+		fmt.Println(">>> Database and GOPATH is in sync.")
+		return
+	}
+
+	fmt.Println()
+
+	ok := confirm(os.Stdin, msgContinue, false)
+	if !ok {
+		return
+	}
+
+	if env.countUpdate > 0 {
+		for x, pkg := range env.pkgs {
+			if pkg.state&packageStateChange == 0 {
+				continue
+			}
+
+			env.pkgs[x].Version = env.pkgs[x].VersionNext
+			env.pkgs[x].VersionNext = ""
+			env.pkgs[x].state = packageStateDirty
+		}
+	}
+	if env.countNew > 0 {
+		for _, pkg := range env.pkgs {
+			if pkg.state&packageStateNew == 0 {
+				continue
+			}
+			pkg.state = packageStateDirty
+			env.updateMissing(pkg)
+		}
+	}
+	env.dirty = true
+
+	return
 }
 
 //

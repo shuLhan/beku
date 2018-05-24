@@ -32,6 +32,7 @@ type Package struct {
 	Deps        []string
 	RequiredBy  []string
 	vcs         VCSMode
+	state       packageState
 	isTag       bool
 }
 
@@ -46,6 +47,7 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 		RemoteURL:  "https://" + pkgName,
 		FullPath:   filepath.Join(build.Default.GOPATH, dirSrc, importPath),
 		vcs:        vcsMode,
+		state:      packageStateNew,
 	}
 
 	switch vcsMode {
@@ -220,7 +222,7 @@ func (pkg *Package) Scan() (err error) {
 // only external dependencies.
 //
 func (pkg *Package) ScanDeps(env *Env) (err error) {
-	fmt.Println(">>> Scanning dependencies ...")
+	fmt.Printf(">>> Scanning dependencies for %s ...\n", pkg.ImportPath)
 
 	imports, err := pkg.GetRecursiveImports()
 	if err != nil {
@@ -247,7 +249,9 @@ func (pkg *Package) GetRecursiveImports() (
 ) {
 	//nolint:gas
 	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Deps "\n"}}`, "./...")
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 
 	cmd.Dir = pkg.FullPath
 	cmd.Stderr = defStderr
@@ -276,6 +280,10 @@ func (pkg *Package) GetRecursiveImports() (
 	}
 
 	sort.Strings(imports)
+
+	if Debug >= DebugL1 {
+		fmt.Println(">>> imports:", imports)
+	}
 
 	return
 }
