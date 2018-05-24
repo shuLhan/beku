@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 )
@@ -103,7 +102,7 @@ func confirm(in io.Reader, msg string, defIsYes bool) bool {
 	for {
 		b, err = r.ReadByte()
 		if err != nil {
-			log.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			break
 		}
 		if b == ' ' || b == '\t' {

@@ -3,7 +3,6 @@ package beku
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -234,7 +233,7 @@ func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 
 	err = cmd.Run()
 	if err != nil {
-		log.Println("gitRemoteChange:", err)
+		fmt.Fprintln(defStderr, "gitRemoteChange:", err)
 	}
 
 	//nolint:gas

@@ -1,10 +1,10 @@
 package beku
 
 import (
+	"fmt"
 	"go/build"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 )
@@ -79,7 +79,8 @@ func TestMain(m *testing.M) {
 
 	testGOPATH, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	testGOPATH += "/testdata"
@@ -91,21 +92,23 @@ func TestMain(m *testing.M) {
 
 	err = testInitOutput()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	testEnv, err = NewEnvironment()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	testGitPkgCur = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
 	testGitPkgNew = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
 	testGitPkgShare = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
 
-	log.Printf("test env : %+v\n", *testEnv)
-	log.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)
-	log.Printf("testGitPkgNew: %+v\n", *testGitPkgNew)
+	fmt.Printf("test env : %+v\n", *testEnv)
+	fmt.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)
+	fmt.Printf("testGitPkgNew: %+v\n", *testGitPkgNew)
 
 	os.Exit(m.Run())
 }

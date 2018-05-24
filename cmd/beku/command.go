@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/shuLhan/beku"
@@ -231,15 +230,17 @@ func (cmd *command) loadDatabase() (err error) {
 func (cmd *command) firstTime() {
 	err := cmd.env.Scan()
 	if err != nil {
-		log.Fatal("Scan:", err)
+		fmt.Fprintln(os.Stderr, ">>> Scan:", err)
+		os.Exit(1)
 	}
 
 	err = cmd.env.Save("")
 	if err != nil {
-		log.Fatal("Save:", err)
+		fmt.Fprintln(os.Stderr, ">>> Save:", err)
+		os.Exit(1)
 	}
 
-	log.Println("Initialization complete.")
+	fmt.Println("Initialization complete.")
 }
 
 func newCommand() (err error) {
@@ -257,13 +258,13 @@ func newCommand() (err error) {
 
 	err = cmd.loadDatabase()
 	if err != nil {
-		log.Println("No database found.")
-		log.Println("Initializing database for the first time...")
+		fmt.Println("No database found.")
+		fmt.Println("Initializing database for the first time...")
 		cmd.firstTime()
 	}
 
 	if beku.Debug >= beku.DebugL2 {
-		log.Printf("Environment: %s", cmd.env)
+		fmt.Printf("Environment: %s", cmd.env)
 	}
 
 	return

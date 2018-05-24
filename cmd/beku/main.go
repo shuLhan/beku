@@ -22,7 +22,7 @@
 //
 // ## Remove Operation
 //
-//	-R, --remove [pkg]
+//	-R, --remove <pkg>
 //
 // Remove package from GOPATH, including source and installed binaries and
 // archives.

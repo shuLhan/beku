@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/build"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -229,7 +228,7 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 	}
 
 	if Debug >= DebugL2 && len(imports) > 0 {
-		log.Println("   imports recursive:", imports)
+		fmt.Println("   imports recursive:", imports)
 	}
 
 	for x := 0; x < len(imports); x++ {
@@ -307,7 +306,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 	// (1)
 	if strings.HasPrefix(importPath, pkg.ImportPath) {
 		if Debug >= DebugL2 {
-			log.Printf("%15s >>> %s\n", dbgSkipSelf, importPath)
+			fmt.Printf("%15s >>> %s\n", dbgSkipSelf, importPath)
 		}
 		return false
 	}
@@ -324,7 +323,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 			continue
 		}
 		if Debug >= DebugL2 {
-			log.Printf("%15s >>> %s\n", dbgSkipStd, importPath)
+			fmt.Printf("%15s >>> %s\n", dbgSkipStd, importPath)
 		}
 		return false
 	}
@@ -342,7 +341,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 	}
 
 	if Debug >= DebugL2 {
-		log.Printf("%15s >>> %s\n", dbgMissDep, importPath)
+		fmt.Printf("%15s >>> %s\n", dbgMissDep, importPath)
 	}
 
 	pkg.pushMissing(importPath)
@@ -505,7 +504,7 @@ func (pkg *Package) pushDep(importPath string) bool {
 	pkg.Deps = append(pkg.Deps, importPath)
 
 	if Debug >= DebugL2 {
-		log.Printf("%15s >>> %s\n", dbgLinkDep, importPath)
+		fmt.Printf("%15s >>> %s\n", dbgLinkDep, importPath)
 	}
 
 	return true

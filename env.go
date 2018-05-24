@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"go/build"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -157,7 +156,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 //
 func (env *Env) scanPackages(rootPath string) (err error) {
 	if Debug >= DebugL2 {
-		log.Println("Scanning", rootPath)
+		fmt.Println(">>> Scanning", rootPath)
 	}
 
 	fis, err := ioutil.ReadDir(rootPath)
@@ -217,7 +216,7 @@ func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 	pkg := NewPackage(pkgName, pkgName, vcsMode)
 
 	if Debug >= DebugL2 {
-		log.Println("Scanning package:", pkg.ImportPath)
+		fmt.Println(">>> Scanning package:", pkg.ImportPath)
 	}
 
 	err = pkg.Scan()
@@ -267,7 +266,7 @@ func (env *Env) Load(file string) (err error) {
 	}
 
 	if Debug >= DebugL1 {
-		log.Println("Env.Load:", env.dbFile)
+		fmt.Println(">>> Env.Load:", env.dbFile)
 	}
 
 	env.db, err = ini.Open(env.dbFile)
@@ -278,7 +277,7 @@ func (env *Env) Load(file string) (err error) {
 	sections := env.db.GetSections(sectionPackage)
 	for _, sec := range sections {
 		if len(sec.Sub) == 0 {
-			log.Println(errDBPackageName, sec.LineNum, env.dbFile)
+			fmt.Fprintln(os.Stderr, errDBPackageName, sec.LineNum, env.dbFile)
 			continue
 		}
 
@@ -577,7 +576,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	}
 
 	if Debug >= DebugL1 {
-		log.Println("Sync:\n", newPkg)
+		fmt.Println(">>> Sync:\n", newPkg)
 	}
 
 	if curPkg.IsEqual(newPkg) {
