@@ -110,55 +110,55 @@ func testEnvQuery(t *testing.T) {
 		expStderr string
 	}{{
 		desc: `Query all`,
-		expStdout: `github.com/alecthomas/gometalinter 0725fc6
-github.com/codegangsta/cli 8e01ec4
-github.com/go-fsnotify/fsnotify v1.4.7
-github.com/go-log/log v0.1.0
-github.com/golang/lint c5fb716
-github.com/golang/protobuf bbd03ef
-github.com/google/go-github 08e68b5
-github.com/google/go-querystring 53e6ce1
-github.com/hashicorp/consul v1.1.0
-github.com/influxdata/chronograf 0204873d5
-github.com/jguer/go-alpm 6150b61
-github.com/json-iterator/go 1.1.3
-github.com/kevinburke/go-bindata 2197b05
-github.com/kisielk/errcheck 23699b7
-github.com/kisielk/gotool d6ce626
-github.com/loadimpact/k6 1ddf285
-github.com/mattn/go-colorable efa5899
-github.com/mattn/go-isatty 6ca4dbf
-github.com/mgutz/ansi 9520e82
-github.com/miekg/dns 906238e
-github.com/mikkeloscar/aur 9050804
-github.com/mikkeloscar/gopkgbuild 32274fc
-github.com/mitchellh/hashstructure 2bca23e
-github.com/naoina/denco a2656d3
-github.com/pborman/uuid c65b2f8
-github.com/pkg/errors 816c908
-github.com/shuLhan/beku 3fb3f96
-github.com/shuLhan/dsv bbe8681
-github.com/shuLhan/go-bindata eb5746d
-github.com/shuLhan/gontacts d4786e8
-github.com/shuLhan/haminer 42be4cb
-github.com/shuLhan/numerus 104dd6b
-github.com/shuLhan/share b2c8fd7
-github.com/shuLhan/tabula 14d5c16
-github.com/shuLhan/tekstus 651065d
-github.com/sirupsen/logrus 68cec9f
-github.com/skratchdot/open-golang 75fb7ed
-github.com/yosssi/ace v0.0.5
-github.com/zyedidia/micro nightly
-golang.org/x/net 2491c5d
-golang.org/x/oauth2 cdc340f
-golang.org/x/sys 37707fd
-golang.org/x/tools c1547a3f
-golang.org/x/tour 65fff99
-github.com/stretchr/testify v1.2.1
-gotest.tools v2.0.0
-github.com/google/go-cmp v0.2.0
-golang.org/x/text v0.3.0
-github.com/ksubedi/gomove 0.2.17
+		expStdout: `github.com/alecthomas/gometalinter  0725fc6
+github.com/codegangsta/cli          8e01ec4
+github.com/go-fsnotify/fsnotify     v1.4.7
+github.com/go-log/log               v0.1.0
+github.com/golang/lint              c5fb716
+github.com/golang/protobuf          bbd03ef
+github.com/google/go-github         08e68b5
+github.com/google/go-querystring    53e6ce1
+github.com/hashicorp/consul         v1.1.0
+github.com/influxdata/chronograf    0204873d5
+github.com/jguer/go-alpm            6150b61
+github.com/json-iterator/go         1.1.3
+github.com/kevinburke/go-bindata    2197b05
+github.com/kisielk/errcheck         23699b7
+github.com/kisielk/gotool           d6ce626
+github.com/loadimpact/k6            1ddf285
+github.com/mattn/go-colorable       efa5899
+github.com/mattn/go-isatty          6ca4dbf
+github.com/mgutz/ansi               9520e82
+github.com/miekg/dns                906238e
+github.com/mikkeloscar/aur          9050804
+github.com/mikkeloscar/gopkgbuild   32274fc
+github.com/mitchellh/hashstructure  2bca23e
+github.com/naoina/denco             a2656d3
+github.com/pborman/uuid             c65b2f8
+github.com/pkg/errors               816c908
+github.com/shuLhan/beku             3fb3f96
+github.com/shuLhan/dsv              bbe8681
+github.com/shuLhan/go-bindata       eb5746d
+github.com/shuLhan/gontacts         d4786e8
+github.com/shuLhan/haminer          42be4cb
+github.com/shuLhan/numerus          104dd6b
+github.com/shuLhan/share            b2c8fd7
+github.com/shuLhan/tabula           14d5c16
+github.com/shuLhan/tekstus          651065d
+github.com/sirupsen/logrus          68cec9f
+github.com/skratchdot/open-golang   75fb7ed
+github.com/yosssi/ace               v0.0.5
+github.com/zyedidia/micro           nightly
+golang.org/x/net                    2491c5d
+golang.org/x/oauth2                 cdc340f
+golang.org/x/sys                    37707fd
+golang.org/x/tools                  c1547a3f
+golang.org/x/tour                   65fff99
+github.com/stretchr/testify         v1.2.1
+gotest.tools                        v2.0.0
+github.com/google/go-cmp            v0.2.0
+golang.org/x/text                   v0.3.0
+github.com/ksubedi/gomove           0.2.17
 `,
 	}, {
 		desc: `With valid and invalid packages`,
@@ -166,7 +166,7 @@ github.com/ksubedi/gomove 0.2.17
 			"github.com/zyedidia/micro",
 			"github.com/x/test",
 		},
-		expStdout: `github.com/zyedidia/micro nightly
+		expStdout: `github.com/zyedidia/micro           nightly
 `,
 	}}
 

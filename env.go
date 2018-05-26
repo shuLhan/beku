@@ -38,6 +38,7 @@ type Env struct {
 	dbFile      string
 	countNew    int
 	countUpdate int
+	fmtMaxPath  int
 	dirty       bool
 }
 
@@ -90,11 +91,7 @@ func (env *Env) GetPackage(importPath, remoteURL string) *Package {
 }
 
 //
-// Scan will gather all information in user system to start `beku`-ing.
-//
-// (1) It will load all standard packages (packages in `$GOROOT/src`)
-// (2) It will load all packages in `$GOPATH/src`
-// (3) Scan package dependencies and link them
+// Scan will gather all package information in user system to start `beku`-ing.
 //
 func (env *Env) Scan() (err error) {
 	err = env.scanPackages(env.dirSrc)
@@ -234,6 +231,10 @@ func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 	if curPkg == nil {
 		env.pkgs = append(env.pkgs, pkg)
 		env.countNew++
+
+		if len(pkg.ImportPath) > env.fmtMaxPath {
+			env.fmtMaxPath = len(pkg.ImportPath)
+		}
 	} else {
 		if curPkg.Version != pkg.Version {
 			curPkg.VersionNext = pkg.Version
@@ -251,6 +252,10 @@ func (env *Env) addPackage(pkg *Package) {
 	}
 
 	env.pkgs = append(env.pkgs, pkg)
+
+	if len(pkg.ImportPath) > env.fmtMaxPath {
+		env.fmtMaxPath = len(pkg.ImportPath)
+	}
 }
 
 //
@@ -312,15 +317,19 @@ func (env *Env) Load(file string) (err error) {
 // information about that package.
 //
 func (env *Env) Query(pkgs []string) {
+	format := fmt.Sprintf("%%-%ds  %%s\n", env.fmtMaxPath)
+
 	for x := 0; x < len(env.pkgs); x++ {
 		if len(pkgs) == 0 {
-			fmt.Fprintln(defStdout, env.pkgs[x].ImportPath, env.pkgs[x].Version)
+			fmt.Fprintf(defStdout, format, env.pkgs[x].ImportPath,
+				env.pkgs[x].Version)
 			continue
-		} else {
-			for y := 0; y < len(pkgs); y++ {
-				if env.pkgs[x].ImportPath == pkgs[y] {
-					fmt.Fprintln(defStdout, env.pkgs[x].ImportPath, env.pkgs[x].Version)
-				}
+		}
+		for y := 0; y < len(pkgs); y++ {
+			if env.pkgs[x].ImportPath == pkgs[y] {
+				fmt.Fprintf(defStdout, format,
+					env.pkgs[x].ImportPath,
+					env.pkgs[x].Version)
 			}
 		}
 	}
@@ -335,29 +344,30 @@ func (env *Env) Rescan() (err error) {
 		return
 	}
 
+	format := fmt.Sprintf("%%-%ds  %%-12s  %%-12s\n", env.fmtMaxPath)
+
 	if env.countUpdate > 0 {
 		fmt.Printf(">>> The following packages will be updated,\n\n")
-		fmt.Printf("ImportPath\tOld Version\tNew Version\n\n")
+		fmt.Printf(format+"\n", "ImportPath", "Old Version", "New Version")
 
 		for _, pkg := range env.pkgs {
 			if pkg.state&packageStateChange == 0 {
 				continue
 			}
 
-			fmt.Printf("%s\t%s\t%s\n", pkg.ImportPath,
-				pkg.Version, pkg.VersionNext)
+			fmt.Printf(format, pkg.ImportPath, pkg.Version, pkg.VersionNext)
 		}
 	}
 	if env.countNew > 0 {
 		fmt.Printf("\n>>> New packages,\n\n")
-		fmt.Printf("ImportPath\tVersion\n\n")
+		fmt.Printf(format+"\n", "ImportPath", "Old Version", "New Version")
 
 		for _, pkg := range env.pkgs {
 			if pkg.state&packageStateNew == 0 {
 				continue
 			}
 
-			fmt.Printf("%s\t%s\n", pkg.ImportPath, pkg.Version)
+			fmt.Printf(format, pkg.ImportPath, "-", pkg.Version)
 		}
 	}
 
