@@ -75,6 +75,11 @@
 // It is useful if you have the fork of the main package but want to install
 // it to the legacy directory.
 //
+//	[-u,--update]
+//
+// Fetch new tag or commit from remote repository. User will be asked for
+// confirmation before upgrade.
+//
 // ### Examples
 //
 //	$ beku -S golang.org/x/text
@@ -98,6 +103,10 @@
 // Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 // and checkout the commit `5c1cf69` as the working version.
 //
+//	$ beku -Su
+//
+// Update all packages in database to new tag or commits with approval from
+// user.
 //
 // # Known Limitations
 //
@@ -141,6 +150,8 @@ func main() {
 	case opSync:
 		err = cmd.sync()
 	case opSync | opSyncInto:
+		err = cmd.sync()
+	case opSync | opUpdate:
 		err = cmd.sync()
 	default:
 		fmt.Fprintln(os.Stderr, errInvalidOptions)

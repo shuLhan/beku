@@ -83,28 +83,38 @@ This option will install the package import path into custom directory.
 It is useful if you have the fork of the main package but want to install
 it to the legacy directory.
 
+        [-u,--update]
+
+Fetch new tag or commit from remote repository. User will be asked for
+confirmation before upgrade.
+
 ### Examples
 
-	beku -S golang.org/x/text
+	$ beku -S golang.org/x/text
 
 Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`,
 and set their version to the latest commit on branch master.
 
-	beku -S github.com/golang/text --into golang.org/x/text
+	$ beku -S github.com/golang/text --into golang.org/x/text
 
 Download package `github.com/golang/text` into
 `$GOPATH/src/golang.org/x/text`, and set their version to the latest commit
 on branch master.
 
-	beku -S golang.org/x/text@v0.3.0
+	$ beku -S golang.org/x/text@v0.3.0
 
 Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 and checkout the tag `v0.3.0` as the working version.
 
-	beku -S golang.org/x/text@5c1cf69
+	$ beku -S golang.org/x/text@5c1cf69
 
 Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
 and checkout the commit `5c1cf69` as the working version.
+
+        $ beku -Su
+
+Update all packages in database to new tag or commits with approval from
+user.
 
 
 # Known Limitations

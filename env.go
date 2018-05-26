@@ -339,7 +339,7 @@ func (env *Env) Query(pkgs []string) {
 //
 // Rescan GOPATH for new packages.
 //
-func (env *Env) Rescan() (err error) {
+func (env *Env) Rescan() (ok bool, err error) {
 	err = env.Scan()
 	if err != nil {
 		return
@@ -379,7 +379,7 @@ func (env *Env) Rescan() (err error) {
 
 	fmt.Println()
 
-	ok := confirm(os.Stdin, msgContinue, false)
+	ok = confirm(os.Stdin, msgContinue, false)
 	if !ok {
 		return
 	}
@@ -810,6 +810,76 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 }
 
 //
+// SyncMany packages at once.
+//
+func (env *Env) SyncMany(pkgs []string) (err error) {
+	for _, pkg := range pkgs {
+		err = env.Sync(pkg, "")
+		if err != nil {
+			return
+		}
+	}
+
+	return
+}
+
+//
+// SyncAll packages into latest version (tag or commit).
+//
+func (env *Env) SyncAll() (err error) {
+	var (
+		countUpdate int
+		buf         bytes.Buffer
+	)
+
+	format := fmt.Sprintf("%%-%ds  %%-12s  %%-12s\n", env.fmtMaxPath)
+	fmt.Fprintf(&buf, ">>> The following packages will be updated,\n\n")
+	fmt.Fprintf(&buf, format+"\n", "ImportPath", "Old Version", "New Version")
+
+	fmt.Println(">>> Updating all packages ...")
+
+	for _, pkg := range env.pkgs {
+		fmt.Printf("\n>>> Updating %s %s\n", pkg.ImportPath, pkg.Version)
+		err = pkg.Fetch()
+		if err != nil {
+			return
+		}
+		if pkg.Version != pkg.VersionNext {
+			fmt.Printf(">>> Latest version is %s\n", pkg.VersionNext)
+			fmt.Fprintf(&buf, format, pkg.ImportPath, pkg.Version, pkg.VersionNext)
+			countUpdate++
+		} else {
+			fmt.Println(">>> No update.")
+		}
+	}
+
+	if countUpdate == 0 {
+		fmt.Println(">>> All packages are up to date.")
+		return
+	}
+
+	fmt.Println(buf.String())
+
+	ok := confirm(os.Stdin, msgContinue, false)
+	if !ok {
+		return
+	}
+
+	for _, pkg := range env.pkgs {
+		err = pkg.CheckoutVersion(pkg.VersionNext)
+		if err != nil {
+			return
+		}
+		pkg.Version = pkg.VersionNext
+		pkg.state = packageStateDirty
+	}
+
+	env.dirty = true
+
+	return
+}
+
+//
 // (1) Update missing packages.
 // (2) Re-scan package dependencies.
 // (3) Run `go install` only if no missing package.
@@ -826,7 +896,7 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 
 	// (3)
 	if len(curPkg.DepsMissing) == 0 {
-		err = curPkg.GoInstall(true)
+		err = curPkg.GoInstall()
 		if err != nil {
 			return
 		}

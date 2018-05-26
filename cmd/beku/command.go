@@ -17,12 +17,14 @@ var (
 )
 
 const (
-	flagUsageHelp      = "Show the short usage."
-	flagUsageQuery     = "Query the package database."
-	flagUsageRecursive = "Remove package including their dependencies."
-	flagUsageRemove    = "Remove package."
-	flagUsageSync      = "Synchronize package. If no package is given, it will do rescan."
-	flagUsageSyncInto  = "Download package into `directory`."
+	flagOperationHelp   = "Show the short usage."
+	flagOperationQuery  = "Query the package database."
+	flagOperationRemove = "Remove package."
+	flagOperationSync   = "Synchronize package. If no package is given, it will do rescan."
+
+	flagOptionRecursive = "Remove package including their dependencies."
+	flagOptionSyncInto  = "Download package into `directory`."
+	flagOptionUpdate    = "Update all packages to latest version."
 )
 
 type command struct {
@@ -37,27 +39,44 @@ func (cmd *command) usage() {
 	help := `usage: beku <operation> [...]
 operations:
 	beku {-h|--help}
-		` + flagUsageHelp + `
+		` + flagOperationHelp + `
 
 	beku {-Q|--query} [pkg ...]
-		` + flagUsageQuery + `
+		` + flagOperationQuery + `
 
 	beku {-R|--remove} <pkg> [options]
-		` + flagUsageRemove + `
+		` + flagOperationRemove + `
 
 	options:
 		[-s|--recursive]
-			` + flagUsageRecursive + `
+			` + flagOptionRecursive + `
 
 	beku {-S|--sync} <pkg[@version]> [options]
-		` + flagUsageSync + `
+		` + flagOperationSync + `
+
+	option:
+		[-u|--update]
+			` + flagOptionUpdate + `
 
 	options:
 		[--into <directory>]
-			` + flagUsageSyncInto + `
+			` + flagOptionSyncInto + `
 `
 
 	fmt.Fprint(os.Stderr, help)
+}
+
+func (cmd *command) parseSyncFlags(arg string) (operation, error) {
+	if len(arg) == 0 {
+		return opNone, nil
+	}
+
+	switch arg[0] {
+	case 'u':
+		return opUpdate, nil
+	}
+
+	return opNone, errInvalidOptions
 }
 
 func (cmd *command) parseRemoveFlags(arg string) (operation, error) {
@@ -103,10 +122,11 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 			return opNone, errInvalidOptions
 		}
 	case 'S':
-		op = opSync
-		if len(arg) > 1 {
-			return opNone, errInvalidOptions
+		op, err = cmd.parseSyncFlags(arg[1:])
+		if err != nil {
+			return opNone, err
 		}
+		op |= opSync
 	case 'R':
 		op, err = cmd.parseRemoveFlags(arg[1:])
 		if err != nil {
@@ -139,6 +159,8 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 		op = opRemove
 	case "sync":
 		op = opSync
+	case "update":
+		op = opUpdate
 	default:
 		return opNone, errInvalidOptions
 	}
@@ -239,15 +261,30 @@ func (cmd *command) loadDatabase() (err error) {
 }
 
 func (cmd *command) sync() (err error) {
-	if cmd.firstTime || len(cmd.pkgs) == 0 {
-		err = cmd.env.Rescan()
-		if err != nil {
+	if len(cmd.pkgs) > 1 && len(cmd.syncInto) > 0 {
+		return errInvalidOptions
+	}
+
+	var ok bool
+
+	if cmd.firstTime {
+		ok, err = cmd.env.Rescan()
+		if !ok || err != nil {
 			return
 		}
 	}
-	if len(cmd.pkgs) > 0 {
+
+	switch len(cmd.pkgs) {
+	case 0:
+		if cmd.op&opUpdate > 0 {
+			err = cmd.env.SyncAll()
+		}
+	case 1:
 		err = cmd.env.Sync(cmd.pkgs[0], cmd.syncInto)
+	default:
+		err = cmd.env.SyncMany(cmd.pkgs)
 	}
+
 	return
 }
 

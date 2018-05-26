@@ -11,4 +11,5 @@ const (
 	opRemove
 	opSync
 	opSyncInto
+	opUpdate
 )
