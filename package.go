@@ -59,6 +59,19 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 }
 
 //
+// CheckoutVersion will set the package version to new version.
+//
+func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
+	switch pkg.vcs {
+	case VCSModeGit:
+		err = pkg.gitCheckoutVersion(newVersion)
+	}
+
+	return
+
+}
+
+//
 // CompareVersion will compare package version using current package as base.
 //
 func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
