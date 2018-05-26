@@ -13,18 +13,16 @@ var (
 	errMultiOperations = errors.New("error: only at operation may be used at a time")
 	errNoDB            = errors.New("error: no database found")
 	errNoOperation     = errors.New("error: no operation specified")
-	errNoTarget        = errors.New("error: no targets specified")
+	errNoTarget        = errors.New("error: no package specified")
 )
 
 const (
-	emptyValue = ""
-
 	flagUsageHelp      = "Show the short usage."
 	flagUsageQuery     = "Query the package database."
-	flagUsageRecursive = "Remove target include their dependencies."
-	flagUsageRemove    = "Remove package from GOPATH."
-	flagUsageSync      = "Synchronize `package`."
-	flagUsageSyncInto  = "Package download `directory`."
+	flagUsageRecursive = "Remove package including their dependencies."
+	flagUsageRemove    = "Remove package."
+	flagUsageSync      = "Synchronize package. If no package is given, it will do rescan."
+	flagUsageSyncInto  = "Download package into `directory`."
 )
 
 type command struct {
@@ -40,12 +38,23 @@ func (cmd *command) usage() {
 operations:
 	beku {-h|--help}
 		` + flagUsageHelp + `
+
 	beku {-Q|--query} [pkg ...]
 		` + flagUsageQuery + `
-	beku {-R|--remove} <pkg> [-s|--recursive]
+
+	beku {-R|--remove} <pkg> [options]
 		` + flagUsageRemove + `
-	beku {-S|--sync} <pkg[@version]> [--into <directory>]
+
+	options:
+		[-s|--recursive]
+			` + flagUsageRecursive + `
+
+	beku {-S|--sync} <pkg[@version]> [options]
 		` + flagUsageSync + `
+
+	options:
+		[--into <directory>]
+			` + flagUsageSyncInto + `
 `
 
 	fmt.Fprint(os.Stderr, help)
