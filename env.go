@@ -42,6 +42,7 @@ type Env struct {
 	dirty       bool
 }
 
+//
 // NewEnvironment will gather all information in user system.
 // `beku` required that `$GOPATH` environment variable must exist.
 //

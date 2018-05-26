@@ -108,13 +108,14 @@ func (pkg *Package) GoClean() (err error) {
 
 	//nolint:gas
 	cmd := exec.Command("go", "clean", "-i", "-cache", "-testcache", "./...")
-	if Debug >= DebugL1 {
-		fmt.Println(">>>", cmd.Args)
-	}
 	cmd.Dir = pkg.FullPath
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
+
+	if Debug >= DebugL1 {
+		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	}
 
 	err = cmd.Run()
 	if err != nil {
@@ -266,12 +267,12 @@ func (pkg *Package) GetRecursiveImports() (
 ) {
 	//nolint:gas
 	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Imports "\n"}}`, "./...")
-	if Debug >= DebugL1 {
-		fmt.Println(">>>", cmd.Args)
-	}
-
 	cmd.Dir = pkg.FullPath
 	cmd.Stderr = defStderr
+
+	if Debug >= DebugL1 {
+		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	}
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -415,23 +416,24 @@ func (pkg *Package) load(sec *ini.Section) {
 //
 // GoInstall a package recursively ("./...").
 //
-func (pkg *Package) GoInstall(isVerbose bool) (err error) {
+func (pkg *Package) GoInstall() (err error) {
 	fmt.Println(">>> Running go install ...")
 
 	//nolint:gas
 	cmd := exec.Command("go", "install")
-
-	if isVerbose {
+	if Debug >= DebugL2 {
 		cmd.Args = append(cmd.Args, "-v")
 	}
-
 	cmd.Args = append(cmd.Args, "./...")
-	fmt.Println(">>>", cmd.Args)
 
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
+
+	if Debug >= DebugL1 {
+		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	}
 
 	err = cmd.Run()
 
