@@ -73,7 +73,12 @@ func testPackageInstall(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
+		testResetOutput(t, true)
+
 		err := c.pkg.Install()
+
+		testPrintOutput(t)
+
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
 			continue
@@ -730,9 +735,10 @@ func testPackageGoClean(t *testing.T) {
 
 		if len(c.pkgBin) > 0 {
 			_, err = os.Stat(c.pkgBin)
-			exp := fmt.Sprintf(c.expBinErr, c.pkgBin)
-
-			test.Assert(t, "pkgBin", exp, err.Error(), true)
+			if err != nil {
+				exp := fmt.Sprintf(c.expBinErr, c.pkgBin)
+				test.Assert(t, "pkgBin", exp, err.Error(), true)
+			}
 		}
 	}
 }

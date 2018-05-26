@@ -74,6 +74,13 @@ func testResetOutput(t *testing.T, truncate bool) {
 	}
 }
 
+func testPrintOutput(t *testing.T) {
+	testResetOutput(t, false)
+	stdout, stderr := testGetOutput(t)
+	t.Log(">>> stdout:\n", stdout)
+	t.Log(">>> stderr:\n", stderr)
+}
+
 func TestMain(m *testing.M) {
 	orgGOPATH := build.Default.GOPATH
 
