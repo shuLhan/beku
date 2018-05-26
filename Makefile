@@ -34,7 +34,7 @@ coverbrowse: $(COVER_HTML)
 	xdg-open $<
 
 lint:
-	gometalinter ./...
+	golangci-lint run ./...
 
 clean:
 	rm -rf $(COVER_OUT) $(COVER_HTML)
