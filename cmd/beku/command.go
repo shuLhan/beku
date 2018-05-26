@@ -242,7 +242,7 @@ func (cmd *command) sync() (err error) {
 	return
 }
 
-func newCommand() (err error) {
+func newCommand() (cmd *command, err error) {
 	cmd = &command{}
 
 	err = cmd.parseFlags(os.Args[1:])

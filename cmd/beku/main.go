@@ -116,12 +116,8 @@ import (
 	"os"
 )
 
-var (
-	cmd *command
-)
-
 func main() {
-	err := newCommand()
+	cmd, err := newCommand()
 	if err != nil {
 		if err == errNoDB {
 			fmt.Fprintln(os.Stderr, err)
