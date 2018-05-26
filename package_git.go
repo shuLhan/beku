@@ -14,21 +14,41 @@ import (
 // gitCheckoutVersion will set the HEAD to version stated in package.
 //
 func (pkg *Package) gitCheckoutVersion(version string) (err error) {
-	//nolint:gas
-	cmd := exec.Command("git", "checkout", "-q", version)
+	cmd := exec.Command("git", "stash", "push", "-q")
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
-	}
+	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
 
 	err = cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("gitCheckoutVersion %s: %s", pkg.FullPath, err)
 		return
 	}
+
+	//nolint:gas
+	cmd = exec.Command("git", "checkout", "-q", version)
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("gitCheckoutVersion %s: %s", pkg.FullPath, err)
+		return
+	}
+
+	cmd = exec.Command("git", "stash", "pop", "-q")
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+
+	_ = cmd.Run()
 
 	return
 }
