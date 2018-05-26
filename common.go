@@ -15,6 +15,56 @@ import (
 )
 
 //
+// GetCompareURL return the URL that compare two versions of package from
+// given remote URL. Remote URL can be in git format
+// ("git@github.com:<username>/<reponame>") or in HTTP format.
+//
+// On package that hosted on Github, the compare URL format is,
+//
+//	https://github.com/<username>/<reponame>/compare/<old-version>...<new-version>
+//
+func GetCompareURL(remoteURL, oldVer, newVer string) (url string) {
+	if len(remoteURL) == 0 {
+		return
+	}
+
+	remoteURL = strings.TrimPrefix(remoteURL, "git@")
+	remoteURL = strings.TrimPrefix(remoteURL, "https://")
+	remoteURL = strings.TrimPrefix(remoteURL, "www.")
+	remoteURL = strings.TrimSuffix(remoteURL, ".git")
+
+	var host, user, repo string
+
+	colIdx := strings.IndexByte(remoteURL, ':')
+	if colIdx > 0 {
+		names := strings.Split(remoteURL[colIdx+1:], "/")
+
+		host = remoteURL[0:colIdx]
+		user = names[0]
+		repo = names[len(names)-1]
+	} else {
+		names := strings.Split(remoteURL, "/")
+		if len(names) < 3 {
+			return
+		}
+		host = names[0]
+		user = names[1]
+		repo = names[len(names)-1]
+	}
+
+	switch host {
+	case "github.com":
+		url = fmt.Sprintf("https://%s/%s/%s/compare/%s...%s", host,
+			user, repo, oldVer, newVer)
+	case "golang.org":
+		url = fmt.Sprintf("https://github.com/golang/%s/compare/%s...%s",
+			repo, oldVer, newVer)
+	}
+
+	return
+}
+
+//
 // IsDirEmpty will return true if directory is not exist or empty; otherwise
 // it will return false.
 //

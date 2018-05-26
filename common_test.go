@@ -9,6 +9,49 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
+func TestGetCompareURL(t *testing.T) {
+	cases := []struct {
+		desc      string
+		remoteURL string
+		oldVer    string
+		newVer    string
+		exp       string
+	}{{
+		desc: "With empty remoteURL",
+	}, {
+		desc:      "With git format",
+		remoteURL: "git@github.com:shuLhan/beku.git",
+		oldVer:    "A",
+		newVer:    "B",
+		exp:       "https://github.com/shuLhan/beku/compare/A...B",
+	}, {
+		desc:      "With HTTP format",
+		remoteURL: "https://github.com/shuLhan/beku",
+		oldVer:    "A",
+		newVer:    "B",
+		exp:       "https://github.com/shuLhan/beku/compare/A...B",
+	}, {
+		desc:      "With golang.org as hostname",
+		remoteURL: "https://golang.org/x/net",
+		oldVer:    "A",
+		newVer:    "B",
+		exp:       "https://github.com/golang/net/compare/A...B",
+	}, {
+		desc:      "With unknown hostname",
+		remoteURL: "https://gopkg.in/yaml.v2",
+		oldVer:    "A",
+		newVer:    "B",
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got := GetCompareURL(c.remoteURL, c.oldVer, c.newVer)
+
+		test.Assert(t, "", c.exp, got, true)
+	}
+}
+
 func TestIsDirEmpty(t *testing.T) {
 	emptyDir := "testdata/dirempty"
 	err := os.MkdirAll(emptyDir, 0700)

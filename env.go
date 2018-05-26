@@ -832,9 +832,10 @@ func (env *Env) SyncAll() (err error) {
 		buf         bytes.Buffer
 	)
 
-	format := fmt.Sprintf("%%-%ds  %%-12s  %%-12s\n", env.fmtMaxPath)
+	format := fmt.Sprintf("%%-%ds  %%-12s  %%-12s %%s\n", env.fmtMaxPath)
 	fmt.Fprintf(&buf, ">>> The following packages will be updated,\n\n")
-	fmt.Fprintf(&buf, format+"\n", "ImportPath", "Old Version", "New Version")
+	fmt.Fprintf(&buf, format+"\n", "ImportPath", "Old Version",
+		"New Version", "Compare URL")
 
 	fmt.Println(">>> Updating all packages ...")
 
@@ -844,13 +845,20 @@ func (env *Env) SyncAll() (err error) {
 		if err != nil {
 			return
 		}
-		if pkg.Version != pkg.VersionNext {
-			fmt.Printf(">>> Latest version is %s\n", pkg.VersionNext)
-			fmt.Fprintf(&buf, format, pkg.ImportPath, pkg.Version, pkg.VersionNext)
-			countUpdate++
-		} else {
+		if pkg.Version == pkg.VersionNext {
 			fmt.Println(">>> No update.")
+			continue
 		}
+
+		fmt.Printf(">>> Latest version is %s\n", pkg.VersionNext)
+
+		compareURL := GetCompareURL(pkg.RemoteURL, pkg.Version,
+			pkg.VersionNext)
+
+		fmt.Fprintf(&buf, format, pkg.ImportPath, pkg.Version,
+			pkg.VersionNext, compareURL)
+
+		countUpdate++
 	}
 
 	if countUpdate == 0 {
