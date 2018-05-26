@@ -296,13 +296,14 @@ func (pkg *Package) GetRecursiveImports() (
 // (0) not empty
 // (1) not self importing
 // (2) not vendor
-// (3) not standard packages.
+// (3) not pseudo-package ("C")
+// (4) not standard packages
 //
-// (4) If all above filter passed, then it will do package normalization to
+// (5) If all above filter passed, then it will do package normalization to
 // check their dependencies with existing package in `$GOPATH/src`.
 //
-// (4.1) if match found, link the package deps to existing package instance.
-// (4.2) If no match found, add to `depsMissing` as string
+// (5.1) if match found, link the package deps to existing package instance.
+// (5.2) If no match found, add to list of missing `depsMissing`
 //
 // It will return true if import path is added as dependencies or as missing
 // one; otherwise it will return false.
@@ -328,6 +329,11 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 	}
 
 	// (3)
+	if importPath == "C" {
+		return false
+	}
+
+	// (4)
 	for x := 0; x < len(env.pkgsStd); x++ {
 		if pkgs[0] != env.pkgsStd[x] {
 			continue
@@ -338,13 +344,13 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		return false
 	}
 
-	// (4)
+	// (5)
 	for x := 0; x < len(env.pkgs); x++ {
 		if !strings.HasPrefix(importPath, env.pkgs[x].ImportPath) {
 			continue
 		}
 
-		// (4.1)
+		// (5.1)
 		pkg.pushDep(env.pkgs[x].ImportPath)
 		env.pkgs[x].pushRequiredBy(pkg.ImportPath)
 		return true
@@ -354,6 +360,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		fmt.Printf("%15s >>> %s\n", dbgMissDep, importPath)
 	}
 
+	// (5.2)
 	pkg.pushMissing(importPath)
 	env.addPackageMissing(importPath)
 
