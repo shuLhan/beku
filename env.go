@@ -705,7 +705,10 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 //
 func (env *Env) updateMissing(newPkg *Package) {
 	var updated bool
-	fmt.Println(">>> Update missing:", newPkg.ImportPath)
+
+	if Debug >= DebugL1 {
+		fmt.Println(">>> Update missing:", newPkg.ImportPath)
+	}
 
 	for x := 0; x < len(env.pkgs); x++ {
 		updated = env.pkgs[x].UpdateMissingDep(newPkg)

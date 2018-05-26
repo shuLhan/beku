@@ -8,7 +8,7 @@ import (
 const (
 	// DefDBName define default database name, where the dependencies will
 	// be saved and loaded.
-	DefDBName = "gopath.deps"
+	DefDBName = "beku.db"
 )
 
 const (

@@ -25,7 +25,7 @@ func testEnvLoad(t *testing.T) {
 		expErr: fmt.Sprintf("open %s: no such file or directory", testEnv.dbDefFile),
 	}, {
 		desc: `With valid file`,
-		file: "testdata/gopath.deps",
+		file: "testdata/beku.db",
 	}}
 
 	var err error
@@ -239,13 +239,13 @@ func testEnvSave(t *testing.T) {
 	}{{
 		desc:       "Not dirty",
 		dirty:      false,
-		file:       "testdata/gopath.deps.save",
-		expStatErr: "stat testdata/gopath.deps.save: no such file or directory",
+		file:       "testdata/beku.db.save",
+		expStatErr: "stat testdata/beku.db.save: no such file or directory",
 	}, {
 		desc:       "Dirty",
 		dirty:      true,
-		file:       "testdata/gopath.deps.save",
-		expStatErr: "stat testdata/gopath.deps.save: no such file or directory",
+		file:       "testdata/beku.db.save",
+		expStatErr: "stat testdata/beku.db.save: no such file or directory",
 	}}
 
 	for _, c := range cases {
@@ -264,7 +264,7 @@ func testEnvSave(t *testing.T) {
 			continue
 		}
 
-		diffs, err := diff.Files("testdata/gopath.deps", c.file, diff.LevelLines)
+		diffs, err := diff.Files("testdata/beku.db", c.file, diff.LevelLines)
 		if err != nil {
 			t.Fatal(err)
 		}

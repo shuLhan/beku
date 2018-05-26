@@ -6,13 +6,13 @@
 // Beku is a command line program to manage packages in $GOPATH. Beku provide
 // syntax like `pacman`.
 //
-// Beku read and write the package database into a file named "gopath.deps".
+// Beku read and write the package database into a file named "beku.db".
 //
 // At first execution, beku will try to open the package database in current
 // directory. If no file found, it will try to open
-// "$GOPATH/var/beku/gopath.deps". When both locations does not provide
+// "$GOPATH/var/beku/beku.db". When both locations does not provide
 // package database, beku will scan entire "$GOPATH/src" and write the
-// package database into "$GOPATH/var/beku/gopath.deps".
+// package database into "$GOPATH/var/beku/beku.db".
 //
 // ## Query Operation
 //
