@@ -647,6 +647,7 @@ func (env *Env) String() string {
 func (env *Env) install(pkg *Package) (ok bool, err error) {
 	err = pkg.Install()
 	if err != nil {
+		_ = pkg.Remove()
 		return
 	}
 
