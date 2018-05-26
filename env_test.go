@@ -41,7 +41,7 @@ func testEnvLoad(t *testing.T) {
 	}
 }
 
-func testEnvGetPackage(t *testing.T) {
+func testEnvGetPackageFromDB(t *testing.T) {
 	cases := []struct {
 		desc       string
 		importPath string
@@ -96,7 +96,7 @@ func testEnvGetPackage(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := testEnv.GetPackage(c.importPath, c.remoteURL)
+		got := testEnv.GetPackageFromDB(c.importPath, c.remoteURL)
 
 		test.Assert(t, "", c.exp, got, true)
 	}
@@ -222,7 +222,7 @@ func testEnvFilterUnusedDeps(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.importPath)
 
-		pkg := testEnv.GetPackage(c.importPath, "")
+		pkg := testEnv.GetPackageFromDB(c.importPath, "")
 		unused := make(map[string]bool)
 		testEnv.filterUnusedDeps(pkg, unused)
 
@@ -298,7 +298,7 @@ func testEnvUpdateMissing(t *testing.T) {
 	for _, c := range cases {
 		testEnv.updateMissing(c.newPkg)
 
-		got := testEnv.GetPackage(c.expPkg, "")
+		got := testEnv.GetPackageFromDB(c.expPkg, "")
 
 		test.Assert(t, "expDeps", c.expDeps, got.Deps, true)
 		test.Assert(t, "expMissing", c.expMissing, got.DepsMissing, true)
@@ -367,7 +367,7 @@ func testEnvSync(t *testing.T) {
 
 func TestEnv(t *testing.T) {
 	t.Run("Load", testEnvLoad)
-	t.Run("GetPackage", testEnvGetPackage)
+	t.Run("GetPackageFromDB", testEnvGetPackageFromDB)
 	t.Run("Query", testEnvQuery)
 	t.Run("filterUnusedDeps", testEnvFilterUnusedDeps)
 	t.Run("Save", testEnvSave)

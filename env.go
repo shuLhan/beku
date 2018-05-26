@@ -75,10 +75,10 @@ func NewEnvironment() (env *Env, err error) {
 }
 
 //
-// GetPackage will return installed package on system.
+// GetPackageFromDB will return installed package registered on database.
 // If no package found, it will return nil.
 //
-func (env *Env) GetPackage(importPath, remoteURL string) *Package {
+func (env *Env) GetPackageFromDB(importPath, remoteURL string) *Package {
 	for x := 0; x < len(env.pkgs); x++ {
 		if importPath == env.pkgs[x].ImportPath {
 			return env.pkgs[x]
@@ -228,7 +228,7 @@ func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 		return fmt.Errorf("%s: %s", pkgName, err)
 	}
 
-	curPkg := env.GetPackage(pkg.ImportPath, pkg.RemoteURL)
+	curPkg := env.GetPackageFromDB(pkg.ImportPath, pkg.RemoteURL)
 	if curPkg == nil {
 		env.pkgs = append(env.pkgs, pkg)
 		env.countNew++
@@ -414,7 +414,7 @@ func (env *Env) Rescan() (ok bool, err error) {
 // dependencies, as long as they are not required by other package.
 //
 func (env *Env) Remove(rmPkg string, recursive bool) (err error) {
-	pkg := env.GetPackage(rmPkg, "")
+	pkg := env.GetPackageFromDB(rmPkg, "")
 	if pkg == nil {
 		fmt.Println("Package", rmPkg, "not installed")
 		return
@@ -495,7 +495,7 @@ func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
 	}
 
 	for x := 0; x < len(pkg.Deps); x++ {
-		dep = env.GetPackage(pkg.Deps[x], "")
+		dep = env.GetPackageFromDB(pkg.Deps[x], "")
 
 		if len(dep.Deps) > 0 {
 			env.filterUnusedDeps(dep, tobeRemoved)
@@ -525,7 +525,7 @@ func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
 // or binary). This also remove in other packages "RequiredBy" if exist.
 //
 func (env *Env) removePackage(importPath string) (err error) {
-	pkg := env.GetPackage(importPath, "")
+	pkg := env.GetPackageFromDB(importPath, "")
 	if pkg == nil {
 		return
 	}
@@ -786,7 +786,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	}
 
 	// (2)
-	curPkg := env.GetPackage(newPkg.ImportPath, newPkg.RemoteURL)
+	curPkg := env.GetPackageFromDB(newPkg.ImportPath, newPkg.RemoteURL)
 	if curPkg != nil {
 		ok, err = env.update(curPkg, newPkg)
 	} else {
