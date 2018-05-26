@@ -174,6 +174,8 @@ func (pkg *Package) Remove() (err error) {
 		return
 	}
 
+	_ = RmdirEmptyAll(pkg.FullPath)
+
 	return
 }
 

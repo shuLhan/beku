@@ -462,6 +462,8 @@ This package is required by,
 			err = fmt.Errorf("Remove: %s", err)
 			return
 		}
+
+		_ = RmdirEmptyAll(pkgImportPath)
 	}
 
 	return

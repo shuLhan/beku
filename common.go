@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -69,6 +70,32 @@ func IsTagVersion(version string) bool {
 		return true
 	}
 	return false
+}
+
+//
+// RmdirEmptyAll remove directory in path if it's empty until one of the
+// parent is not empty.
+//
+func RmdirEmptyAll(path string) error {
+	if len(path) == 0 {
+		return nil
+	}
+	fi, err := os.Stat(path)
+	if err != nil {
+		return RmdirEmptyAll(filepath.Dir(path))
+	}
+	if !fi.IsDir() {
+		return nil
+	}
+	if !IsDirEmpty(path) {
+		return nil
+	}
+	err = os.Remove(path)
+	if err != nil {
+		return err
+	}
+
+	return RmdirEmptyAll(filepath.Dir(path))
 }
 
 //
