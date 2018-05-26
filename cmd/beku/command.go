@@ -11,6 +11,7 @@ import (
 var (
 	errInvalidOptions  = errors.New("error: invalid options")
 	errMultiOperations = errors.New("error: only at operation may be used at a time")
+	errNoDB            = errors.New("error: no database found")
 	errNoOperation     = errors.New("error: no operation specified")
 	errNoTarget        = errors.New("error: no targets specified")
 )
@@ -27,10 +28,11 @@ const (
 )
 
 type command struct {
-	op       operation
-	env      *beku.Env
-	pkgs     []string
-	syncInto string
+	op        operation
+	env       *beku.Env
+	pkgs      []string
+	syncInto  string
+	firstTime bool
 }
 
 func (cmd *command) usage() {
@@ -227,20 +229,17 @@ func (cmd *command) loadDatabase() (err error) {
 	return
 }
 
-func (cmd *command) firstTime() {
-	err := cmd.env.Scan()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, ">>> Scan:", err)
-		os.Exit(1)
+func (cmd *command) sync() (err error) {
+	if cmd.firstTime || len(cmd.pkgs) == 0 {
+		err = cmd.env.Rescan()
+		if err != nil {
+			return
+		}
 	}
-
-	err = cmd.env.Save("")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, ">>> Save:", err)
-		os.Exit(1)
+	if len(cmd.pkgs) > 0 {
+		err = cmd.env.Sync(cmd.pkgs[0], cmd.syncInto)
 	}
-
-	fmt.Println("Initialization complete.")
+	return
 }
 
 func newCommand() (err error) {
@@ -258,9 +257,14 @@ func newCommand() (err error) {
 
 	err = cmd.loadDatabase()
 	if err != nil {
-		fmt.Println("No database found.")
-		fmt.Println("Initializing database for the first time...")
-		cmd.firstTime()
+		if os.IsNotExist(err) {
+			if cmd.op&opSync > 0 {
+				cmd.firstTime = true
+				err = nil
+			} else {
+				err = errNoDB
+			}
+		}
 	}
 
 	if beku.Debug >= beku.DebugL2 {

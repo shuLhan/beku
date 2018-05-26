@@ -123,7 +123,12 @@ var (
 func main() {
 	err := newCommand()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		if err == errNoDB {
+			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, "Run 'beku -S' to initialize database")
+		} else {
+			fmt.Fprintln(os.Stderr, err)
+		}
 		os.Exit(1)
 	}
 
@@ -138,15 +143,11 @@ func main() {
 	case opRemove | opRecursive:
 		err = cmd.env.Remove(cmd.pkgs[0], true)
 	case opSync:
-		if len(cmd.pkgs) > 0 {
-			err = cmd.env.Sync(cmd.pkgs[0], "")
-		} else {
-			err = cmd.env.Rescan()
-		}
+		err = cmd.sync()
 	case opSync | opSyncInto:
-		err = cmd.env.Sync(cmd.pkgs[0], cmd.syncInto)
+		err = cmd.sync()
 	default:
-		fmt.Fprintln(os.Stderr, "Invalid operations or options")
+		fmt.Fprintln(os.Stderr, errInvalidOptions)
 		os.Exit(1)
 	}
 
