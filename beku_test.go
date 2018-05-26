@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	testGitRepo      = "github.com/shuLhan/beku_test"
-	testGitRepoShare = "github.com/shuLhan/share"
-	testPkgNotExist  = "github.com/shuLhan/notexist"
+	testGitRepo        = "github.com/shuLhan/beku_test"
+	testGitRepoVersion = "c9f69fb"
+	testGitRepoShare   = "github.com/shuLhan/share"
+	testPkgNotExist    = "github.com/shuLhan/notexist"
 )
 
 var (
@@ -112,6 +113,13 @@ func TestMain(m *testing.M) {
 	testGitPkgCur = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
 	testGitPkgNew = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
 	testGitPkgShare = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
+
+	// Always set the git test repo to latest version.
+	err = testGitPkgCur.CheckoutVersion(testGitRepoVersion)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	fmt.Printf("test env : %+v\n", *testEnv)
 	fmt.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)
