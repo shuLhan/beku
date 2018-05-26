@@ -250,7 +250,7 @@ func (pkg *Package) GetRecursiveImports() (
 	imports []string, err error,
 ) {
 	//nolint:gas
-	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Deps "\n"}}`, "./...")
+	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Imports "\n"}}`, "./...")
 	if Debug >= DebugL1 {
 		fmt.Println(">>>", cmd.Args)
 	}
