@@ -627,7 +627,7 @@ func (env *Env) String() string {
 `, env.dirSrc, env.pkgsStd)
 
 	for x := 0; x < len(env.pkgs); x++ {
-		fmt.Fprintf(&buf, "%s", env.pkgs[x])
+		fmt.Fprintf(&buf, "%s", env.pkgs[x].String())
 	}
 
 	fmt.Fprintf(&buf, "\n[package \"_missing_\"]\n")
@@ -674,7 +674,8 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		return
 	}
 
-	fmt.Printf("Updating package from,\n%s\nto,\n%s\n", curPkg, newPkg)
+	fmt.Printf("Updating package from,\n%s\nto,\n%s\n", curPkg.String(),
+		newPkg.String())
 
 	ok = confirm(os.Stdin, msgUpdateView, false)
 	if ok {

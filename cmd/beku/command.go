@@ -268,7 +268,7 @@ func newCommand() (cmd *command, err error) {
 	}
 
 	if beku.Debug >= beku.DebugL2 {
-		fmt.Printf("Environment: %s", cmd.env)
+		fmt.Printf("Environment: %s", cmd.env.String())
 	}
 
 	return
