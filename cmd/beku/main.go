@@ -114,6 +114,8 @@
 //
 // * Tested only on package hosted on Github.
 //
+// * Tested only on Git v2.17 or greater
+//
 // # References
 //
 // [1] https://www.archlinux.org/pacman/
