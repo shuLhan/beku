@@ -222,7 +222,9 @@ func (pkg *Package) Scan() (err error) {
 // only external dependencies.
 //
 func (pkg *Package) ScanDeps(env *Env) (err error) {
-	fmt.Printf(">>> Scanning dependencies for %s ...\n", pkg.ImportPath)
+	if Debug >= DebugL1 {
+		fmt.Printf(">>> Scanning dependencies for %s ...\n", pkg.ImportPath)
+	}
 
 	imports, err := pkg.GetRecursiveImports()
 	if err != nil {
@@ -281,8 +283,8 @@ func (pkg *Package) GetRecursiveImports() (
 
 	sort.Strings(imports)
 
-	if Debug >= DebugL1 {
-		fmt.Println(">>> imports:", imports)
+	if Debug >= DebugL2 {
+		fmt.Println(">>> GetRecursiveImports: imports", imports)
 	}
 
 	return

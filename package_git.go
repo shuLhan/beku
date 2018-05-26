@@ -16,7 +16,9 @@ import (
 func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "checkout", "-q", version)
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -69,7 +71,9 @@ func (pkg *Package) gitClone() (err error) {
 func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "log", "--oneline", pkg.Version+"..."+newPkg.Version)
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -91,7 +95,9 @@ func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
 func (pkg *Package) gitFetch() (err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "fetch", "--all")
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -119,7 +125,9 @@ func (pkg *Package) gitFetch() (err error) {
 func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "rev-parse", "--short", ref)
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 
 	bcommit, err := cmd.Output()
@@ -139,7 +147,9 @@ func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
 func (pkg *Package) gitGetTag() (tag string, err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "describe", "--tags", "--exact-match")
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 
 	btag, err := cmd.Output()
@@ -156,7 +166,9 @@ func (pkg *Package) gitGetTag() (tag string, err error) {
 func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "rev-list", "--tags", "--max-count=1")
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 
 	bout, err := cmd.Output()
@@ -169,7 +181,9 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 
 	//nolint:gas
 	cmd = exec.Command("git", "describe", "--tags", "--abbrev=0", out)
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 
 	bout, err = cmd.Output()
@@ -226,7 +240,9 @@ func (pkg *Package) gitInstall() (err error) {
 func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "remote", "remove", pkg.RemoteName)
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -238,7 +254,9 @@ func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 
 	//nolint:gas
 	cmd = exec.Command("git", "remote", "add", newPkg.RemoteName, newPkg.RemoteURL)
-	fmt.Println(">>>", cmd.Args)
+	if Debug >= DebugL1 {
+		fmt.Println(">>>", cmd.Args)
+	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr

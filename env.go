@@ -572,6 +572,10 @@ func (env *Env) Save(file string) (err error) {
 
 	dir := filepath.Dir(file)
 
+	if Debug >= DebugL1 {
+		fmt.Println(">>> Save: MkdirAll:", dir)
+	}
+
 	err = os.MkdirAll(dir, 0700)
 	if err != nil {
 		return
@@ -701,7 +705,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 //
 func (env *Env) updateMissing(newPkg *Package) {
 	var updated bool
-	fmt.Println(">>> Update missing ...")
+	fmt.Println(">>> Update missing:", newPkg.ImportPath)
 
 	for x := 0; x < len(env.pkgs); x++ {
 		updated = env.pkgs[x].UpdateMissingDep(newPkg)
