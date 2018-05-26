@@ -33,6 +33,7 @@ type Env struct {
 	pkgs        []*Package
 	pkgsMissing []string
 	pkgsStd     []string
+	pkgsUnused  []*Package
 	db          *ini.Ini
 	dbDefFile   string
 	dbFile      string
@@ -74,6 +75,109 @@ func NewEnvironment() (env *Env, err error) {
 	return
 }
 
+func (env *Env) cleanUnused() {
+	for _, pkg := range env.pkgsUnused {
+		fmt.Println(">>> Removing source at", pkg.FullPath)
+		_ = pkg.Remove()
+
+		pkgPath := filepath.Join(env.dirPkg, pkg.ImportPath)
+
+		fmt.Println(">>> Removing installed binaries at", pkgPath)
+		_ = os.RemoveAll(pkgPath)
+		_ = RmdirEmptyAll(pkgPath)
+	}
+}
+
+//
+// Freeze all packages in GOPATH. Install all registered packages in database
+// and remove non-registered from GOPATH "src" and "pkg" directories.
+//
+func (env *Env) Freeze() (err error) {
+	var localPkg *Package
+
+	for _, pkg := range env.pkgs {
+		fmt.Printf(">>> Freezing %s@%s\n", pkg.ImportPath, pkg.Version)
+
+		localPkg, err = env.GetPackage(pkg.ImportPath)
+		if err != nil {
+			return
+		}
+		if localPkg == nil {
+			err = pkg.Install()
+			if err != nil {
+				return
+			}
+			continue
+		}
+
+		err = localPkg.Update(pkg)
+		if err != nil {
+			return
+		}
+	}
+
+	env.pkgsUnused = nil
+
+	err = env.GetUnused(env.dirSrc)
+	if err != nil {
+		err = fmt.Errorf("Freeze: %s", err.Error())
+		return
+	}
+
+	if len(env.pkgsUnused) == 0 {
+		fmt.Println(">>> No unused packages found.")
+		return
+	}
+
+	fmt.Printf("\n>>> The following packages will be cleaned,\n\n")
+	for _, pkg := range env.pkgsUnused {
+		fmt.Printf("  * %s\n", pkg.ImportPath)
+	}
+
+	fmt.Println()
+
+	ok := confirm(os.Stdin, msgContinue, false)
+	if !ok {
+		return
+	}
+
+	env.cleanUnused()
+
+	fmt.Println(">>> Freeze completed.")
+
+	return
+}
+
+//
+// GetPackage will return installed package from system.
+//
+func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
+	fullPath := filepath.Join(env.dirSrc, importPath)
+	dirGit := filepath.Join(fullPath, gitDir)
+
+	_, err = os.Stat(fullPath)
+	if err != nil {
+		err = nil
+		return
+	}
+
+	_, err = os.Stat(dirGit)
+	if err != nil {
+		if IsDirEmpty(fullPath) {
+			err = nil
+		} else {
+			err = fmt.Errorf(errDirNotEmpty, fullPath)
+		}
+		return
+	}
+
+	pkg = NewPackage(importPath, importPath, VCSModeGit)
+
+	err = pkg.Scan()
+
+	return
+}
+
 //
 // GetPackageFromDB will return installed package registered on database.
 // If no package found, it will return nil.
@@ -89,6 +193,62 @@ func (env *Env) GetPackageFromDB(importPath, remoteURL string) *Package {
 		}
 	}
 	return nil
+}
+
+//
+// GetUnused will get all non-registered packages from GOPATH "src".
+//
+func (env *Env) GetUnused(srcPath string) (err error) {
+	fis, err := ioutil.ReadDir(srcPath)
+	if err != nil {
+		err = fmt.Errorf("CleanPackages: %s", err)
+		return
+	}
+
+	var nextScan []string
+
+	for _, fi := range fis {
+		// (0)
+		if !fi.IsDir() {
+			continue
+		}
+
+		dirName := fi.Name()
+		fullPath := filepath.Join(srcPath, dirName)
+		dirGit := filepath.Join(fullPath, gitDir)
+
+		// (1)
+		if IsIgnoredDir(dirName) {
+			continue
+		}
+
+		// (2)
+		_, err = os.Stat(dirGit)
+		if err != nil {
+			nextScan = append(nextScan, fullPath)
+			err = nil
+			continue
+		}
+
+		importPath := strings.TrimPrefix(fullPath, env.dirSrc+"/")
+
+		pkg := env.GetPackageFromDB(importPath, "")
+		if pkg != nil {
+			continue
+		}
+
+		pkg = NewPackage(importPath, importPath, VCSModeGit)
+		env.pkgsUnused = append(env.pkgsUnused, pkg)
+	}
+
+	for x := 0; x < len(nextScan); x++ {
+		err = env.GetUnused(nextScan[x])
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }
 
 //
@@ -154,12 +314,12 @@ func (env *Env) scanStdPackages(srcPath string) error {
 // (1) skip ignored directory
 // (2) skip directory without `.git`
 //
-func (env *Env) scanPackages(rootPath string) (err error) {
+func (env *Env) scanPackages(srcPath string) (err error) {
 	if Debug >= DebugL2 {
-		fmt.Println(">>> Scanning", rootPath)
+		fmt.Println(">>> Scanning", srcPath)
 	}
 
-	fis, err := ioutil.ReadDir(rootPath)
+	fis, err := ioutil.ReadDir(srcPath)
 	if err != nil {
 		err = fmt.Errorf("scanPackages: %s", err)
 		return
@@ -174,7 +334,7 @@ func (env *Env) scanPackages(rootPath string) (err error) {
 		}
 
 		dirName := fi.Name()
-		fullPath := filepath.Join(rootPath, dirName)
+		fullPath := filepath.Join(srcPath, dirName)
 		dirGit := filepath.Join(fullPath, gitDir)
 
 		// (1)

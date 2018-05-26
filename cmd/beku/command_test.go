@@ -30,6 +30,9 @@ func TestParseFlags(t *testing.T) {
 		args:   []string{"--into"},
 		expErr: errInvalidOptions.Error(),
 	}, {
+		args:   []string{"--update"},
+		expErr: errInvalidOptions.Error(),
+	}, {
 		args:   []string{"-s"},
 		expErr: errInvalidOptions.Error(),
 	}, {

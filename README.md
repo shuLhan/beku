@@ -22,6 +22,16 @@ directory. If no file found, it will try to open
 package database, beku will scan entire "$GOPATH/src" and write the
 package database into "$GOPATH/var/beku/beku.db".
 
+## Freeze Operation
+
+     -B, --freeze
+
+Operate on the package database and GOPATH. This operation will ensure that
+all packages listed on database file is installed with their specific
+version on GOPATH.  Also, all packages that are not registered will be
+removed from GOPATH "src" and "pkg" directories.
+
+
 ## Query Operation
 
 	-Q, --query [pkg ...]

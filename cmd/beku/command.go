@@ -18,6 +18,7 @@ var (
 
 const (
 	flagOperationHelp   = "Show the short usage."
+	flagOperationFreeze = "Install all packages on database."
 	flagOperationQuery  = "Query the package database."
 	flagOperationRemove = "Remove package."
 	flagOperationSync   = "Synchronize package. If no package is given, it will do rescan."
@@ -40,6 +41,9 @@ func (cmd *command) usage() {
 operations:
 	beku {-h|--help}
 		` + flagOperationHelp + `
+
+	beku {-B|--freeze}
+		` + flagOperationFreeze + `
 
 	beku {-Q|--query} [pkg ...]
 		` + flagOperationQuery + `
@@ -116,6 +120,11 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 		if len(arg) > 1 {
 			return opNone, errInvalidOptions
 		}
+	case 'B':
+		op = opFreeze
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
 	case 'Q':
 		op = opQuery
 		if len(arg) > 1 {
@@ -149,6 +158,8 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 	switch arg {
 	case "help":
 		op = opHelp
+	case "freeze":
+		op = opFreeze
 	case "into":
 		op = opSyncInto
 	case "query":
@@ -224,7 +235,7 @@ func (cmd *command) parseFlags(args []string) (err error) {
 			return
 		}
 	}
-	if cmd.op == opRecursive || cmd.op == opSyncInto {
+	if cmd.op == opRecursive || cmd.op == opSyncInto || cmd.op == opUpdate {
 		return errInvalidOptions
 	}
 	if cmd.op&opSyncInto == opSyncInto {
@@ -234,8 +245,8 @@ func (cmd *command) parseFlags(args []string) (err error) {
 	}
 
 	// (1)
-	op = cmd.op & (opQuery | opRemove | opSync)
-	if op == opQuery|opRemove || op == opQuery|opSync || op == opRemove|opSync {
+	op = cmd.op & (opFreeze | opQuery | opRemove | opSync)
+	if op != opFreeze && op != opQuery && op != opRemove && op != opSync {
 		return errMultiOperations
 	}
 
