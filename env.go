@@ -819,6 +819,14 @@ func (env *Env) String() string {
 // install a package.
 //
 func (env *Env) install(pkg *Package) (ok bool, err error) {
+	if !IsDirEmpty(pkg.FullPath) {
+		fmt.Printf(">>> Directory %s is not empty.\n", pkg.FullPath)
+		ok = confirm(os.Stdin, msgContinue, false)
+		if !ok {
+			return
+		}
+	}
+
 	err = pkg.Install()
 	if err != nil {
 		_ = pkg.Remove()
