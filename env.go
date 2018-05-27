@@ -93,7 +93,10 @@ func (env *Env) cleanUnused() {
 // and remove non-registered from GOPATH "src" and "pkg" directories.
 //
 func (env *Env) Freeze() (err error) {
-	var localPkg *Package
+	var (
+		localPkg *Package
+		ok       bool
+	)
 
 	for _, pkg := range env.pkgs {
 		fmt.Printf(">>> Freezing %s@%s\n", pkg.ImportPath, pkg.Version)
@@ -126,7 +129,7 @@ func (env *Env) Freeze() (err error) {
 
 	if len(env.pkgsUnused) == 0 {
 		fmt.Println(">>> No unused packages found.")
-		return
+		goto out
 	}
 
 	fmt.Printf("\n>>> The following packages will be cleaned,\n\n")
@@ -136,13 +139,13 @@ func (env *Env) Freeze() (err error) {
 
 	fmt.Println()
 
-	ok := confirm(os.Stdin, msgContinue, false)
-	if !ok {
-		return
+	ok = confirm(os.Stdin, msgContinue, false)
+	if ok {
+		env.cleanUnused()
 	}
 
-	env.cleanUnused()
-
+out:
+	env.reinstallAll()
 	fmt.Println(">>> Freeze completed.")
 
 	return
@@ -1064,13 +1067,18 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 
 	// (3)
 	if len(curPkg.DepsMissing) == 0 {
-		err = curPkg.GoInstall()
-		if err != nil {
-			return
-		}
+		_ = curPkg.GoInstall()
 	}
 
 	fmt.Println(">>> Package installed:\n", curPkg)
 
 	return
+}
+
+func (env *Env) reinstallAll() {
+	for _, pkg := range env.pkgs {
+		if len(pkg.DepsMissing) == 0 {
+			_ = pkg.GoInstall()
+		}
+	}
 }

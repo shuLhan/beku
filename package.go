@@ -417,8 +417,6 @@ func (pkg *Package) load(sec *ini.Section) {
 // GoInstall a package recursively ("./...").
 //
 func (pkg *Package) GoInstall() (err error) {
-	fmt.Println(">>> Running go install ...")
-
 	//nolint:gas
 	cmd := exec.Command("go", "install")
 	if Debug >= DebugL2 {
@@ -431,9 +429,7 @@ func (pkg *Package) GoInstall() (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
-	}
+	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
 
 	err = cmd.Run()
 
