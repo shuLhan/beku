@@ -1,0 +1,3 @@
+[submodule "testdata/src/github.com/shuLhan/beku_test"]
+	path = testdata/src/github.com/shuLhan/beku_test
+	url = https://github.com/shuLhan/beku_test
