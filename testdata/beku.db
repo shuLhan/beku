@@ -1,3 +1,5 @@
+[beku]
+
 [package "github.com/alecthomas/gometalinter"]
 vcs = git
 remote-name = origin

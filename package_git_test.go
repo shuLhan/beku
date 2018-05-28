@@ -110,9 +110,6 @@ func testGitFetch(t *testing.T) {
 		expVersionNext: "v0.2.0",
 		expStdout: `Fetching origin
 `,
-		expStderr: `From github.com:shuLhan/beku_test
- * [new branch]      master     -> origin/master
-`,
 	}, {
 		desc:           "With tag #2",
 		curVersion:     "v0.2.0",

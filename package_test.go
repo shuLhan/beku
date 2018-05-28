@@ -573,13 +573,14 @@ func testUpdate(t *testing.T) {
 			isTag:      true,
 		},
 		expPkg: &Package{
-			vcs:        VCSModeGit,
-			ImportPath: testGitRepo,
-			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
-			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
-			Version:    "v0.1.0",
-			isTag:      true,
+			vcs:         VCSModeGit,
+			ImportPath:  testGitRepo,
+			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
+			RemoteName:  gitDefRemoteName,
+			RemoteURL:   "git@github.com:shuLhan/beku_test.git",
+			Version:     "v0.1.0",
+			VersionNext: "c9f69fb",
+			isTag:       true,
 		},
 	}, {
 		desc: "Update version back",
@@ -600,13 +601,14 @@ func testUpdate(t *testing.T) {
 			isTag:      true,
 		},
 		expPkg: &Package{
-			vcs:        VCSModeGit,
-			ImportPath: testGitRepo,
-			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
-			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
-			Version:    "c9f69fb",
-			isTag:      false,
+			vcs:         VCSModeGit,
+			ImportPath:  testGitRepo,
+			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
+			RemoteName:  gitDefRemoteName,
+			RemoteURL:   "git@github.com:shuLhan/beku_test.git",
+			Version:     "c9f69fb",
+			VersionNext: "c9f69fb",
+			isTag:       false,
 		},
 	}}
 
@@ -630,7 +632,7 @@ func testUpdate(t *testing.T) {
 			t.Log("stdout:", stdout)
 		}
 
-		test.Assert(t, "current pkg", c.expPkg, c.curPkg, true)
+		test.Assert(t, "current pkg", *c.expPkg, *c.curPkg, true)
 	}
 }
 

@@ -372,10 +372,15 @@ func (pkg *Package) gitUpdate(newPkg *Package) (err error) {
 		return
 	}
 
-	err = pkg.gitCheckoutVersion(newPkg.Version)
+	err = pkg.gitFetch()
 	if err != nil {
 		err = fmt.Errorf("gitUpdate: %s", err)
 		return
+	}
+
+	err = pkg.gitCheckoutVersion(newPkg.Version)
+	if err != nil {
+		err = fmt.Errorf("gitUpdate: %s", err)
 	}
 
 	return
