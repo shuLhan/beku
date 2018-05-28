@@ -687,6 +687,7 @@ func testUpdateMissingDep(t *testing.T) {
 			Deps: []string{
 				"c",
 			},
+			state: packageStateDirty,
 		},
 		expMisPkg: &Package{
 			ImportPath: "c",
@@ -699,7 +700,7 @@ func testUpdateMissingDep(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := c.curPkg.UpdateMissingDep(c.misPkg)
+		got := c.curPkg.UpdateMissingDep(c.misPkg, true)
 
 		test.Assert(t, "return value", c.exp, got, true)
 		test.Assert(t, "package", c.expCurPkg, c.curPkg, true)

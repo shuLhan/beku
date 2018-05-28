@@ -23,6 +23,27 @@
 // version on GOPATH.  Also, all packages that are not registered will be
 // removed from GOPATH "src" and "pkg" directories.
 //
+// ## Database Operation
+//
+//	-D, --database
+//
+// Modify the package database. This operation required one of the options
+// below.
+//
+// ### Options
+//
+//	-e, --exclude <pkg ...>
+//
+// Remove list of package by import path from database and add mark it as
+// excluded package.  Excluded package will be ignored on future operations.
+//
+// ### Examples
+//
+//	$ beku -De github.com/shuLhan/beku
+//
+// Exclude package "github.com/shuLhan/beku" from future scanning,
+// installation, or removal.
+//
 //
 // ## Query Operation
 //
@@ -153,6 +174,8 @@ func main() {
 	case opHelp:
 		cmd.usage()
 		os.Exit(1)
+	case opDatabase | opExclude:
+		cmd.env.Exclude(cmd.pkgs)
 	case opFreeze:
 		err = cmd.env.Freeze()
 	case opQuery:

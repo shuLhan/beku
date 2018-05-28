@@ -10,7 +10,176 @@ import (
 	"github.com/shuLhan/tekstus/diff"
 )
 
+func testEnvAddExclude(t *testing.T) {
+	testEnv.pkgsExclude = nil
+
+	cases := []struct {
+		desc       string
+		exclude    string
+		expExclude []string
+		expReturn  bool
+	}{{
+		desc: "With empty excluded",
+	}, {
+		desc:       "Exclude A",
+		exclude:    "A",
+		expExclude: []string{"A"},
+		expReturn:  true,
+	}, {
+		desc:       "Exclude A again",
+		exclude:    "A",
+		expExclude: []string{"A"},
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got := testEnv.addExclude(c.exclude)
+
+		test.Assert(t, "expExclude", c.expExclude, testEnv.pkgsExclude, true)
+		test.Assert(t, "expReturn", c.expReturn, got, true)
+	}
+}
+
+func testEnvExclude(t *testing.T) {
+	testEnv.pkgsExclude = nil
+	testEnv.pkgs = nil
+	testEnv.pkgsMissing = nil
+
+	err := testEnv.Load(testDBLoad)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		desc       string
+		excludes   []string
+		expExclude []string
+		expPkgsLen int
+		expPkg     *Package
+		expMissing []string
+	}{{
+		desc:       "Exclude package not in DB",
+		excludes:   []string{"github.com/shuLhan/notInDB"},
+		expExclude: []string{"github.com/shuLhan/notInDB"},
+		expPkgsLen: 49,
+		expMissing: []string{
+			"github.com/BurntSushi/toml",
+			"gopkg.in/urfave/cli.v1",
+			"gopkg.in/yaml.v2",
+			"google.golang.org/appengine/log",
+			"golang.org/x/crypto/ssh/terminal",
+			"google.golang.org/appengine",
+			"github.com/modern-go/concurrent",
+			"github.com/modern-go/reflect2",
+			"gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"github.com/yosssi/gohtml",
+			"cloud.google.com/go/compute/metadata",
+			"github.com/spf13/pflag",
+		},
+	}, {
+		desc:     "Exclude package in missing",
+		excludes: []string{"github.com/spf13/pflag"},
+		expExclude: []string{
+			"github.com/shuLhan/notInDB",
+			"github.com/spf13/pflag",
+		},
+		expPkgsLen: 49,
+		expPkg: &Package{
+			ImportPath: "gotest.tools",
+			FullPath:   filepath.Join(testEnv.dirSrc, "gotest.tools"),
+			RemoteName: "origin",
+			RemoteURL:  "https://github.com/gotestyourself/gotestyourself",
+			Version:    "v2.0.0",
+			isTag:      true,
+			Deps: []string{
+				"github.com/pkg/errors",
+				"golang.org/x/tools",
+				"github.com/google/go-cmp",
+			},
+			RequiredBy: []string{
+				"github.com/alecthomas/gometalinter",
+			},
+			state: packageStateDirty,
+			vcs:   VCSModeGit,
+		},
+		expMissing: []string{
+			"github.com/BurntSushi/toml",
+			"gopkg.in/urfave/cli.v1",
+			"gopkg.in/yaml.v2",
+			"google.golang.org/appengine/log",
+			"golang.org/x/crypto/ssh/terminal",
+			"google.golang.org/appengine",
+			"github.com/modern-go/concurrent",
+			"github.com/modern-go/reflect2",
+			"gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"github.com/yosssi/gohtml",
+			"cloud.google.com/go/compute/metadata",
+		},
+	}, {
+		desc: "Exclude package in DB",
+		excludes: []string{
+			"github.com/shuLhan/beku",
+		},
+		expExclude: []string{
+			"github.com/shuLhan/notInDB",
+			"github.com/spf13/pflag",
+			"github.com/shuLhan/beku",
+		},
+		expPkgsLen: 48,
+		expPkg: &Package{
+			ImportPath: "github.com/shuLhan/share",
+			FullPath:   filepath.Join(testEnv.dirSrc, "github.com/shuLhan/share"),
+			RemoteName: "origin",
+			RemoteURL:  "git@github.com:shuLhan/share.git",
+			Version:    "b2c8fd7",
+			state:      packageStateLoad,
+			vcs:        VCSModeGit,
+		},
+		expMissing: []string{
+			"github.com/BurntSushi/toml",
+			"gopkg.in/urfave/cli.v1",
+			"gopkg.in/yaml.v2",
+			"google.golang.org/appengine/log",
+			"golang.org/x/crypto/ssh/terminal",
+			"google.golang.org/appengine",
+			"github.com/modern-go/concurrent",
+			"github.com/modern-go/reflect2",
+			"gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"github.com/yosssi/gohtml",
+			"cloud.google.com/go/compute/metadata",
+		},
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		testEnv.Exclude(c.excludes)
+
+		test.Assert(t, "exp excludes", c.expExclude, testEnv.pkgsExclude, true)
+		test.Assert(t, "pkgs length", c.expPkgsLen, len(testEnv.pkgs), true)
+		test.Assert(t, "pkgs missing", c.expMissing, testEnv.pkgsMissing, true)
+
+		if c.expPkg == nil {
+			continue
+		}
+
+		_, got := testEnv.GetPackageFromDB(c.expPkg.ImportPath, "")
+
+		test.Assert(t, "expPkg", c.expPkg, got, true)
+	}
+
+	err = testEnv.Save(testDBSaveExclude)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testEnvLoad(t *testing.T) {
+	testEnv.pkgsExclude = nil
+	testEnv.pkgs = nil
+	testEnv.pkgsMissing = nil
+
 	cases := []struct {
 		desc   string
 		file   string
@@ -25,7 +194,7 @@ func testEnvLoad(t *testing.T) {
 		expErr: fmt.Sprintf("open %s: no such file or directory", testEnv.dbDefFile),
 	}, {
 		desc: `With valid file`,
-		file: "testdata/beku.db",
+		file: testDBLoad,
 	}}
 
 	var err error
@@ -96,7 +265,7 @@ func testEnvGetPackageFromDB(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		got := testEnv.GetPackageFromDB(c.importPath, c.remoteURL)
+		_, got := testEnv.GetPackageFromDB(c.importPath, c.remoteURL)
 
 		test.Assert(t, "", c.exp, got, true)
 	}
@@ -222,7 +391,7 @@ func testEnvFilterUnusedDeps(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.importPath)
 
-		pkg := testEnv.GetPackageFromDB(c.importPath, "")
+		_, pkg := testEnv.GetPackageFromDB(c.importPath, "")
 		unused := make(map[string]bool)
 		testEnv.filterUnusedDeps(pkg, unused)
 
@@ -264,7 +433,7 @@ func testEnvSave(t *testing.T) {
 			continue
 		}
 
-		diffs, err := diff.Files("testdata/beku.db", c.file, diff.LevelLines)
+		diffs, err := diff.Files(testDBLoad, c.file, diff.LevelLines)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -296,9 +465,9 @@ func testEnvUpdateMissing(t *testing.T) {
 	}}
 
 	for _, c := range cases {
-		testEnv.updateMissing(c.newPkg)
+		testEnv.updateMissing(c.newPkg, true)
 
-		got := testEnv.GetPackageFromDB(c.expPkg, "")
+		_, got := testEnv.GetPackageFromDB(c.expPkg, "")
 
 		test.Assert(t, "expDeps", c.expDeps, got.Deps, true)
 		test.Assert(t, "expMissing", c.expMissing, got.DepsMissing, true)
@@ -366,6 +535,8 @@ func testEnvSync(t *testing.T) {
 }
 
 func TestEnv(t *testing.T) {
+	t.Run("addExclude", testEnvAddExclude)
+	t.Run("Exclude", testEnvExclude)
 	t.Run("Load", testEnvLoad)
 	t.Run("GetPackageFromDB", testEnvGetPackageFromDB)
 	t.Run("Query", testEnvQuery)

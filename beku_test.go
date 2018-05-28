@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	testDBLoad         = "testdata/beku.db"
+	testDBSaveExclude  = "testdata/beku.db.exclude"
 	testGitRepo        = "github.com/shuLhan/beku_test"
 	testGitRepoVersion = "c9f69fb"
 	testGitRepoShare   = "github.com/shuLhan/share"

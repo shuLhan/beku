@@ -17,11 +17,12 @@ var (
 )
 
 const (
-	flagOperationHelp   = "Show the short usage."
-	flagOperationFreeze = "Install all packages on database."
-	flagOperationQuery  = "Query the package database."
-	flagOperationRemove = "Remove package."
-	flagOperationSync   = "Synchronize package. If no package is given, it will do rescan."
+	flagOperationHelp     = "Show the short usage."
+	flagOperationDatabase = "Operate on the package database."
+	flagOperationFreeze   = "Install all packages on database."
+	flagOperationQuery    = "Query the package database."
+	flagOperationRemove   = "Remove package."
+	flagOperationSync     = "Synchronize package. If no package is given, it will do rescan."
 
 	flagOptionRecursive = "Remove package including their dependencies."
 	flagOptionSyncInto  = "Download package into `directory`."
@@ -44,6 +45,9 @@ operations:
 
 	beku {-B|--freeze}
 		` + flagOperationFreeze + `
+
+	beku {-D|--database}
+		` + flagOperationDatabase + `
 
 	beku {-Q|--query} [pkg ...]
 		` + flagOperationQuery + `
@@ -68,6 +72,19 @@ operations:
 `
 
 	fmt.Fprint(os.Stderr, help)
+}
+
+func (cmd *command) parseDatabaseFlags(arg string) (operation, error) {
+	if len(arg) == 0 {
+		return opNone, nil
+	}
+
+	switch arg[0] {
+	case 'e':
+		return opExclude, nil
+	}
+
+	return opNone, errInvalidOptions
 }
 
 func (cmd *command) parseSyncFlags(arg string) (operation, error) {
@@ -125,6 +142,12 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 		if len(arg) > 1 {
 			return opNone, errInvalidOptions
 		}
+	case 'D':
+		op, err = cmd.parseDatabaseFlags(arg[1:])
+		if err != nil {
+			return opNone, err
+		}
+		op |= opDatabase
 	case 'Q':
 		op = opQuery
 		if len(arg) > 1 {
@@ -158,6 +181,10 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 	switch arg {
 	case "help":
 		op = opHelp
+	case "database":
+		op = opDatabase
+	case "exclude":
+		op = opExclude
 	case "freeze":
 		op = opFreeze
 	case "into":
@@ -235,7 +262,8 @@ func (cmd *command) parseFlags(args []string) (err error) {
 			return
 		}
 	}
-	if cmd.op == opRecursive || cmd.op == opSyncInto || cmd.op == opUpdate {
+	if cmd.op == opExclude || cmd.op == opRecursive ||
+		cmd.op == opSyncInto || cmd.op == opUpdate {
 		return errInvalidOptions
 	}
 	if cmd.op&opSyncInto == opSyncInto {
@@ -245,8 +273,9 @@ func (cmd *command) parseFlags(args []string) (err error) {
 	}
 
 	// (1)
-	op = cmd.op & (opFreeze | opQuery | opRemove | opSync)
-	if op != opFreeze && op != opQuery && op != opRemove && op != opSync {
+	op = cmd.op & (opDatabase | opFreeze | opQuery | opRemove | opSync)
+	if op != opDatabase && op != opFreeze && op != opQuery &&
+		op != opRemove && op != opSync {
 		return errMultiOperations
 	}
 

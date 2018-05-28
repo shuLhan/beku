@@ -31,6 +31,7 @@ type Env struct {
 	dirRootSrc  string
 	dirSrc      string
 	pkgs        []*Package
+	pkgsExclude []string
 	pkgsMissing []string
 	pkgsStd     []string
 	pkgsUnused  []*Package
@@ -75,6 +76,25 @@ func NewEnvironment() (env *Env, err error) {
 	return
 }
 
+//
+// addExclude will add package to list of excluded packages. It will return
+// true if importPath is not already exist in list; otherwise it will return
+// false.
+//
+func (env *Env) addExclude(importPath string) bool {
+	if len(importPath) == 0 {
+		return false
+	}
+	for x := 0; x < len(env.pkgsExclude); x++ {
+		if env.pkgsExclude[x] == importPath {
+			return false
+		}
+	}
+
+	env.pkgsExclude = append(env.pkgsExclude, importPath)
+	return true
+}
+
 func (env *Env) cleanUnused() {
 	for _, pkg := range env.pkgsUnused {
 		fmt.Println(">>> Removing source at", pkg.FullPath)
@@ -85,6 +105,30 @@ func (env *Env) cleanUnused() {
 		fmt.Println(">>> Removing installed binaries at", pkgPath)
 		_ = os.RemoveAll(pkgPath)
 		_ = RmdirEmptyAll(pkgPath)
+	}
+}
+
+//
+// Exclude mark list of packages to be excluded from future operations.
+//
+func (env *Env) Exclude(importPaths []string) {
+	exPkg := new(Package)
+
+	for _, exImportPath := range importPaths {
+		ok := env.addExclude(exImportPath)
+		if ok {
+			env.dirty = true
+		}
+
+		pkgIdx, pkg := env.GetPackageFromDB(exImportPath, "")
+		if pkg != nil {
+			env.removePkgFromDBByIdx(pkgIdx)
+		}
+
+		exPkg.ImportPath = exImportPath
+		env.updateMissing(exPkg, false)
+
+		env.removeRequiredBy(exImportPath)
 	}
 }
 
@@ -182,24 +226,25 @@ func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
 }
 
 //
-// GetPackageFromDB will return installed package registered on database.
-// If no package found, it will return nil.
+// GetPackageFromDB will return index and pointer to package in database.
+// If no package found, it will return -1 and nil.
 //
-func (env *Env) GetPackageFromDB(importPath, remoteURL string) *Package {
+func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
 	for x := 0; x < len(env.pkgs); x++ {
 		if importPath == env.pkgs[x].ImportPath {
-			return env.pkgs[x]
+			return x, env.pkgs[x]
 		}
 
 		if remoteURL == env.pkgs[x].RemoteURL {
-			return env.pkgs[x]
+			return x, env.pkgs[x]
 		}
 	}
-	return nil
+	return -1, nil
 }
 
 //
-// GetUnused will get all non-registered packages from GOPATH "src".
+// GetUnused will get all non-registered packages from GOPATH "src", without
+// including all excluded packages.
 //
 func (env *Env) GetUnused(srcPath string) (err error) {
 	fis, err := ioutil.ReadDir(srcPath)
@@ -235,7 +280,11 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 
 		importPath := strings.TrimPrefix(fullPath, env.dirSrc+"/")
 
-		pkg := env.GetPackageFromDB(importPath, "")
+		if env.IsExcluded(importPath) {
+			continue
+		}
+
+		_, pkg := env.GetPackageFromDB(importPath, "")
 		if pkg != nil {
 			continue
 		}
@@ -252,6 +301,22 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 	}
 
 	return
+}
+
+//
+// IsExcluded will return true if import path is registered as one of excluded
+// package; otherwise it will return false.
+//
+func (env *Env) IsExcluded(importPath string) bool {
+	if len(importPath) == 0 {
+		return true
+	}
+	for x := 0; x < len(env.pkgsExclude); x++ {
+		if env.pkgsExclude[x] == importPath {
+			return true
+		}
+	}
+	return false
 }
 
 //
@@ -376,6 +441,10 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 	pkgName := strings.TrimPrefix(fullPath, env.dirSrc+"/")
 
+	if env.IsExcluded(pkgName) {
+		return
+	}
+
 	pkg := NewPackage(pkgName, pkgName, vcsMode)
 
 	if Debug >= DebugL2 {
@@ -391,7 +460,7 @@ func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 		return fmt.Errorf("%s: %s", pkgName, err)
 	}
 
-	curPkg := env.GetPackageFromDB(pkg.ImportPath, pkg.RemoteURL)
+	_, curPkg := env.GetPackageFromDB(pkg.ImportPath, pkg.RemoteURL)
 	if curPkg == nil {
 		env.pkgs = append(env.pkgs, pkg)
 		env.countNew++
@@ -455,10 +524,33 @@ func (env *Env) Load(file string) (err error) {
 		return
 	}
 
+	env.loadBeku()
+	env.loadPackages()
+
+	return
+}
+
+func (env *Env) loadBeku() {
+	secBeku := env.db.GetSection(sectionBeku, "")
+	if secBeku == nil {
+		return
+	}
+
+	for _, v := range secBeku.Vars {
+		if v.KeyLower == keyExclude {
+			env.addExclude(v.Value)
+		}
+	}
+}
+
+func (env *Env) loadPackages() {
 	sections := env.db.GetSections(sectionPackage)
 	for _, sec := range sections {
 		if len(sec.Sub) == 0 {
 			fmt.Fprintln(os.Stderr, errDBPackageName, sec.LineNum, env.dbFile)
+			continue
+		}
+		if env.IsExcluded(sec.Sub) {
 			continue
 		}
 
@@ -472,8 +564,6 @@ func (env *Env) Load(file string) (err error) {
 
 		env.addPackage(pkg)
 	}
-
-	return
 }
 
 //
@@ -490,6 +580,10 @@ func (env *Env) Query(pkgs []string) {
 			continue
 		}
 		for y := 0; y < len(pkgs); y++ {
+			if env.IsExcluded(pkgs[y]) {
+				continue
+			}
+
 			if env.pkgs[x].ImportPath == pkgs[y] {
 				fmt.Fprintf(defStdout, format,
 					env.pkgs[x].ImportPath,
@@ -564,7 +658,7 @@ func (env *Env) Rescan() (ok bool, err error) {
 				continue
 			}
 			pkg.state = packageStateDirty
-			env.updateMissing(pkg)
+			env.updateMissing(pkg, true)
 		}
 	}
 	env.dirty = true
@@ -577,7 +671,12 @@ func (env *Env) Rescan() (ok bool, err error) {
 // dependencies, as long as they are not required by other package.
 //
 func (env *Env) Remove(rmPkg string, recursive bool) (err error) {
-	pkg := env.GetPackageFromDB(rmPkg, "")
+	if env.IsExcluded(rmPkg) {
+		fmt.Printf(errExcluded, rmPkg)
+		return
+	}
+
+	_, pkg := env.GetPackageFromDB(rmPkg, "")
 	if pkg == nil {
 		fmt.Println("Package", rmPkg, "not installed")
 		return
@@ -658,7 +757,7 @@ func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
 	}
 
 	for x := 0; x < len(pkg.Deps); x++ {
-		dep = env.GetPackageFromDB(pkg.Deps[x], "")
+		_, dep = env.GetPackageFromDB(pkg.Deps[x], "")
 
 		if len(dep.Deps) > 0 {
 			env.filterUnusedDeps(dep, tobeRemoved)
@@ -688,7 +787,7 @@ func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
 // or binary). This also remove in other packages "RequiredBy" if exist.
 //
 func (env *Env) removePackage(importPath string) (err error) {
-	pkg := env.GetPackageFromDB(importPath, "")
+	pkgIdx, pkg := env.GetPackageFromDB(importPath, "")
 	if pkg == nil {
 		return
 	}
@@ -698,19 +797,17 @@ func (env *Env) removePackage(importPath string) (err error) {
 		return
 	}
 
-	idx := -1
-	for x := 0; x < len(env.pkgs); x++ {
-		if env.pkgs[x].ImportPath == importPath {
-			idx = x
-			continue
-		}
+	env.removeRequiredBy(importPath)
+	env.removePkgFromDBByIdx(pkgIdx)
 
-		ok := env.pkgs[x].RemoveRequiredBy(importPath)
-		if ok {
-			env.dirty = true
-		}
-	}
+	return
+}
 
+//
+// removePkgFromDBByIdx remove package from database by package index in the
+// list.
+//
+func (env *Env) removePkgFromDBByIdx(idx int) {
 	if idx < 0 {
 		return
 	}
@@ -722,8 +819,18 @@ func (env *Env) removePackage(importPath string) (err error) {
 	env.pkgs = env.pkgs[:lenpkgs-1]
 
 	env.dirty = true
+}
 
-	return
+//
+// removeRequiredBy will remove import path in package required-by.
+//
+func (env *Env) removeRequiredBy(importPath string) {
+	for x := 0; x < len(env.pkgs); x++ {
+		ok := env.pkgs[x].RemoveRequiredBy(importPath)
+		if ok {
+			env.dirty = true
+		}
+	}
 }
 
 //
@@ -759,6 +866,26 @@ func (env *Env) Save(file string) (err error) {
 
 	env.db = &ini.Ini{}
 
+	env.saveBeku()
+	env.savePackages()
+
+	err = env.db.Save(file)
+
+	return
+}
+
+func (env *Env) saveBeku() {
+	secBeku := ini.NewSection(sectionBeku, "")
+
+	for _, exclude := range env.pkgsExclude {
+		secBeku.Add(keyExclude, exclude)
+	}
+
+	secBeku.AddNewLine()
+	env.db.AddSection(secBeku)
+}
+
+func (env *Env) savePackages() {
 	for _, pkg := range env.pkgs {
 		sec := ini.NewSection(sectionPackage, pkg.ImportPath)
 
@@ -785,10 +912,6 @@ func (env *Env) Save(file string) (err error) {
 
 		env.db.AddSection(sec)
 	}
-
-	err = env.db.Save(file)
-
-	return
 }
 
 //
@@ -887,9 +1010,10 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 
 //
 // updateMissing will remove missing package if it's already provided by new
-// package and add it as one of package dependencies.
+// package. If "addAsDep" is true and the new package provide the missing one,
+// then it will be added as one of package dependencies.
 //
-func (env *Env) updateMissing(newPkg *Package) {
+func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 	var updated bool
 
 	if Debug >= DebugL1 {
@@ -897,7 +1021,7 @@ func (env *Env) updateMissing(newPkg *Package) {
 	}
 
 	for x := 0; x < len(env.pkgs); x++ {
-		updated = env.pkgs[x].UpdateMissingDep(newPkg)
+		updated = env.pkgs[x].UpdateMissingDep(newPkg, addAsDep)
 		if updated {
 			env.dirty = true
 		}
@@ -933,6 +1057,11 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	if len(pkgName) == 0 {
 		return
 	}
+	if env.IsExcluded(pkgName) {
+		fmt.Printf(errExcluded, pkgName)
+		err = nil
+		return
+	}
 
 	var (
 		ok      bool
@@ -957,7 +1086,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	}
 
 	// (2)
-	curPkg := env.GetPackageFromDB(newPkg.ImportPath, newPkg.RemoteURL)
+	_, curPkg := env.GetPackageFromDB(newPkg.ImportPath, newPkg.RemoteURL)
 	if curPkg != nil {
 		ok, err = env.update(curPkg, newPkg)
 	} else {
@@ -1065,7 +1194,7 @@ func (env *Env) SyncAll() (err error) {
 //
 func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 	// (1)
-	env.updateMissing(newPkg)
+	env.updateMissing(newPkg, true)
 
 	// (2)
 	err = curPkg.ScanDeps(env)

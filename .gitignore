@@ -1,3 +1,4 @@
+/testdata/beku.db.exclude
 /testdata/beku.db.save
 /testdata/a/b/file
 /beku.test

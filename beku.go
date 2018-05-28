@@ -55,6 +55,7 @@ var (
 
 	errDBPackageName = "missing package name, line %d at %s"
 	errDirNotEmpty   = "directory %s is not empty"
+	errExcluded      = "Package '%s' is in excluded list\n"
 )
 
 var (
@@ -67,10 +68,12 @@ var (
 	defStdout = os.Stdout
 	defStderr = os.Stderr
 
+	sectionBeku    = "beku"
 	sectionPackage = "package"
 
 	keyDeps        = "deps"
 	keyDepsMissing = "missing"
+	keyExclude     = "exclude"
 	keyRemoteName  = "remote-name"
 	keyRemoteURL   = "remote-url"
 	keyRequiredBy  = "required-by"

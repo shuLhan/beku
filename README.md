@@ -22,6 +22,29 @@ directory. If no file found, it will try to open
 package database, beku will scan entire "$GOPATH/src" and write the
 package database into "$GOPATH/var/beku/beku.db".
 
+
+## Database Operation
+
+     -D, --database
+
+Modify the package database. This operation required one of the options
+below.
+
+### Options
+
+     -e, --exclude <pkg ...>
+
+Remove list of package by import path from database and add mark it as
+excluded package.  Excluded package will be ignored on future operations.
+
+### Examples
+
+     $ beku -De github.com/shuLhan/beku
+
+Exclude package "github.com/shuLhan/beku" from future scanning,
+installation, or removal.
+
+
 ## Freeze Operation
 
      -B, --freeze
