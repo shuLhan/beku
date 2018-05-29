@@ -22,6 +22,23 @@ directory. If no file found, it will try to open
 package database, beku will scan entire "$GOPATH/src" and write the
 package database into "$GOPATH/var/beku/beku.db".
 
+## Global Options
+
+     --noconfirm
+
+No confirmation will be asked on any operation. Useful when running beku
+inside a script.
+
+
+## Freeze Operation
+
+     -B, --freeze
+
+Operate on the package database and GOPATH. This operation will ensure that
+all packages listed on database file is installed with their specific
+version on GOPATH.  Also, all packages that are not registered will be
+removed from GOPATH "src" and "pkg" directories.
+
 
 ## Database Operation
 
@@ -43,16 +60,6 @@ excluded package.  Excluded package will be ignored on future operations.
 
 Exclude package "github.com/shuLhan/beku" from future scanning,
 installation, or removal.
-
-
-## Freeze Operation
-
-     -B, --freeze
-
-Operate on the package database and GOPATH. This operation will ensure that
-all packages listed on database file is installed with their specific
-version on GOPATH.  Also, all packages that are not registered will be
-removed from GOPATH "src" and "pkg" directories.
 
 
 ## Query Operation

@@ -42,6 +42,7 @@ type Env struct {
 	countUpdate int
 	fmtMaxPath  int
 	dirty       bool
+	NoConfirm   bool
 }
 
 //
@@ -183,9 +184,13 @@ func (env *Env) Freeze() (err error) {
 
 	fmt.Println()
 
-	ok = confirm(os.Stdin, msgContinue, false)
-	if ok {
+	if env.NoConfirm {
 		env.cleanUnused()
+	} else {
+		ok = confirm(os.Stdin, msgContinue, false)
+		if ok {
+			env.cleanUnused()
+		}
 	}
 
 out:
@@ -636,9 +641,13 @@ func (env *Env) Rescan() (ok bool, err error) {
 
 	fmt.Println()
 
-	ok = confirm(os.Stdin, msgContinue, false)
-	if !ok {
-		return
+	if env.NoConfirm {
+		ok = true
+	} else {
+		ok = confirm(os.Stdin, msgContinue, false)
+		if !ok {
+			return
+		}
 	}
 
 	if env.countUpdate > 0 {
@@ -712,9 +721,11 @@ This package is required by,
 		fmt.Println(" *", importPath)
 	}
 
-	ok := confirm(os.Stdin, msgContinue, false)
-	if !ok {
-		return
+	if !env.NoConfirm {
+		ok := confirm(os.Stdin, msgContinue, false)
+		if !ok {
+			return
+		}
 	}
 
 	for _, importPath := range listRemoved {
@@ -944,9 +955,11 @@ func (env *Env) String() string {
 func (env *Env) install(pkg *Package) (ok bool, err error) {
 	if !IsDirEmpty(pkg.FullPath) {
 		fmt.Printf(">>> Directory %s is not empty.\n", pkg.FullPath)
-		ok = confirm(os.Stdin, msgContinue, false)
-		if !ok {
-			return
+		if !env.NoConfirm {
+			ok = confirm(os.Stdin, msgContinue, false)
+			if !ok {
+				return
+			}
 		}
 	}
 
@@ -985,17 +998,25 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	fmt.Printf("Updating package from,\n%s\nto,\n%s\n", curPkg.String(),
 		newPkg.String())
 
-	ok = confirm(os.Stdin, msgUpdateView, false)
-	if ok {
-		err = curPkg.CompareVersion(newPkg)
-		if err != nil {
-			return
+	if env.NoConfirm {
+		ok = true
+	} else {
+		ok = confirm(os.Stdin, msgUpdateView, false)
+		if ok {
+			err = curPkg.CompareVersion(newPkg)
+			if err != nil {
+				return
+			}
 		}
 	}
 
-	ok = confirm(os.Stdin, msgUpdateProceed, true)
-	if !ok {
-		return
+	if env.NoConfirm {
+		ok = true
+	} else {
+		ok = confirm(os.Stdin, msgUpdateProceed, true)
+		if !ok {
+			return
+		}
 	}
 
 	err = curPkg.Update(newPkg)
@@ -1168,9 +1189,11 @@ func (env *Env) SyncAll() (err error) {
 
 	fmt.Println(buf.String())
 
-	ok := confirm(os.Stdin, msgContinue, false)
-	if !ok {
-		return
+	if !env.NoConfirm {
+		ok := confirm(os.Stdin, msgContinue, false)
+		if !ok {
+			return
+		}
 	}
 
 	for _, pkg := range env.pkgs {

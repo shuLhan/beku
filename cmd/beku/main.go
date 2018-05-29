@@ -14,6 +14,14 @@
 // package database, beku will scan entire "$GOPATH/src" and write the
 // package database into "$GOPATH/var/beku/beku.db".
 //
+// ## Global Options
+//
+//	--noconfirm
+//
+// No confirmation will be asked on any operation. Useful when running beku
+// inside a script.
+//
+//
 // ## Freeze Operation
 //
 //	-B, --freeze
@@ -169,6 +177,8 @@ func main() {
 		}
 		os.Exit(1)
 	}
+
+	cmd.env.NoConfirm = cmd.noConfirm
 
 	switch cmd.op {
 	case opHelp:

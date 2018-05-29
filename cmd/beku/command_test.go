@@ -30,6 +30,9 @@ func TestParseFlags(t *testing.T) {
 		args:   []string{"--into"},
 		expErr: errInvalidOptions.Error(),
 	}, {
+		args:   []string{"--noconfirm"},
+		expErr: errInvalidOptions.Error(),
+	}, {
 		args:   []string{"--update"},
 		expErr: errInvalidOptions.Error(),
 	}, {
@@ -168,6 +171,13 @@ func TestParseFlags(t *testing.T) {
 		expCmd: &command{
 			op:   opRemove | opRecursive,
 			pkgs: []string{"A"},
+		},
+	}, {
+		args: []string{"-Rs", "A", "--noconfirm"},
+		expCmd: &command{
+			op:        opRemove | opRecursive,
+			noConfirm: true,
+			pkgs:      []string{"A"},
 		},
 	}, {
 		args:   []string{"-Rx", "A"},

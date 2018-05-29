@@ -24,6 +24,7 @@ const (
 	flagOperationRemove   = "Remove package."
 	flagOperationSync     = "Synchronize package. If no package is given, it will do rescan."
 
+	flagOptionNoConfirm = "No confirmation will be asked on any operation."
 	flagOptionRecursive = "Remove package including their dependencies."
 	flagOptionSyncInto  = "Download package into `directory`."
 	flagOptionUpdate    = "Update all packages to latest version."
@@ -35,10 +36,14 @@ type command struct {
 	pkgs      []string
 	syncInto  string
 	firstTime bool
+	noConfirm bool
 }
 
 func (cmd *command) usage() {
 	help := `usage: beku <operation> [...]
+common options:
+	--noconfirm
+		` + flagOptionNoConfirm + `
 operations:
 	beku {-h|--help}
 		` + flagOperationHelp + `
@@ -189,6 +194,8 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 		op = opFreeze
 	case "into":
 		op = opSyncInto
+	case "noconfirm":
+		cmd.noConfirm = true
 	case "query":
 		op = opQuery
 	case "recursive":
@@ -262,7 +269,7 @@ func (cmd *command) parseFlags(args []string) (err error) {
 			return
 		}
 	}
-	if cmd.op == opExclude || cmd.op == opRecursive ||
+	if cmd.op == opNone || cmd.op == opExclude || cmd.op == opRecursive ||
 		cmd.op == opSyncInto || cmd.op == opUpdate {
 		return errInvalidOptions
 	}
