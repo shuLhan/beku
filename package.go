@@ -424,12 +424,18 @@ func (pkg *Package) GoInstall() (err error) {
 	}
 	cmd.Args = append(cmd.Args, "./...")
 
+	path := os.Getenv(envPATH)
+	if len(path) == 0 {
+		path = defPATH
+	}
+
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
+	cmd.Env = append(cmd.Env, "PATH="+path)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	fmt.Printf(">>> %s %s %s\n", cmd.Dir, cmd.Env, cmd.Args)
 
 	err = cmd.Run()
 

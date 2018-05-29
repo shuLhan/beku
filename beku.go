@@ -17,6 +17,8 @@ const (
 	dbgSkipSelf = "skip self dep"
 	dbgSkipStd  = "skip std dep"
 
+	defPATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+
 	dirDB       = "var/beku"
 	dirBin      = "bin"
 	dirPkg      = "pkg"
@@ -25,6 +27,7 @@ const (
 	dirVendor   = "vendor"
 
 	envDEBUG = "BEKU_DEBUG"
+	envPATH  = "PATH"
 
 	msgUpdateProceed = "Proceed with update?"
 	msgUpdateView    = "View commit logs?"
