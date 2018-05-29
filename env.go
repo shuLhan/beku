@@ -394,6 +394,10 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 
 	fis, err := ioutil.ReadDir(srcPath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			err = nil
+			return
+		}
 		err = fmt.Errorf("scanPackages: %s", err)
 		return
 	}
@@ -636,7 +640,7 @@ func (env *Env) Rescan() (ok bool, err error) {
 
 	if env.countUpdate == 0 && env.countNew == 0 {
 		fmt.Println(">>> Database and GOPATH is in sync.")
-		return
+		return true, nil
 	}
 
 	fmt.Println()
