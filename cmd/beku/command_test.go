@@ -1,12 +1,14 @@
 package main
 
 import (
+	"go/build"
+	"os"
 	"testing"
 
 	"github.com/shuLhan/share/lib/test"
 )
 
-func TestParseFlags(t *testing.T) {
+func testParseFlags(t *testing.T) {
 	cases := []struct {
 		args   []string
 		expErr string
@@ -15,6 +17,12 @@ func TestParseFlags(t *testing.T) {
 		expErr: errNoOperation.Error(),
 	}, {
 		args:   []string{"-s", "-"},
+		expErr: errInvalidOptions.Error(),
+	}, {
+		args:   []string{"-su", "-"},
+		expErr: errInvalidOptions.Error(),
+	}, {
+		args:   []string{"-hs"},
 		expErr: errInvalidOptions.Error(),
 	}, {
 		args: []string{"-h"},
@@ -45,10 +53,49 @@ func TestParseFlags(t *testing.T) {
 		args:   []string{"--into", "directory"},
 		expErr: errInvalidOptions.Error(),
 	}, {
-		args:   []string{"-Q", "package", "--into", "directory"},
+		args: []string{"-B"},
+		expCmd: &command{
+			op: opFreeze,
+		},
+	}, {
+		args: []string{"--freeze"},
+		expCmd: &command{
+			op: opFreeze,
+		},
+	}, {
+		args:   []string{"-Bs"},
 		expErr: errInvalidOptions.Error(),
 	}, {
-		args:   []string{"-R", "package", "--into", "directory"},
+		args: []string{"-D"},
+		expCmd: &command{
+			op: opDatabase,
+		},
+	}, {
+		args:   []string{"-Ds"},
+		expErr: errInvalidOptions.Error(),
+	}, {
+		args: []string{"-De"},
+		expCmd: &command{
+			op: opDatabase | opExclude,
+		},
+	}, {
+		args: []string{"--database"},
+		expCmd: &command{
+			op: opDatabase,
+		},
+	}, {
+		args: []string{"--database", "--exclude", "A"},
+		expCmd: &command{
+			op: opDatabase | opExclude,
+			pkgs: []string{
+				"A",
+			},
+		},
+	}, {
+		args:   []string{"-Qs", "A"},
+		expErr: errInvalidOptions.Error(),
+	}, {
+		args:   []string{"-Q", "package", "--into", "directory"},
 		expErr: errInvalidOptions.Error(),
 	}, {
 		args:   []string{"-Q", "query", "-R", "remove"},
@@ -89,6 +136,14 @@ func TestParseFlags(t *testing.T) {
 			op: opSync,
 		},
 	}, {
+		args: []string{"-Su"},
+		expCmd: &command{
+			op: opSync | opUpdate,
+		},
+	}, {
+		args:   []string{"-Sh"},
+		expErr: errInvalidOptions.Error(),
+	}, {
 		args: []string{"--sync"},
 		expCmd: &command{
 			op: opSync,
@@ -121,6 +176,9 @@ func TestParseFlags(t *testing.T) {
 	}, {
 		args:   []string{"-Rs"},
 		expErr: errNoTarget.Error(),
+	}, {
+		args:   []string{"-R", "package", "--into", "directory"},
+		expErr: errInvalidOptions.Error(),
 	}, {
 		args: []string{"-R", "A"},
 		expCmd: &command{
@@ -200,4 +258,77 @@ func TestParseFlags(t *testing.T) {
 
 		test.Assert(t, "cmd", c.expCmd, cmd, true)
 	}
+}
+
+func testNewCommand(t *testing.T) {
+	cases := []struct {
+		desc   string
+		gopath string
+		args   []string
+		expCmd *command
+		expErr string
+	}{{
+		desc: "With sync",
+		args: []string{
+			"beku", "-S", "A",
+		},
+		expCmd: &command{
+			op:   opSync,
+			pkgs: []string{"A"},
+		},
+	}, {
+		desc:   "With sync operation and no database found",
+		gopath: "/tmp",
+		args: []string{
+			"beku", "-S", "A",
+		},
+		expCmd: &command{
+			op:        opSync,
+			pkgs:      []string{"A"},
+			firstTime: true,
+		},
+	}, {
+		desc:   "With remove operation and no database found",
+		gopath: "/tmp",
+		args: []string{
+			"beku", "-R", "A",
+		},
+		expCmd: &command{
+			op:        opRemove,
+			pkgs:      []string{"A"},
+			firstTime: false,
+		},
+		expErr: errNoDB.Error(),
+	}}
+
+	for _, c := range cases {
+		orgGOPATH := build.Default.GOPATH
+		orgArgs := os.Args
+
+		if len(c.gopath) > 0 {
+			build.Default.GOPATH = c.gopath
+		}
+		os.Args = c.args
+
+		cmd, err := newCommand()
+		if err != nil {
+			test.Assert(t, "err", c.expErr, err.Error(), true)
+			build.Default.GOPATH = orgGOPATH
+			os.Args = orgArgs
+			continue
+		}
+
+		test.Assert(t, "command.op", c.expCmd.op, cmd.op, true)
+		test.Assert(t, "command.pkgs", c.expCmd.pkgs, cmd.pkgs, true)
+		test.Assert(t, "command.syncInto", c.expCmd.syncInto, cmd.syncInto, true)
+		test.Assert(t, "command.firstTime", c.expCmd.firstTime, cmd.firstTime, true)
+
+		build.Default.GOPATH = orgGOPATH
+		os.Args = orgArgs
+	}
+}
+
+func TestCommand(t *testing.T) {
+	t.Run("parseFlags", testParseFlags)
+	t.Run("newCommand", testNewCommand)
 }

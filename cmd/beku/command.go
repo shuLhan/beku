@@ -133,20 +133,20 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 
 	switch arg[0] {
 	case 's':
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
 		op = opRecursive
-		if len(arg) > 1 {
-			return opNone, errInvalidOptions
-		}
 	case 'h':
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
 		op = opHelp
-		if len(arg) > 1 {
-			return opNone, errInvalidOptions
-		}
 	case 'B':
-		op = opFreeze
 		if len(arg) > 1 {
 			return opNone, errInvalidOptions
 		}
+		op = opFreeze
 	case 'D':
 		op, err = cmd.parseDatabaseFlags(arg[1:])
 		if err != nil {
