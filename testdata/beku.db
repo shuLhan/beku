@@ -1,4 +1,5 @@
 [beku]
+vendor = false
 
 [package "github.com/alecthomas/gometalinter"]
 vcs = git

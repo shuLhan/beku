@@ -38,7 +38,6 @@ const (
 
 // List of error messages.
 var (
-	ErrGOPATH = errors.New("GOPATH is not defined")
 	ErrGOROOT = errors.New("GOROOT is not defined")
 
 	// ErrVersion define an error when directory have VCS metadata (e.g.
@@ -71,9 +70,11 @@ var (
 	sectionBeku    = "beku"
 	sectionPackage = "package"
 
+	keyExclude = "exclude"
+	keyVendor  = "vendor"
+
 	keyDeps        = "deps"
 	keyDepsMissing = "missing"
-	keyExclude     = "exclude"
 	keyRemoteName  = "remote-name"
 	keyRemoteURL   = "remote-url"
 	keyRequiredBy  = "required-by"

@@ -46,7 +46,7 @@ type Package struct {
 // NewPackage create a package set the package version, tag status, and
 // dependencies.
 //
-func NewPackage(pkgName, importPath string) (
+func NewPackage(env *Env, pkgName, importPath string) (
 	pkg *Package, err error,
 ) {
 	repoRoot, err := vcs.RepoRootForImportPath(pkgName, Debug >= DebugL2)
@@ -67,8 +67,8 @@ func NewPackage(pkgName, importPath string) (
 
 	pkg = &Package{
 		ImportPath: repoRoot.Root,
-		FullPath:   filepath.Join(build.Default.GOPATH, dirSrc, repoRoot.Root),
-		ScanPath:   filepath.Join(build.Default.GOPATH, dirSrc, importPath),
+		FullPath:   filepath.Join(env.dirSrc, repoRoot.Root),
+		ScanPath:   filepath.Join(env.dirSrc, importPath),
 		RemoteName: gitDefRemoteName,
 		RemoteURL:  repoRoot.Repo,
 		vcsMode:    repoRoot.VCS.Cmd,
@@ -147,7 +147,7 @@ func (pkg *Package) GoClean() (err error) {
 }
 
 //
-// Install a package. Clone package to GOPATH/src, set to the latest tag if
+// Install a package. Clone package "src" directory, set to the latest tag if
 // exist or to the latest commit, and scan dependencies.
 //
 func (pkg *Package) Install() (err error) {
@@ -189,7 +189,7 @@ func (pkg *Package) IsEqual(other *Package) bool {
 }
 
 //
-// Remove package installed binaries, archives, and source from GOPATH.
+// Remove package installed binaries, archives, and source.
 //
 func (pkg *Package) Remove() (err error) {
 	err = pkg.GoClean()
@@ -263,7 +263,7 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 		fmt.Println("[PKG] ScanDeps", pkg.ImportPath)
 	}
 
-	imports, err := pkg.GetRecursiveImports()
+	imports, err := pkg.GetRecursiveImports(env)
 	if err != nil {
 		return
 	}
@@ -279,7 +279,7 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 // GetRecursiveImports will get all import path recursively using `go list`
 // and return it as slice of string without any duplication.
 //
-func (pkg *Package) GetRecursiveImports() (
+func (pkg *Package) GetRecursiveImports(env *Env) (
 	imports []string, err error,
 ) {
 	//nolint:gas
@@ -306,6 +306,10 @@ func (pkg *Package) GetRecursiveImports() (
 	importsDup := strings.Split(string(out), "\n")
 
 	for x := 0; x < len(importsDup); x++ {
+		if env.vendor {
+			importsDup[x] = strings.TrimPrefix(importsDup[x], env.prefix+"/")
+		}
+
 		found = false
 		for y := 0; y < len(imports); y++ {
 			if importsDup[x] == imports[y] {
@@ -334,7 +338,7 @@ func (pkg *Package) GetRecursiveImports() (
 // (4) not standard packages
 //
 // (5) If all above filter passed, then it will do package normalization to
-// check their dependencies with existing package in `$GOPATH/src`.
+// check their dependencies with existing package in environment.
 //
 // (5.1) if match found, link the package deps to existing package instance.
 // (5.2) If no match found, add to list of missing `depsMissing`
@@ -436,6 +440,9 @@ func (pkg *Package) load(sec *ini.Section) {
 
 //
 // GoInstall a package recursively ("./...").
+//
+// (1) Set PATH to let go install that require gcc work when invoked from
+// non-interactive shell (e.g. buildbot).
 //
 func (pkg *Package) GoInstall() (err error) {
 	//nolint:gas

@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 
 //
-// Package beku provide library for managing Go packages in GOPATH.
+// Package beku provide library for managing Go packages in user's environment
+// (GOPATH or vendor directory).
 //
 package beku
 
@@ -22,36 +23,39 @@ import (
 
 //
 // Env contains the environment of Go including GOROOT source directory,
-// GOPATH source directory, list of packages in GOPATH, list of standard
+// package root directory (prefix), list of packages, list of standard
 // packages, and list of missing packages.
 //
 type Env struct {
-	dirBin      string
-	dirPkg      string
-	dirRootSrc  string
-	dirSrc      string
-	pkgs        []*Package
-	pkgsExclude []string
-	pkgsMissing []string
-	pkgsStd     []string
-	pkgsUnused  []*Package
-	db          *ini.Ini
-	dbDefFile   string
-	dbFile      string
-	countNew    int
-	countUpdate int
-	fmtMaxPath  int
-	dirty       bool
-	NoConfirm   bool
+	prefix       string
+	dirBin       string
+	dirPkg       string
+	dirGoRootSrc string
+	dirSrc       string
+	pkgs         []*Package
+	pkgsExclude  []string
+	pkgsMissing  []string
+	pkgsStd      []string
+	pkgsUnused   []*Package
+	db           *ini.Ini
+	dbDefFile    string
+	dbFile       string
+	countNew     int
+	countUpdate  int
+	fmtMaxPath   int
+	dirty        bool
+	NoConfirm    bool
+	vendor       bool
 }
 
 //
 // NewEnvironment will gather all information in user system.
-// `beku` required that `$GOPATH` environment variable must exist.
 //
-func NewEnvironment() (env *Env, err error) {
-	if len(build.Default.GOPATH) == 0 {
-		return nil, ErrGOPATH
+func NewEnvironment(vendor bool) (env *Env, err error) {
+	if !vendor {
+		if len(build.Default.GOPATH) == 0 {
+			vendor = true
+		}
 	}
 	if len(build.Default.GOROOT) == 0 {
 		return nil, ErrGOROOT
@@ -61,18 +65,44 @@ func NewEnvironment() (env *Env, err error) {
 	Debug = debugMode(debug)
 
 	env = &Env{
-		dirSrc:     filepath.Join(build.Default.GOPATH, dirSrc),
-		dirRootSrc: filepath.Join(build.Default.GOROOT, dirSrc),
-		dirBin:     filepath.Join(build.Default.GOPATH, dirBin),
+		dirGoRootSrc: filepath.Join(build.Default.GOROOT, dirSrc),
+		dirBin:       filepath.Join(build.Default.GOPATH, dirBin),
 		dirPkg: filepath.Join(build.Default.GOPATH, dirPkg,
 			build.Default.GOOS+"_"+build.Default.GOARCH),
-		dbDefFile: filepath.Join(build.Default.GOPATH, dirDB, DefDBName),
+		vendor: vendor,
 	}
 
-	err = env.scanStdPackages(env.dirRootSrc)
+	if vendor {
+		err = env.initVendor()
+		if err != nil {
+			return
+		}
+	} else {
+		env.initGopath()
+	}
+
+	err = env.scanStdPackages(env.dirGoRootSrc)
+
+	return
+}
+
+func (env *Env) initGopath() {
+	env.prefix = build.Default.GOPATH
+	env.dirSrc = filepath.Join(build.Default.GOPATH, dirSrc)
+	env.dbDefFile = filepath.Join(build.Default.GOPATH, dirDB, DefDBName)
+}
+
+func (env *Env) initVendor() (err error) {
+	wd, err := os.Getwd()
 	if err != nil {
 		return
 	}
+
+	prefix := strings.TrimPrefix(wd, filepath.Join(build.Default.GOPATH, dirSrc)+"/")
+
+	env.prefix = filepath.Join(prefix, dirVendor)
+	env.dirSrc = filepath.Join(wd, dirVendor)
+	env.dbDefFile = DefDBName
 
 	return
 }
@@ -134,8 +164,8 @@ func (env *Env) Exclude(importPaths []string) {
 }
 
 //
-// Freeze all packages in GOPATH. Install all registered packages in database
-// and remove non-registered from GOPATH "src" and "pkg" directories.
+// Freeze all packages in database. Install all registered packages in
+// database and remove non-registered from "src" and "pkg" directories.
 //
 func (env *Env) Freeze() (err error) {
 	var (
@@ -223,7 +253,7 @@ func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
 		return
 	}
 
-	pkg, err = NewPackage(importPath, importPath)
+	pkg, err = NewPackage(env, importPath, importPath)
 	if err != nil {
 		return
 	}
@@ -251,8 +281,8 @@ func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
 }
 
 //
-// GetUnused will get all non-registered packages from GOPATH "src", without
-// including all excluded packages.
+// GetUnused will get all non-registered packages from "src" directory,
+// without including all excluded packages.
 //
 func (env *Env) GetUnused(srcPath string) (err error) {
 	fis, err := ioutil.ReadDir(srcPath)
@@ -297,7 +327,7 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 			continue
 		}
 
-		pkg, err = NewPackage(importPath, importPath)
+		pkg, err = NewPackage(env, importPath, importPath)
 		if err != nil {
 			return
 		}
@@ -379,7 +409,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 			continue
 		}
 
-		stdPkg := strings.TrimPrefix(fullPath, env.dirRootSrc+"/")
+		stdPkg := strings.TrimPrefix(fullPath, env.dirGoRootSrc+"/")
 		env.pkgsStd = append(env.pkgsStd, stdPkg)
 	}
 
@@ -387,7 +417,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 }
 
 //
-// scanPackages will traverse each directory in GOPATH `src` recursively until
+// scanPackages will traverse each directory in `src` recursively until
 // it's found VCS metadata, e.g. `.git` directory.
 //
 // (0) skip file
@@ -461,7 +491,7 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		return
 	}
 
-	pkg, err := NewPackage(pkgName, pkgName)
+	pkg, err := NewPackage(env, pkgName, pkgName)
 	if err != nil {
 		return
 	}
@@ -556,6 +586,12 @@ func (env *Env) loadBeku() {
 	}
 
 	for _, v := range secBeku.Vars {
+		if v.KeyLower == keyVendor {
+			if v.IsValueBoolTrue() {
+				env.vendor = true
+				_ = env.initVendor()
+			}
+		}
 		if v.KeyLower == keyExclude {
 			env.addExclude(v.Value)
 		}
@@ -613,7 +649,7 @@ func (env *Env) Query(pkgs []string) {
 }
 
 //
-// Rescan GOPATH for new packages.
+// Rescan for new packages.
 //
 func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	err = env.Scan()
@@ -694,8 +730,8 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 }
 
 //
-// Remove package from GOPATH. If recursive is true, it will also remove their
-// dependencies, as long as they are not required by other package.
+// Remove package from environment. If recursive is true, it will also remove
+// their dependencies, as long as they are not required by other package.
 //
 func (env *Env) Remove(rmPkg string, recursive bool) (err error) {
 	if env.IsExcluded(rmPkg) {
@@ -902,6 +938,12 @@ func (env *Env) Save(file string) (err error) {
 func (env *Env) saveBeku() {
 	secBeku := ini.NewSection(sectionBeku, "")
 
+	if env.vendor {
+		secBeku.Set(keyVendor, "true")
+	} else {
+		secBeku.Set(keyVendor, "false")
+	}
+
 	for _, exclude := range env.pkgsExclude {
 		secBeku.Add(keyExclude, exclude)
 	}
@@ -943,12 +985,14 @@ func (env *Env) String() string {
 
 	fmt.Fprintf(&buf, `
 [ENV]
+             Vendor: %t
+             Prefix: %s
             Dir bin: %s
             Dir pkg: %s
             Dir src: %s
        Dir root src: %s
   Standard Packages: %s
-`, env.dirBin, env.dirPkg, env.dirSrc, env.dirRootSrc, env.pkgsStd)
+`, env.vendor, env.prefix, env.dirBin, env.dirPkg, env.dirSrc, env.dirGoRootSrc, env.pkgsStd)
 
 	for x := 0; x < len(env.pkgs); x++ {
 		fmt.Fprintf(&buf, "%s", env.pkgs[x].String())
@@ -1137,7 +1181,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		return
 	}
 
-	newPkg, err := NewPackage(pkgName, importPath)
+	newPkg, err := NewPackage(env, pkgName, importPath)
 	if err != nil {
 		return
 	}

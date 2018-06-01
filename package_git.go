@@ -57,7 +57,7 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 }
 
 //
-// gitClone the package into "$GOPATH/src/{ImportPath}".
+// gitClone the package into "{prefix}/src/{ImportPath}".
 // If destination directory is not empty it will return an error.
 //
 func (pkg *Package) gitClone() (err error) {
@@ -238,7 +238,7 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 }
 
 //
-// gitInstall the package into GOPATH source directory.
+// gitInstall the package into source directory.
 //
 func (pkg *Package) gitInstall() (err error) {
 	err = pkg.gitClone()

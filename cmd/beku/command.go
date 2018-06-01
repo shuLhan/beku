@@ -28,6 +28,7 @@ const (
 	flagOptionRecursive = "Remove package including their dependencies."
 	flagOptionSyncInto  = "Download package into `directory`."
 	flagOptionUpdate    = "Update all packages to latest version."
+	flagOptionVendor    = "Operate in vendor mode."
 )
 
 type command struct {
@@ -37,6 +38,7 @@ type command struct {
 	syncInto  string
 	firstTime bool
 	noConfirm bool
+	vendor    bool
 }
 
 func (cmd *command) usage() {
@@ -44,6 +46,8 @@ func (cmd *command) usage() {
 common options:
 	--noconfirm
 		` + flagOptionNoConfirm + `
+	-V,--vendor
+		` + flagOptionVendor + `
 operations:
 	beku {-h|--help}
 		` + flagOperationHelp + `
@@ -170,6 +174,11 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 			return opNone, err
 		}
 		op |= opRemove
+	case 'V':
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
+		cmd.vendor = true
 	default:
 		return opNone, errInvalidOptions
 	}
@@ -206,6 +215,8 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 		op = opSync
 	case "update":
 		op = opUpdate
+	case "vendor":
+		cmd.vendor = true
 	default:
 		return opNone, errInvalidOptions
 	}
@@ -302,7 +313,9 @@ func (cmd *command) loadDatabase() (err error) {
 		return
 	}
 
-	err = cmd.env.Load("")
+	if !cmd.vendor {
+		err = cmd.env.Load("")
+	}
 
 	return
 }
@@ -347,7 +360,7 @@ func newCommand() (cmd *command, err error) {
 		return
 	}
 
-	cmd.env, err = beku.NewEnvironment()
+	cmd.env, err = beku.NewEnvironment(cmd.vendor)
 	if err != nil {
 		return
 	}

@@ -106,15 +106,15 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	testEnv, err = NewEnvironment()
+	testEnv, err = NewEnvironment(false)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	testGitPkgCur, _ = NewPackage(testGitRepo, testGitRepo)
-	testGitPkgNew, _ = NewPackage(testGitRepo, testGitRepo)
-	testGitPkgShare, _ = NewPackage(testGitRepoShare, testGitRepoShare)
+	testGitPkgCur, _ = NewPackage(testEnv, testGitRepo, testGitRepo)
+	testGitPkgNew, _ = NewPackage(testEnv, testGitRepo, testGitRepo)
+	testGitPkgShare, _ = NewPackage(testEnv, testGitRepoShare, testGitRepoShare)
 
 	// Always set the git test repo to latest version.
 	testEnv.NoConfirm = true

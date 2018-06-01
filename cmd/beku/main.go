@@ -3,16 +3,16 @@
 // license that can be found in the LICENSE file.
 
 //
-// Beku is a command line program to manage packages in $GOPATH. Beku provide
-// syntax like `pacman`.
+// Beku is a command line program to manage packages in user's environment
+// (GOPATH or vendor) directory.  Beku provide syntax like `pacman`.
 //
 // Beku read and write the package database into a file named "beku.db".
 //
 // At first execution, beku will try to open the package database in current
 // directory. If no file found, it will try to open
-// "$GOPATH/var/beku/beku.db". When both locations does not provide
-// package database, beku will scan entire "$GOPATH/src" and write the
-// package database into "$GOPATH/var/beku/beku.db".
+// "{prefix}/var/beku/beku.db". When both locations does not provide
+// package database, beku will scan entire "{prefix}/src" and write the
+// package database into "{prefix}/var/beku/beku.db".
 //
 // ## Global Options
 //
@@ -21,15 +21,21 @@
 // No confirmation will be asked on any operation. Useful when running beku
 // inside a script.
 //
+//	-V, --vendor
+//
+// Operate in vendor mode.  This option used only when first scanning
+// (`beku -V -S`).
+// Any operation after that, will use the "vendor" directory in current
+// working directory as installation prefix.
 //
 // ## Freeze Operation
 //
 //	-B, --freeze
 //
-// Operate on the package database and GOPATH. This operation will ensure that
-// all packages listed on database file is installed with their specific
-// version on GOPATH.  Also, all packages that are not registered will be
-// removed from GOPATH "src" and "pkg" directories.
+// Operate on the package database and user's environment. This operation will
+// ensure that all packages listed on database file is installed with their
+// specific version.  Also, all packages that are not registered
+// will be removed from "src" and "pkg" directories.
 //
 // ## Database Operation
 //
@@ -63,8 +69,8 @@
 //
 //	-R, --remove <pkg>
 //
-// Remove package from GOPATH, including source and installed binaries and
-// archives.
+// Remove package from environment, including source and installed binaries
+// and archives.
 //
 // ### Options
 //
@@ -77,16 +83,16 @@
 //
 // 	$ beku -R github.com/shuLhan/beku
 //
-// Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
-// their installed binaries in "$GOPATH/bin", and their installed archives on
-// "$GOPATH/pkg/{GOOS}_{GOARCH}".
+// Remove package "github.com/shuLhan/beku" source in "{prefix}/src",
+// their installed binaries in "{prefix}/bin", and their installed archives on
+// "{prefix}/pkg/{GOOS}_{GOARCH}".
 //
 //	$ beku -R github.com/shuLhan/beku --recursive
 //	$ beku -Rs github.com/shuLhan/beku
 //
-// Remove package "github.com/shuLhan/beku" source in "$GOPATH/src",
-// their installed binaries in "$GOPATH/bin", their installed archives on
-// "$GOPATH/pkg/{GOOS}_{GOARCH}", and all their dependencies.
+// Remove package "github.com/shuLhan/beku" source in "{prefix}/src",
+// their installed binaries in "{prefix}/bin", their installed archives on
+// "{prefix}/pkg/{GOOS}_{GOARCH}", and all their dependencies.
 //
 //
 // ## Sync Operation
@@ -94,7 +100,7 @@
 //	-S, --sync <pkg[@version]>
 //
 // Synchronizes package. Given a package import path, beku will try to clone
-// the package into GOPATH source directory and set the package version to
+// the package into source directory and set the package version to
 // latest the tag. If no tag found, it will use the latest commit on master
 // branch. A specific version can be set using "@version" suffix.
 //
@@ -120,23 +126,23 @@
 //
 //	$ beku -S golang.org/x/text
 //
-// Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`,
+// Download package `golang.org/x/text` into `{prefix}/src/golang.org/x/text`,
 // and set their version to the latest commit on branch master.
 //
 //	$ beku -S github.com/golang/text --into golang.org/x/text
 //
 // Download package `github.com/golang/text` into
-// `$GOPATH/src/golang.org/x/text`, and set their version to the latest commit
+// `{prefix}/src/golang.org/x/text`, and set their version to the latest commit
 // on branch master.
 //
 //	$ beku -S golang.org/x/text@v0.3.0
 //
-// Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
+// Download package `golang.org/x/text` into `{prefix}/src/golang.org/x/text`
 // and checkout the tag `v0.3.0` as the working version.
 //
 //	$ beku -S golang.org/x/text@5c1cf69
 //
-// Download package `golang.org/x/text` into `$GOPATH/src/golang.org/x/text`
+// Download package `golang.org/x/text` into `{prefix}/src/golang.org/x/text`
 // and checkout the commit `5c1cf69` as the working version.
 //
 //	$ beku -Su
