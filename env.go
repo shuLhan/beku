@@ -605,7 +605,7 @@ func (env *Env) Query(pkgs []string) {
 //
 // Rescan GOPATH for new packages.
 //
-func (env *Env) Rescan() (ok bool, err error) {
+func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	err = env.Scan()
 	if err != nil {
 		return
@@ -639,7 +639,11 @@ func (env *Env) Rescan() (ok bool, err error) {
 	}
 
 	if env.countUpdate == 0 && env.countNew == 0 {
-		fmt.Println(">>> Database and GOPATH is in sync.")
+		if firstTime {
+			env.dirty = true
+		} else {
+			fmt.Println(">>> Database and GOPATH is in sync.")
+		}
 		return true, nil
 	}
 
@@ -865,14 +869,10 @@ func (env *Env) Save(file string) (err error) {
 	}
 
 	if Debug >= DebugL1 {
-		fmt.Println(">>> Saving db", file)
+		fmt.Println(">>> Saving database:", file)
 	}
 
 	dir := filepath.Dir(file)
-
-	if Debug >= DebugL1 {
-		fmt.Println(">>> Save: MkdirAll:", dir)
-	}
 
 	err = os.MkdirAll(dir, 0700)
 	if err != nil {

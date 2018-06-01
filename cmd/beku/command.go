@@ -315,7 +315,7 @@ func (cmd *command) sync() (err error) {
 	var ok bool
 
 	if cmd.firstTime {
-		ok, err = cmd.env.Rescan()
+		ok, err = cmd.env.Rescan(true)
 		if !ok || err != nil {
 			return
 		}
@@ -323,7 +323,11 @@ func (cmd *command) sync() (err error) {
 
 	switch len(cmd.pkgs) {
 	case 0:
-		if cmd.op&opUpdate > 0 {
+		if cmd.op&opUpdate == 0 {
+			if !cmd.firstTime {
+				_, err = cmd.env.Rescan(false)
+			}
+		} else {
 			err = cmd.env.SyncAll()
 		}
 	case 1:
