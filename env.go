@@ -317,7 +317,7 @@ func (env *Env) IsExcluded(importPath string) bool {
 		return true
 	}
 	for x := 0; x < len(env.pkgsExclude); x++ {
-		if env.pkgsExclude[x] == importPath {
+		if strings.Contains(importPath, env.pkgsExclude[x]) {
 			return true
 		}
 	}
