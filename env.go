@@ -1083,12 +1083,6 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	if len(pkgName) == 0 {
 		return
 	}
-	if env.IsExcluded(pkgName) {
-		fmt.Printf(errExcluded, pkgName)
-		err = nil
-		return
-	}
-
 	var (
 		ok      bool
 		version string
@@ -1102,6 +1096,12 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 
 	if len(importPath) == 0 {
 		importPath = pkgName
+	}
+
+	if env.IsExcluded(pkgName) || env.IsExcluded(importPath) {
+		fmt.Printf(errExcluded, pkgName)
+		err = nil
+		return
 	}
 
 	newPkg := NewPackage(pkgName, importPath, VCSModeGit)
