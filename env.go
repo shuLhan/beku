@@ -236,7 +236,7 @@ func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
 //
 func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
 	for x := 0; x < len(env.pkgs); x++ {
-		if importPath == env.pkgs[x].ImportPath {
+		if strings.HasPrefix(importPath, env.pkgs[x].ImportPath) {
 			return x, env.pkgs[x]
 		}
 
