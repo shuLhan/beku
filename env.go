@@ -960,7 +960,7 @@ func (env *Env) install(pkg *Package) (ok bool, err error) {
 	if !IsDirEmpty(pkg.FullPath) {
 		fmt.Printf(">>> Directory %s is not empty.\n", pkg.FullPath)
 		if !env.NoConfirm {
-			ok = confirm(os.Stdin, msgContinue, false)
+			ok = confirm(os.Stdin, msgCleanDir, false)
 			if !ok {
 				return
 			}

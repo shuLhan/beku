@@ -29,9 +29,10 @@ const (
 	envDEBUG = "BEKU_DEBUG"
 	envPATH  = "PATH"
 
+	msgCleanDir      = "Clean destination directory?"
+	msgContinue      = "Continue?"
 	msgUpdateProceed = "Proceed with update?"
 	msgUpdateView    = "View commit logs?"
-	msgContinue      = "Continue?"
 
 	prefixTag = 'v'
 
