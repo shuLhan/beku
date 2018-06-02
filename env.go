@@ -965,6 +965,7 @@ func (env *Env) install(pkg *Package) (ok bool, err error) {
 				return
 			}
 		}
+		_ = pkg.Remove()
 	}
 
 	err = pkg.Install()
