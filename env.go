@@ -936,9 +936,12 @@ func (env *Env) String() string {
 	var buf bytes.Buffer
 
 	fmt.Fprintf(&buf, `
-         GOPATH src: %s
+            Dir bin: %s
+            Dir pkg: %s
+            Dir src: %s
+       Dir root src: %s
   Standard Packages: %s
-`, env.dirSrc, env.pkgsStd)
+`, env.dirBin, env.dirPkg, env.dirSrc, env.dirRootSrc, env.pkgsStd)
 
 	for x := 0; x < len(env.pkgs); x++ {
 		fmt.Fprintf(&buf, "%s", env.pkgs[x].String())
