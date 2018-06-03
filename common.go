@@ -174,7 +174,7 @@ func confirm(in io.Reader, msg string, defIsYes bool) bool {
 		yon = "[Y/n]"
 	}
 
-	fmt.Printf("%s %s: ", msg, yon)
+	fmt.Printf("%s %s ", msg, yon)
 
 	for {
 		b, err = r.ReadByte()

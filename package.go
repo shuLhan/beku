@@ -51,13 +51,13 @@ func NewPackage(pkgName, importPath string) (
 ) {
 	repoRoot, err := vcs.RepoRootForImportPath(pkgName, Debug >= DebugL2)
 	if err != nil {
-		fmt.Fprintf(defStderr, "NewPackage: error: %s\n", err.Error())
-		fmt.Fprintf(defStderr, "NewPackage: skip %s\n", pkgName)
+		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> error: %s\n", err.Error())
+		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> skip %s\n", pkgName)
 		return
 	}
 
 	if Debug >= DebugL2 {
-		fmt.Printf("NewPackage: %+v\n", *repoRoot)
+		fmt.Printf("[PKG] NewPackage >>> %+v\n", *repoRoot)
 	}
 
 	if repoRoot.VCS.Cmd != VCSModeGit {
@@ -134,7 +134,7 @@ func (pkg *Package) GoClean() (err error) {
 	cmd.Stderr = defStderr
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] GoClean %s >>> %s %s\n", pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
 	err = cmd.Run()
@@ -199,7 +199,8 @@ func (pkg *Package) Remove() (err error) {
 	}
 
 	if Debug >= DebugL1 {
-		fmt.Println(">>> Remove source:", pkg.FullPath)
+		fmt.Printf("[PKG] Remove %s >>> %s\n", pkg.ImportPath,
+			pkg.FullPath)
 	}
 
 	err = os.RemoveAll(pkg.FullPath)
@@ -259,16 +260,12 @@ func (pkg *Package) Scan() (err error) {
 //
 func (pkg *Package) ScanDeps(env *Env) (err error) {
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> Scanning dependencies for %s ...\n", pkg.ImportPath)
+		fmt.Println("[PKG] ScanDeps", pkg.ImportPath)
 	}
 
 	imports, err := pkg.GetRecursiveImports()
 	if err != nil {
 		return
-	}
-
-	if Debug >= DebugL2 && len(imports) > 0 {
-		fmt.Println("   imports recursive:", imports)
 	}
 
 	for x := 0; x < len(imports); x++ {
@@ -295,7 +292,8 @@ func (pkg *Package) GetRecursiveImports() (
 	}
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] GetRecursiveImports %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
 	out, err := cmd.Output()
@@ -322,10 +320,6 @@ func (pkg *Package) GetRecursiveImports() (
 	}
 
 	sort.Strings(imports)
-
-	if Debug >= DebugL2 {
-		fmt.Println(">>> GetRecursiveImports: imports", imports)
-	}
 
 	return
 }
@@ -357,7 +351,8 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 	// (1)
 	if strings.HasPrefix(importPath, pkg.ImportPath) {
 		if Debug >= DebugL2 {
-			fmt.Printf("%15s >>> %s\n", dbgSkipSelf, importPath)
+			fmt.Printf("[PKG] addDep %s >>> skip self import: %s\n",
+				pkg.ImportPath, importPath)
 		}
 		return false
 	}
@@ -379,7 +374,8 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 			continue
 		}
 		if Debug >= DebugL2 {
-			fmt.Printf("%15s >>> %s\n", dbgSkipStd, importPath)
+			fmt.Printf("[PKG] addDep %s >>> skip std: %s\n",
+				pkg.ImportPath, importPath)
 		}
 		return false
 	}
@@ -397,7 +393,8 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 	}
 
 	if Debug >= DebugL2 {
-		fmt.Printf("%15s >>> %s\n", dbgMissDep, importPath)
+		fmt.Printf("[PKG] addDep %s >>> missing: %s\n",
+			pkg.ImportPath, importPath)
 	}
 
 	// (5.2)
@@ -459,7 +456,8 @@ func (pkg *Package) GoInstall() (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf(">>> %s %s %s\n", cmd.Dir, cmd.Env, cmd.Args)
+	fmt.Printf("[PKG] GoInstall %s >>> %s %s %s\n", pkg.ImportPath,
+		cmd.Dir, cmd.Env, cmd.Args)
 
 	err = cmd.Run()
 
@@ -474,17 +472,20 @@ func (pkg *Package) String() string {
 
 	fmt.Fprintf(&buf, `
 [package "%s"]
+     FullPath = %s
+     ScanPath = %s
           VCS = %s
    RemoteName = %s
     RemoteURL = %s
-     ScanPath = %s
       Version = %s
+  VersionNext = %s
         IsTag = %v
          Deps = %v
    RequiredBy = %v
   DepsMissing = %v
-`, pkg.ImportPath, pkg.vcsMode, pkg.RemoteName, pkg.RemoteURL, pkg.ScanPath,
-		pkg.Version, pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
+`, pkg.ImportPath, pkg.FullPath, pkg.ScanPath, pkg.vcsMode, pkg.RemoteName,
+		pkg.RemoteURL, pkg.Version, pkg.VersionNext, pkg.isTag,
+		pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
 
 	return buf.String()
 }
@@ -569,7 +570,8 @@ func (pkg *Package) pushDep(importPath string) bool {
 	pkg.Deps = append(pkg.Deps, importPath)
 
 	if Debug >= DebugL2 {
-		fmt.Printf("%15s >>> %s\n", dbgLinkDep, importPath)
+		fmt.Printf("[PKG] pushDep %s >>> %s\n", pkg.ImportPath,
+			importPath)
 	}
 
 	return true

@@ -12,11 +12,6 @@ const (
 )
 
 const (
-	dbgLinkDep  = "linking dep"
-	dbgMissDep  = "missing dep"
-	dbgSkipSelf = "skip self dep"
-	dbgSkipStd  = "skip std dep"
-
 	defPATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
 	dirDB       = "var/beku"

@@ -514,11 +514,13 @@ func testPackageString(t *testing.T) {
 		pkg: testGitPkgCur,
 		exp: `
 [package "github.com/shuLhan/beku_test"]
+     FullPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
+     ScanPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
           VCS = git
    RemoteName = origin
     RemoteURL = https://` + testGitRepo + `
-     ScanPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
       Version = v0.2.0
+  VersionNext = c9f69fb
         IsTag = true
          Deps = []
    RequiredBy = []

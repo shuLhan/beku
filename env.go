@@ -98,12 +98,12 @@ func (env *Env) addExclude(importPath string) bool {
 
 func (env *Env) cleanUnused() {
 	for _, pkg := range env.pkgsUnused {
-		fmt.Println(">>> Removing source at", pkg.FullPath)
+		fmt.Println("[ENV] cleanUnused >>>", pkg.FullPath)
 		_ = pkg.Remove()
 
 		pkgPath := filepath.Join(env.dirPkg, pkg.ImportPath)
 
-		fmt.Println(">>> Removing installed binaries at", pkgPath)
+		fmt.Println("[ENV] cleanUnused >>>", pkgPath)
 		_ = os.RemoveAll(pkgPath)
 		_ = RmdirEmptyAll(pkgPath)
 	}
@@ -144,7 +144,7 @@ func (env *Env) Freeze() (err error) {
 	)
 
 	for _, pkg := range env.pkgs {
-		fmt.Printf(">>> Freezing %s@%s\n", pkg.ImportPath, pkg.Version)
+		fmt.Printf("[ENV] Freeze >>> %s@%s\n", pkg.ImportPath, pkg.Version)
 
 		localPkg, err = env.GetPackage(pkg.ImportPath)
 		if err != nil {
@@ -173,11 +173,11 @@ func (env *Env) Freeze() (err error) {
 	}
 
 	if len(env.pkgsUnused) == 0 {
-		fmt.Println(">>> No unused packages found.")
+		fmt.Println("[ENV] Freeze >>> No unused packages found.")
 		goto out
 	}
 
-	fmt.Printf("\n>>> The following packages will be cleaned,\n\n")
+	fmt.Println("[ENV] Freeze >>> The following packages will be cleaned,")
 	for _, pkg := range env.pkgsUnused {
 		fmt.Printf("  * %s\n", pkg.ImportPath)
 	}
@@ -195,7 +195,7 @@ func (env *Env) Freeze() (err error) {
 
 out:
 	env.reinstallAll()
-	fmt.Println(">>> Freeze completed.")
+	fmt.Println("[ENV] Freeze >>> finished")
 
 	return
 }
@@ -396,7 +396,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 //
 func (env *Env) scanPackages(srcPath string) (err error) {
 	if Debug >= DebugL2 {
-		fmt.Println(">>> Scanning", srcPath)
+		fmt.Println("[ENV] scanPackages >>>", srcPath)
 	}
 
 	fis, err := ioutil.ReadDir(srcPath)
@@ -467,7 +467,7 @@ func (env *Env) newPackage(fullPath string) (err error) {
 	}
 
 	if Debug >= DebugL2 {
-		fmt.Println(">>> Scanning package:", pkg.ImportPath)
+		fmt.Println("[ENV] newPackage >>>", pkg.ImportPath)
 	}
 
 	err = pkg.Scan()
@@ -535,7 +535,7 @@ func (env *Env) Load(file string) (err error) {
 	}
 
 	if Debug >= DebugL1 {
-		fmt.Println(">>> Env.Load:", env.dbFile)
+		fmt.Println("[ENV] Load >>>", env.dbFile)
 	}
 
 	env.db, err = ini.Open(env.dbFile)
@@ -624,7 +624,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	format := fmt.Sprintf("%%-%ds  %%-12s  %%-12s\n", env.fmtMaxPath)
 
 	if env.countUpdate > 0 {
-		fmt.Printf(">>> The following packages will be updated,\n\n")
+		fmt.Println("[ENV] Rescan >>> New updates,")
 		fmt.Printf(format+"\n", "ImportPath", "Old Version", "New Version")
 
 		for _, pkg := range env.pkgs {
@@ -636,7 +636,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 		}
 	}
 	if env.countNew > 0 {
-		fmt.Printf("\n>>> New packages,\n\n")
+		fmt.Println("[ENV] Rescan >>> New packages,")
 		fmt.Printf(format+"\n", "ImportPath", "Old Version", "New Version")
 
 		for _, pkg := range env.pkgs {
@@ -652,7 +652,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 		if firstTime {
 			env.dirty = true
 		} else {
-			fmt.Println(">>> Database and GOPATH is in sync.")
+			fmt.Println("[ENV] Rescan >>> Database is in sync.")
 		}
 		return true, nil
 	}
@@ -734,7 +734,7 @@ This package is required by,
 	}
 	listRemoved = append(listRemoved, pkg.ImportPath)
 
-	fmt.Println("The following package will be removed,")
+	fmt.Println("[ENV] Remove >>> The following package will be removed,")
 	for _, importPath := range listRemoved {
 		fmt.Println(" *", importPath)
 	}
@@ -756,7 +756,7 @@ This package is required by,
 		pkgImportPath := filepath.Join(env.dirPkg, importPath)
 
 		if Debug >= DebugL1 {
-			fmt.Println(">>> Removing", pkgImportPath)
+			fmt.Println("[ENV] Remove >>> Removing", pkgImportPath)
 		}
 
 		err = os.RemoveAll(pkgImportPath)
@@ -879,7 +879,7 @@ func (env *Env) Save(file string) (err error) {
 	}
 
 	if Debug >= DebugL1 {
-		fmt.Println(">>> Saving database:", file)
+		fmt.Println("[ENV] Save >>>", file)
 	}
 
 	dir := filepath.Dir(file)
@@ -942,6 +942,7 @@ func (env *Env) String() string {
 	var buf bytes.Buffer
 
 	fmt.Fprintf(&buf, `
+[ENV]
             Dir bin: %s
             Dir pkg: %s
             Dir src: %s
@@ -953,10 +954,8 @@ func (env *Env) String() string {
 		fmt.Fprintf(&buf, "%s", env.pkgs[x].String())
 	}
 
-	fmt.Fprintf(&buf, "\n[package \"_missing_\"]\n")
-
 	for x := range env.pkgsMissing {
-		fmt.Fprintln(&buf, "ImportPath =", env.pkgsMissing[x])
+		fmt.Fprintln(&buf, "missing =", env.pkgsMissing[x])
 	}
 
 	return buf.String()
@@ -967,7 +966,7 @@ func (env *Env) String() string {
 //
 func (env *Env) install(pkg *Package) (ok bool, err error) {
 	if !IsDirEmpty(pkg.FullPath) {
-		fmt.Printf(">>> Directory %s is not empty.\n", pkg.FullPath)
+		fmt.Printf("[ENV] install >>> Directory %s is not empty.\n", pkg.FullPath)
 		if !env.NoConfirm {
 			ok = confirm(os.Stdin, msgCleanDir, false)
 			if !ok {
@@ -1000,17 +999,17 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	}
 
 	if Debug >= DebugL1 {
-		fmt.Println(">>> Sync:\n", newPkg)
+		fmt.Println("[ENV] update >>>", newPkg)
 	}
 
 	if curPkg.IsEqual(newPkg) {
-		fmt.Printf("Nothing to update.\n")
+		fmt.Println("[ENV] update >>> All package is up todate.")
 		ok = true
 		return
 	}
 
-	fmt.Printf("Updating package from,\n%s\nto,\n%s\n", curPkg.String(),
-		newPkg.String())
+	fmt.Printf("[ENV] update >>> Updating package from,\n%s\nto,\n%s\n",
+		curPkg.String(), newPkg.String())
 
 	if env.NoConfirm {
 		ok = true
@@ -1047,7 +1046,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 // installMissing will install all missing packages.
 //
 func (env *Env) installMissing(pkg *Package) (err error) {
-	fmt.Printf("[ENV] installMissing: %s\n", pkg.ImportPath)
+	fmt.Printf("[ENV] installMissing %s\n", pkg.ImportPath)
 
 	for _, misImportPath := range pkg.DepsMissing {
 		_, misPkg := env.GetPackageFromDB(misImportPath, "")
@@ -1055,9 +1054,12 @@ func (env *Env) installMissing(pkg *Package) (err error) {
 			continue
 		}
 
+		fmt.Printf("[ENV] installMissing %s >>> %s\n", pkg.ImportPath,
+			misImportPath)
+
 		err = env.Sync(misImportPath, misImportPath)
 		if err != nil {
-			fmt.Fprintf(defStderr, "[ENV] installMissing: %s\n", err)
+			fmt.Fprintf(defStderr, "[ENV] installMissing >>> %s\n", err)
 			continue
 		}
 	}
@@ -1074,7 +1076,7 @@ func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 	var updated bool
 
 	if Debug >= DebugL1 {
-		fmt.Println(">>> Update missing:", newPkg.ImportPath)
+		fmt.Println("[ENV] updateMissing >>>", newPkg.ImportPath)
 	}
 
 	for x := 0; x < len(env.pkgs); x++ {
@@ -1193,24 +1195,24 @@ func (env *Env) SyncAll() (err error) {
 	)
 
 	format := fmt.Sprintf("%%-%ds  %%-12s  %%-12s %%s\n", env.fmtMaxPath)
-	fmt.Fprintf(&buf, ">>> The following packages will be updated,\n\n")
+	fmt.Fprintf(&buf, "[ENV] SyncAll >>> The following packages will be updated,\n\n")
 	fmt.Fprintf(&buf, format+"\n", "ImportPath", "Old Version",
 		"New Version", "Compare URL")
 
-	fmt.Println(">>> Updating all packages ...")
+	fmt.Println("[ENV] SyncAll >>> Updating all packages ...")
 
 	for _, pkg := range env.pkgs {
-		fmt.Printf("\n>>> Updating %s %s\n", pkg.ImportPath, pkg.Version)
+		fmt.Printf("[ENV] SyncAll >>> %s %s\n", pkg.ImportPath, pkg.Version)
 		err = pkg.Fetch()
 		if err != nil {
 			return
 		}
 		if pkg.Version == pkg.VersionNext {
-			fmt.Println(">>> No update.")
+			fmt.Println("[ENV] SyncAll >>> No update.")
 			continue
 		}
 
-		fmt.Printf(">>> Latest version is %s\n", pkg.VersionNext)
+		fmt.Printf("[ENV] SyncAll >>> Latest version is %s\n", pkg.VersionNext)
 
 		compareURL := GetCompareURL(pkg.RemoteURL, pkg.Version,
 			pkg.VersionNext)
@@ -1222,7 +1224,7 @@ func (env *Env) SyncAll() (err error) {
 	}
 
 	if countUpdate == 0 {
-		fmt.Println(">>> All packages are up to date.")
+		fmt.Println("[ENV] SyncAll >>> All packages are up to date.")
 		return
 	}
 
@@ -1275,7 +1277,7 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 		_ = curPkg.GoInstall()
 	}
 
-	fmt.Println(">>> Package installed:\n", curPkg)
+	fmt.Println("[ENV] postSync >>> Package installed:\n", curPkg)
 
 	return
 }

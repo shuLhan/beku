@@ -19,7 +19,8 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
+		cmd.Dir, cmd.Args)
 
 	err = cmd.Run()
 	if err != nil {
@@ -33,7 +34,8 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
+		cmd.Dir, cmd.Args)
 
 	err = cmd.Run()
 	if err != nil {
@@ -46,7 +48,8 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
+		cmd.Dir, cmd.Args)
 
 	_ = cmd.Run()
 
@@ -77,7 +80,8 @@ func (pkg *Package) gitClone() (err error) {
 	cmd.Stderr = defStderr
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitClone %s >>> %s %s\n", pkg.ImportPath,
+			cmd.Dir, cmd.Args)
 	}
 
 	err = cmd.Run()
@@ -95,12 +99,14 @@ func (pkg *Package) gitClone() (err error) {
 func (pkg *Package) gitCompareVersion(newPkg *Package) (err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "log", "--oneline", pkg.Version+"..."+newPkg.Version)
-	if Debug >= DebugL1 {
-		fmt.Println(">>>", cmd.Args)
-	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
+
+	if Debug >= DebugL1 {
+		fmt.Printf("[PKG] gitCompareVersion %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
+	}
 
 	err = cmd.Run()
 	if err != nil {
@@ -124,7 +130,8 @@ func (pkg *Package) gitFetch() (err error) {
 	cmd.Stderr = defStderr
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitFetch %s >>> %s %s\n", pkg.ImportPath,
+			cmd.Dir, cmd.Args)
 	}
 
 	err = cmd.Run()
@@ -153,7 +160,8 @@ func (pkg *Package) gitGetCommit(ref string) (commit string, err error) {
 	cmd.Dir = pkg.FullPath
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitGetCommit %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
 	bcommit, err := cmd.Output()
@@ -176,7 +184,8 @@ func (pkg *Package) gitGetTag() (tag string, err error) {
 	cmd.Dir = pkg.FullPath
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitGetTag %s >>> %s %s\n", pkg.ImportPath,
+			cmd.Dir, cmd.Args)
 	}
 
 	btag, err := cmd.Output()
@@ -196,7 +205,8 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 	cmd.Dir = pkg.FullPath
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitGetTagLatest %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
 	bout, err := cmd.Output()
@@ -212,7 +222,8 @@ func (pkg *Package) gitGetTagLatest() (tag string, err error) {
 	cmd.Dir = pkg.FullPath
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitGetTagLatest %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
 	bout, err = cmd.Output()
@@ -269,12 +280,14 @@ func (pkg *Package) gitInstall() (err error) {
 func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 	//nolint:gas
 	cmd := exec.Command("git", "remote", "remove", pkg.RemoteName)
-	if Debug >= DebugL1 {
-		fmt.Println(">>>", cmd.Args)
-	}
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
+
+	if Debug >= DebugL1 {
+		fmt.Printf("[PKG] gitRemoteChange %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
+	}
 
 	err = cmd.Run()
 	if err != nil {
@@ -288,7 +301,8 @@ func (pkg *Package) gitRemoteChange(newPkg *Package) (err error) {
 	cmd.Stderr = defStderr
 
 	if Debug >= DebugL1 {
-		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
+		fmt.Printf("[PKG] gitRemoteChange %s >>> %s %s\n",
+			pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
 	err = cmd.Run()
