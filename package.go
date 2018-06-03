@@ -25,6 +25,7 @@ import (
 type Package struct {
 	ImportPath  string
 	FullPath    string
+	ScanPath    string
 	RemoteName  string
 	RemoteURL   string
 	Version     string
@@ -62,9 +63,11 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 
 	pkg = &Package{
 		ImportPath: repoRoot.Root,
-		RemoteURL:  repoRoot.Repo,
 		FullPath:   filepath.Join(build.Default.GOPATH, dirSrc, repoRoot.Root),
-		vcs:        vcsMode,
+		ScanPath:   filepath.Join(build.Default.GOPATH, dirSrc, importPath),
+		RemoteName: gitDefRemoteName,
+		RemoteURL:  repoRoot.Repo,
+		vcsMode:    repoRoot.VCS.Cmd,
 		state:      packageStateNew,
 	}
 
@@ -290,6 +293,10 @@ func (pkg *Package) GetRecursiveImports() (
 	cmd.Dir = pkg.FullPath
 	cmd.Stderr = defStderr
 
+	if len(pkg.ScanPath) > 0 {
+		cmd.Dir = pkg.ScanPath
+	}
+
 	if Debug >= DebugL1 {
 		fmt.Printf(">>> %s %s\n", cmd.Dir, cmd.Args)
 	}
@@ -473,13 +480,14 @@ func (pkg *Package) String() string {
           VCS = %d
    RemoteName = %s
     RemoteURL = %s
+     ScanPath = %s
       Version = %s
         IsTag = %v
          Deps = %v
    RequiredBy = %v
   DepsMissing = %v
-`, pkg.ImportPath, pkg.vcs, pkg.RemoteName, pkg.RemoteURL, pkg.Version,
-		pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
+`, pkg.ImportPath, pkg.vcsMode, pkg.RemoteName, pkg.RemoteURL, pkg.ScanPath,
+		pkg.Version, pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
 
 	return buf.String()
 }

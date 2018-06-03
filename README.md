@@ -110,10 +110,7 @@ branch. A specific version can be set using "@version" suffix.
 If package already exist, it will reset the HEAD to the version that is set
 on database file.
 
-Sync operation will not install missing dependencies.
-
-If no parameter is given, beku will rescan GOPATH, checking for new
-packages.
+If no parameter is given, beku will do a rescan, checking for new packages.
 
 ### Options
 

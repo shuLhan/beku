@@ -1048,6 +1048,28 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 }
 
 //
+// installMissing will install all missing packages.
+//
+func (env *Env) installMissing(pkg *Package) (err error) {
+	fmt.Printf("[ENV] installMissing: %s\n", pkg.ImportPath)
+
+	for _, misImportPath := range pkg.DepsMissing {
+		_, misPkg := env.GetPackageFromDB(misImportPath, "")
+		if misPkg != nil {
+			continue
+		}
+
+		err = env.Sync(misImportPath, misImportPath)
+		if err != nil {
+			fmt.Fprintf(defStderr, "[ENV] installMissing: %s\n", err)
+			continue
+		}
+	}
+
+	return
+}
+
+//
 // updateMissing will remove missing package if it's already provided by new
 // package. If "addAsDep" is true and the new package provide the missing one,
 // then it will be added as one of package dependencies.
@@ -1234,7 +1256,8 @@ func (env *Env) SyncAll() (err error) {
 //
 // (1) Update missing packages.
 // (2) Re-scan package dependencies.
-// (3) Run `go install` only if no missing package.
+// (3) Install missing dependencies.
+// (4) Run `go install` only if no missing package.
 //
 func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 	// (1)
@@ -1246,7 +1269,12 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 		return
 	}
 
-	// (3)
+	err = env.installMissing(curPkg)
+	if err != nil {
+		return
+	}
+
+	// (4)
 	if len(curPkg.DepsMissing) == 0 {
 		_ = curPkg.GoInstall()
 	}

@@ -65,6 +65,7 @@ func testPackageInstall(t *testing.T) {
 		pkg:  testGitPkgShare,
 		expPkg: &Package{
 			ImportPath: testGitRepoShare,
+			ScanPath:   testGitPkgShare.FullPath,
 			FullPath:   testGitPkgShare.FullPath,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepoShare,
@@ -516,6 +517,7 @@ func testPackageString(t *testing.T) {
           VCS = 1
    RemoteName = origin
     RemoteURL = https://` + testGitRepo + `
+     ScanPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
       Version = v0.2.0
         IsTag = true
          Deps = []

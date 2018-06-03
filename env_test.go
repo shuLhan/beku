@@ -484,6 +484,7 @@ func testEnvScan(t *testing.T) {
 		expPkgs: []*Package{{
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
+			ScanPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: "origin",
 			RemoteURL:  "https://github.com/shuLhan/beku_test",
 			Version:    "v0.2.0",
