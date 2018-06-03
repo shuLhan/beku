@@ -1,6 +1,8 @@
 /testdata/beku.db.exclude
 /testdata/beku.db.save
 /testdata/a/b/file
+/testdata/src/github.com/shuLhan/beku_test
+/testdata/src/github.com/shuLhan/share
 /beku.test
 /cover.html
 /cover.out

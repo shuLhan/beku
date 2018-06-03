@@ -117,11 +117,13 @@ func TestMain(m *testing.M) {
 	testGitPkgShare = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
 
 	// Always set the git test repo to latest version.
-	err = testGitPkgCur.CheckoutVersion(testGitRepoVersion)
+	testEnv.NoConfirm = true
+	err = testEnv.Sync(testGitRepo, testGitRepo)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	testEnv.NoConfirm = false
 
 	fmt.Printf("test env : %+v\n", *testEnv)
 	fmt.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)

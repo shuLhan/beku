@@ -13,12 +13,13 @@ import (
 
 func testPackageRemove(t *testing.T) {
 	cases := []struct {
-		desc   string
-		pkg    *Package
-		expErr string
+		desc    string
+		pkgName string
+		pkg     *Package
+		expErr  string
 	}{{
-		desc: `Package is not exist`,
-		pkg:  NewPackage(testPkgNotExist, testPkgNotExist, VCSModeGit),
+		desc:    `Package is not exist`,
+		pkgName: testPkgNotExist,
 	}, {
 		desc: `Package exist`,
 		pkg:  testGitPkgShare,
@@ -26,6 +27,10 @@ func testPackageRemove(t *testing.T) {
 
 	for _, c := range cases {
 		t.Log(c.desc)
+
+		if len(c.pkgName) > 0 {
+			c.pkg = NewPackage(c.pkgName, c.pkgName, VCSModeGit)
+		}
 
 		err := c.pkg.Remove()
 		if err != nil {
@@ -42,7 +47,10 @@ func testPackageRemove(t *testing.T) {
 
 		expErr = fmt.Sprintf("stat %s: no such file or directory", pkg)
 		_, err = os.Stat(pkg)
-		test.Assert(t, "pkg dir should not exist", expErr, err.Error(), true)
+
+		if err != nil {
+			test.Assert(t, "pkg dir should not exist", expErr, err.Error(), true)
+		}
 	}
 }
 
@@ -60,7 +68,7 @@ func testPackageInstall(t *testing.T) {
 			FullPath:   testGitPkgShare.FullPath,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepoShare,
-			Version:    "9337967",
+			Version:    "17828b8",
 			vcs:        VCSModeGit,
 			state:      packageStateNew,
 		},
@@ -455,14 +463,12 @@ func testGoInstall(t *testing.T) {
 		expStdout  string
 		expStderr  string
 	}{{
-		desc:      "Running #1",
-		pkg:       testGitPkgCur,
-		expStderr: `main.go:6:2: cannot find package "github.com/shuLhan/share/lib/text" in any of:`,
+		desc: "Running #1",
+		pkg:  testGitPkgCur,
 	}, {
 		desc:      "Running with verbose",
 		pkg:       testGitPkgCur,
 		isVerbose: true,
-		expStderr: `main.go:6:2: cannot find package "github.com/shuLhan/share/lib/text" in any of:`,
 	}}
 
 	for _, c := range cases {
@@ -509,9 +515,9 @@ func testPackageString(t *testing.T) {
 [package "github.com/shuLhan/beku_test"]
           VCS = 1
    RemoteName = origin
-    RemoteURL = git@github.com:shuLhan/beku_test.git
-      Version = c9f69fb
-        IsTag = false
+    RemoteURL = https://` + testGitRepo + `
+      Version = v0.2.0
+        IsTag = true
          Deps = []
    RequiredBy = []
   DepsMissing = []

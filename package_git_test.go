@@ -28,40 +28,30 @@ Use '--' to separate paths from revisions, like this:
 	}, {
 		desc:       "With empty on new version",
 		curVersion: "v0.1.0",
-		expStdout: `c9f69fb Rename test to main.go
-582b912 Add feature B.
-ec65455 Add feature A.
+		expStdout: `582b912 Add feature B.
 `,
 	}, {
 		desc:       "With empty on current version #1",
 		newVersion: "v0.1.0",
-		expStdout: `c9f69fb Rename test to main.go
-582b912 Add feature B.
-ec65455 Add feature A.
+		expStdout: `582b912 Add feature B.
 `,
 	}, {
 		desc:       "With empty on current version #2",
 		newVersion: "v0.2.0",
-		expStdout: `c9f69fb Rename test to main.go
-`,
 	}, {
 		desc:       "With empty on new version (latest tag)",
 		curVersion: "v0.2.0",
-		expStdout: `c9f69fb Rename test to main.go
-`,
 	}, {
 		desc:       "With valid versions",
 		curVersion: "v0.1.0",
 		newVersion: "v0.2.0",
 		expStdout: `582b912 Add feature B.
-ec65455 Add feature A.
 `,
 	}, {
 		desc:       "With valid versions, but reversed",
 		curVersion: "v0.2.0",
 		newVersion: "v0.1.0",
 		expStdout: `582b912 Add feature B.
-ec65455 Add feature A.
 `,
 	}}
 
@@ -81,6 +71,7 @@ ec65455 Add feature A.
 		err = testGitPkgCur.CompareVersion(testGitPkgNew)
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
+			continue
 		}
 
 		testResetOutput(t, false)
@@ -161,8 +152,8 @@ func testGitScan(t *testing.T) {
 		expIsTag   bool
 	}{{
 		desc:       "Using current package",
-		expVersion: "c9f69fb",
-		expIsTag:   false,
+		expVersion: "v0.2.0",
+		expIsTag:   true,
 	}}
 
 	var err error
@@ -189,14 +180,7 @@ func testGitScanDeps(t *testing.T) {
 		expDeps        []string
 		expDepsMissing []string
 		expPkgsMissing []string
-	}{{
-		expDepsMissing: []string{
-			"github.com/shuLhan/share/lib/text",
-		},
-		expPkgsMissing: []string{
-			"github.com/shuLhan/share/lib/text",
-		},
-	}}
+	}{{}}
 
 	var err error
 

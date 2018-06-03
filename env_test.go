@@ -485,17 +485,12 @@ func testEnvScan(t *testing.T) {
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: "origin",
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
-			Version:    "c9f69fb",
+			RemoteURL:  "https://github.com/shuLhan/beku_test",
+			Version:    "v0.2.0",
+			isTag:      true,
 			vcs:        VCSModeGit,
 			state:      packageStateNew,
-			DepsMissing: []string{
-				"github.com/shuLhan/share/lib/text",
-			},
 		}},
-		expMissing: []string{
-			"github.com/shuLhan/share/lib/text",
-		},
 	}}
 
 	for _, c := range cases {
