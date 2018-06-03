@@ -223,7 +223,10 @@ func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
 		return
 	}
 
-	pkg = NewPackage(importPath, importPath, VCSModeGit)
+	pkg, err = NewPackage(importPath, importPath, VCSModeGit)
+	if err != nil {
+		return
+	}
 
 	err = pkg.Scan()
 
@@ -294,7 +297,11 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 			continue
 		}
 
-		pkg = NewPackage(importPath, importPath, VCSModeGit)
+		pkg, err = NewPackage(importPath, importPath, VCSModeGit)
+		if err != nil {
+			return
+		}
+
 		env.pkgsUnused = append(env.pkgsUnused, pkg)
 	}
 
@@ -454,7 +461,10 @@ func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
 		return
 	}
 
-	pkg := NewPackage(pkgName, pkgName, vcsMode)
+	pkg, err := NewPackage(pkgName, pkgName, vcsMode)
+	if err != nil {
+		return
+	}
 
 	if Debug >= DebugL2 {
 		fmt.Println(">>> Scanning package:", pkg.ImportPath)
@@ -1107,7 +1117,10 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		return
 	}
 
-	newPkg := NewPackage(pkgName, importPath, VCSModeGit)
+	newPkg, err := NewPackage(pkgName, importPath, VCSModeGit)
+	if err != nil {
+		return
+	}
 
 	if len(version) > 0 {
 		newPkg.Version = version

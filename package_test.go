@@ -29,7 +29,7 @@ func testPackageRemove(t *testing.T) {
 		t.Log(c.desc)
 
 		if len(c.pkgName) > 0 {
-			c.pkg = NewPackage(c.pkgName, c.pkgName, VCSModeGit)
+			c.pkg, _ = NewPackage(c.pkgName, c.pkgName, VCSModeGit)
 		}
 
 		err := c.pkg.Remove()
@@ -718,13 +718,14 @@ func testUpdateMissingDep(t *testing.T) {
 func testPackageGoClean(t *testing.T) {
 	cases := []struct {
 		desc      string
+		pkgName   string
 		pkg       *Package
 		pkgBin    string
 		expErr    string
 		expBinErr string
 	}{{
-		desc: `With package not exist`,
-		pkg:  NewPackage(testPkgNotExist, testPkgNotExist, VCSModeGit),
+		desc:    `With package not exist`,
+		pkgName: testPkgNotExist,
 	}, {
 		desc:      `With package exist`,
 		pkg:       testGitPkgCur,
@@ -735,6 +736,10 @@ func testPackageGoClean(t *testing.T) {
 	var err error
 	for _, c := range cases {
 		t.Log(c.desc)
+
+		if len(c.pkgName) > 0 {
+			c.pkg, _ = NewPackage(c.pkgName, c.pkgName, VCSModeGit)
+		}
 
 		err = c.pkg.GoClean()
 		if err != nil {

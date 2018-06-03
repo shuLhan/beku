@@ -60,6 +60,7 @@ var (
 	errDBPackageName = "missing package name, line %d at %s"
 	errDirNotEmpty   = "directory %s is not empty"
 	errExcluded      = "Package '%s' is in excluded list\n"
+	errVCS           = "Unknown VCS mode %s"
 )
 
 var (

@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/shuLhan/share/lib/ini"
+	"golang.org/x/tools/go/vcs"
 )
 
 //
@@ -37,15 +38,32 @@ type Package struct {
 }
 
 //
-// NewPackage create a package set the package version, tag status, and dependencies.
+// NewPackage create a package set the package version, tag status, and
+// dependencies.
 //
 func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
-	pkg *Package,
+	pkg *Package, err error,
 ) {
+	repoRoot, err := vcs.RepoRootForImportPath(pkgName, Debug >= DebugL2)
+	if err != nil {
+		fmt.Fprintf(defStderr, "NewPackage: error: %s\n", err.Error())
+		fmt.Fprintf(defStderr, "NewPackage: skip %s\n", pkgName)
+		return
+	}
+
+	if Debug >= DebugL2 {
+		fmt.Printf("NewPackage: %+v\n", *repoRoot)
+	}
+
+	if repoRoot.VCS.Cmd != valVCSModeGit {
+		err = fmt.Errorf(errVCS, repoRoot.VCS.Cmd)
+		return nil, err
+	}
+
 	pkg = &Package{
-		ImportPath: importPath,
-		RemoteURL:  "https://" + pkgName,
-		FullPath:   filepath.Join(build.Default.GOPATH, dirSrc, importPath),
+		ImportPath: repoRoot.Root,
+		RemoteURL:  repoRoot.Repo,
+		FullPath:   filepath.Join(build.Default.GOPATH, dirSrc, repoRoot.Root),
 		vcs:        vcsMode,
 		state:      packageStateNew,
 	}
@@ -53,6 +71,8 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 	switch vcsMode {
 	case VCSModeGit:
 		pkg.RemoteName = gitDefRemoteName
+	default:
+		err = fmt.Errorf(errVCS, vcsMode)
 	}
 
 	return
