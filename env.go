@@ -223,7 +223,7 @@ func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
 		return
 	}
 
-	pkg, err = NewPackage(importPath, importPath, VCSModeGit)
+	pkg, err = NewPackage(importPath, importPath)
 	if err != nil {
 		return
 	}
@@ -297,7 +297,7 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 			continue
 		}
 
-		pkg, err = NewPackage(importPath, importPath, VCSModeGit)
+		pkg, err = NewPackage(importPath, importPath)
 		if err != nil {
 			return
 		}
@@ -434,7 +434,7 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 			continue
 		}
 
-		err = env.newPackage(fullPath, VCSModeGit)
+		err = env.newPackage(fullPath)
 		if err != nil {
 			return
 		}
@@ -454,14 +454,14 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 // newPackage will append the directory at path as a package only if
 // its contain version information.
 //
-func (env *Env) newPackage(fullPath string, vcsMode VCSMode) (err error) {
+func (env *Env) newPackage(fullPath string) (err error) {
 	pkgName := strings.TrimPrefix(fullPath, env.dirSrc+"/")
 
 	if env.IsExcluded(pkgName) {
 		return
 	}
 
-	pkg, err := NewPackage(pkgName, pkgName, vcsMode)
+	pkg, err := NewPackage(pkgName, pkgName)
 	if err != nil {
 		return
 	}
@@ -914,11 +914,7 @@ func (env *Env) savePackages() {
 	for _, pkg := range env.pkgs {
 		sec := ini.NewSection(sectionPackage, pkg.ImportPath)
 
-		switch pkg.vcs {
-		case VCSModeGit:
-			sec.Set(keyVCSMode, valVCSModeGit)
-		}
-
+		sec.Set(keyVCSMode, pkg.vcsMode)
 		sec.Set(keyRemoteName, pkg.RemoteName)
 		sec.Set(keyRemoteURL, pkg.RemoteURL)
 		sec.Set(keyVersion, pkg.Version)
@@ -1139,7 +1135,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		return
 	}
 
-	newPkg, err := NewPackage(pkgName, importPath, VCSModeGit)
+	newPkg, err := NewPackage(pkgName, importPath)
 	if err != nil {
 		return
 	}

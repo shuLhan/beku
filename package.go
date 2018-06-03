@@ -18,6 +18,10 @@ import (
 	"golang.org/x/tools/go/vcs"
 )
 
+const (
+	VCSModeGit = "git"
+)
+
 //
 // Package define Go package information: path to package, version, whether is
 // tag or not, and VCS mode.
@@ -33,7 +37,7 @@ type Package struct {
 	DepsMissing []string
 	Deps        []string
 	RequiredBy  []string
-	vcs         VCSMode
+	vcsMode     string
 	state       packageState
 	isTag       bool
 }
@@ -42,7 +46,7 @@ type Package struct {
 // NewPackage create a package set the package version, tag status, and
 // dependencies.
 //
-func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
+func NewPackage(pkgName, importPath string) (
 	pkg *Package, err error,
 ) {
 	repoRoot, err := vcs.RepoRootForImportPath(pkgName, Debug >= DebugL2)
@@ -56,7 +60,7 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 		fmt.Printf("NewPackage: %+v\n", *repoRoot)
 	}
 
-	if repoRoot.VCS.Cmd != valVCSModeGit {
+	if repoRoot.VCS.Cmd != VCSModeGit {
 		err = fmt.Errorf(errVCS, repoRoot.VCS.Cmd)
 		return nil, err
 	}
@@ -71,13 +75,6 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 		state:      packageStateNew,
 	}
 
-	switch vcsMode {
-	case VCSModeGit:
-		pkg.RemoteName = gitDefRemoteName
-	default:
-		err = fmt.Errorf(errVCS, vcsMode)
-	}
-
 	return
 }
 
@@ -85,7 +82,7 @@ func NewPackage(pkgName, importPath string, vcsMode VCSMode) (
 // CheckoutVersion will set the package version to new version.
 //
 func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
-	switch pkg.vcs {
+	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitCheckoutVersion(newVersion)
 	}
@@ -98,7 +95,7 @@ func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 // CompareVersion will compare package version using current package as base.
 //
 func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
-	switch pkg.vcs {
+	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitCompareVersion(newPkg)
 	}
@@ -111,7 +108,7 @@ func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 // commit).
 //
 func (pkg *Package) Fetch() (err error) {
-	switch pkg.vcs {
+	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitFetch()
 	}
@@ -154,7 +151,7 @@ func (pkg *Package) GoClean() (err error) {
 // exist or to the latest commit, and scan dependencies.
 //
 func (pkg *Package) Install() (err error) {
-	switch pkg.vcs {
+	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitInstall()
 	}
@@ -242,7 +239,7 @@ func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 // metadata in package repository.
 //
 func (pkg *Package) Scan() (err error) {
-	switch pkg.vcs {
+	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitScan()
 	}
@@ -418,10 +415,10 @@ func (pkg *Package) load(sec *ini.Section) {
 		switch v.KeyLower {
 		case keyVCSMode:
 			switch v.Value {
-			case valVCSModeGit:
-				pkg.vcs = VCSModeGit
+			case VCSModeGit:
+				pkg.vcsMode = VCSModeGit
 			default:
-				pkg.vcs = VCSModeGit
+				pkg.vcsMode = VCSModeGit
 			}
 		case keyRemoteName:
 			pkg.RemoteName = v.Value
@@ -477,7 +474,7 @@ func (pkg *Package) String() string {
 
 	fmt.Fprintf(&buf, `
 [package "%s"]
-          VCS = %d
+          VCS = %s
    RemoteName = %s
     RemoteURL = %s
      ScanPath = %s
@@ -508,7 +505,7 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 		pkg.FullPath = newPkg.FullPath
 	}
 
-	switch pkg.vcs {
+	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitUpdate(newPkg)
 	}

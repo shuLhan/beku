@@ -100,8 +100,8 @@ func testEnvExclude(t *testing.T) {
 			RequiredBy: []string{
 				"github.com/alecthomas/gometalinter",
 			},
-			state: packageStateDirty,
-			vcs:   VCSModeGit,
+			state:   packageStateDirty,
+			vcsMode: VCSModeGit,
 		},
 		expMissing: []string{
 			"github.com/BurntSushi/toml",
@@ -134,7 +134,7 @@ func testEnvExclude(t *testing.T) {
 			RemoteURL:  "git@github.com:shuLhan/share.git",
 			Version:    "b2c8fd7",
 			state:      packageStateLoad,
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 		},
 		expMissing: []string{
 			"github.com/BurntSushi/toml",
@@ -225,7 +225,7 @@ func testEnvGetPackageFromDB(t *testing.T) {
 			RemoteName: "origin",
 			RemoteURL:  "https://github.com/alecthomas/gometalinter",
 			Version:    "0725fc6",
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			state:      packageStateLoad,
 			Deps: []string{
 				"github.com/stretchr/testify",
@@ -244,7 +244,7 @@ func testEnvGetPackageFromDB(t *testing.T) {
 			RemoteURL:  "https://github.com/gotestyourself/gotestyourself",
 			Version:    "v2.0.0",
 			isTag:      true,
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			state:      packageStateLoad,
 			Deps: []string{
 				"github.com/pkg/errors",
@@ -489,7 +489,7 @@ func testEnvScan(t *testing.T) {
 			RemoteURL:  "https://github.com/shuLhan/beku_test",
 			Version:    "v0.2.0",
 			isTag:      true,
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			state:      packageStateNew,
 		}},
 	}}

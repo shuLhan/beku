@@ -29,7 +29,7 @@ func testPackageRemove(t *testing.T) {
 		t.Log(c.desc)
 
 		if len(c.pkgName) > 0 {
-			c.pkg, _ = NewPackage(c.pkgName, c.pkgName, VCSModeGit)
+			c.pkg, _ = NewPackage(c.pkgName, c.pkgName)
 		}
 
 		err := c.pkg.Remove()
@@ -70,7 +70,7 @@ func testPackageInstall(t *testing.T) {
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepoShare,
 			Version:    "17828b8",
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			state:      packageStateNew,
 		},
 	}, {
@@ -353,20 +353,20 @@ func testPackageLoad(t *testing.T) {
 		desc:    "With invalid vcs mode",
 		pkgName: "test_vcs",
 		exp: &Package{
-			vcs: VCSModeGit,
+			vcsMode: VCSModeGit,
 		},
 	}, {
 		desc:    "Duplicate remote name",
 		pkgName: "dup_remote_name",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 		},
 	}, {
 		desc:    "Duplicate remote URL",
 		pkgName: "dup_remote_url",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 			RemoteURL:  "remote url 2",
 		},
@@ -374,7 +374,7 @@ func testPackageLoad(t *testing.T) {
 		desc:    "Duplicate version",
 		pkgName: "dup_version",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 			RemoteURL:  "remote url 2",
 			Version:    "v1.1.0",
@@ -384,7 +384,7 @@ func testPackageLoad(t *testing.T) {
 		desc:    "Version not tag",
 		pkgName: "version_not_tag",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 			RemoteURL:  "remote url 2",
 			Version:    "12345678",
@@ -394,7 +394,7 @@ func testPackageLoad(t *testing.T) {
 		desc:    "With deps",
 		pkgName: "deps",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 			RemoteURL:  "remote url 2",
 			Version:    "12345678",
@@ -409,7 +409,7 @@ func testPackageLoad(t *testing.T) {
 		desc:    "With missing deps",
 		pkgName: "deps_missing",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 			RemoteURL:  "remote url 2",
 			Version:    "12345678",
@@ -424,7 +424,7 @@ func testPackageLoad(t *testing.T) {
 		desc:    "With required-by",
 		pkgName: "required-by",
 		exp: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			RemoteName: "last",
 			RemoteURL:  "remote url 2",
 			Version:    "12345678",
@@ -514,7 +514,7 @@ func testPackageString(t *testing.T) {
 		pkg: testGitPkgCur,
 		exp: `
 [package "github.com/shuLhan/beku_test"]
-          VCS = 1
+          VCS = git
    RemoteName = origin
     RemoteURL = https://` + testGitRepo + `
      ScanPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
@@ -542,21 +542,21 @@ func testUpdate(t *testing.T) {
 	}{{
 		desc: "Update remote URL",
 		curPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepo,
 		},
 		newPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 		},
 		expPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
@@ -565,14 +565,14 @@ func testUpdate(t *testing.T) {
 	}, {
 		desc: "Update version",
 		curPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepo,
 		},
 		newPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
@@ -581,7 +581,7 @@ func testUpdate(t *testing.T) {
 			isTag:      true,
 		},
 		expPkg: &Package{
-			vcs:         VCSModeGit,
+			vcsMode:     VCSModeGit,
 			ImportPath:  testGitRepo,
 			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName:  gitDefRemoteName,
@@ -593,14 +593,14 @@ func testUpdate(t *testing.T) {
 	}, {
 		desc: "Update version back",
 		curPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepo,
 		},
 		newPkg: &Package{
-			vcs:        VCSModeGit,
+			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
@@ -609,7 +609,7 @@ func testUpdate(t *testing.T) {
 			isTag:      true,
 		},
 		expPkg: &Package{
-			vcs:         VCSModeGit,
+			vcsMode:     VCSModeGit,
 			ImportPath:  testGitRepo,
 			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName:  gitDefRemoteName,
@@ -740,7 +740,7 @@ func testPackageGoClean(t *testing.T) {
 		t.Log(c.desc)
 
 		if len(c.pkgName) > 0 {
-			c.pkg, _ = NewPackage(c.pkgName, c.pkgName, VCSModeGit)
+			c.pkg, _ = NewPackage(c.pkgName, c.pkgName)
 		}
 
 		err = c.pkg.GoClean()

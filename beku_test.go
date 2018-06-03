@@ -112,9 +112,9 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	testGitPkgCur, _ = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
-	testGitPkgNew, _ = NewPackage(testGitRepo, testGitRepo, VCSModeGit)
-	testGitPkgShare, _ = NewPackage(testGitRepoShare, testGitRepoShare, VCSModeGit)
+	testGitPkgCur, _ = NewPackage(testGitRepo, testGitRepo)
+	testGitPkgNew, _ = NewPackage(testGitRepo, testGitRepo)
+	testGitPkgShare, _ = NewPackage(testGitRepoShare, testGitRepoShare)
 
 	// Always set the git test repo to latest version.
 	testEnv.NoConfirm = true
