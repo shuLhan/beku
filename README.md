@@ -25,7 +25,7 @@ package database into "{prefix}/var/beku/beku.db".
 
 ## Global Options
 
-     --noconfirm
+	--noconfirm
 
 No confirmation will be asked on any operation. Useful when running beku
 inside a script.
@@ -39,7 +39,7 @@ working directory as installation prefix.
 
 ## Freeze Operation
 
-     -B, --freeze
+	-B, --freeze
 
 Operate on the package database and user's environment. This operation will
 ensure that all packages listed on database file is installed with their
@@ -49,21 +49,21 @@ be removed from "src" and "pkg" directories.
 
 ## Database Operation
 
-     -D, --database
+	-D, --database
 
 Modify the package database. This operation required one of the options
 below.
 
 ### Options
 
-     -e, --exclude <pkg ...>
+	-e, --exclude <pkg ...>
 
 Remove list of package by import path from database and add mark it as
 excluded package.  Excluded package will be ignored on future operations.
 
 ### Examples
 
-     $ beku -De github.com/shuLhan/beku
+	$ beku -De github.com/shuLhan/beku
 
 Exclude package "github.com/shuLhan/beku" from future scanning,
 installation, or removal.
@@ -127,7 +127,7 @@ This option will install the package import path into custom directory.
 It is useful if you have the fork of the main package but want to install
 it to the legacy directory.
 
-        [-u,--update]
+	[-u,--update]
 
 Fetch new tag or commit from remote repository. User will be asked for
 confirmation before upgrade.
@@ -155,7 +155,7 @@ and checkout the tag `v0.3.0` as the working version.
 Download package `golang.org/x/text` into `{prefix}/src/golang.org/x/text`
 and checkout the commit `5c1cf69` as the working version.
 
-        $ beku -Su
+	$ beku -Su
 
 Update all packages in database to new tag or commits with approval from
 user.
@@ -164,8 +164,6 @@ user.
 # Known Limitations
 
 * Only work with package hosted with Git on HTTPS or SSH.
-
-* Tested only on package hosted on Github.
 
 * Tested only on Git v2.17 or greater
 
