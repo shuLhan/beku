@@ -224,8 +224,10 @@ func (env *Env) Freeze() (err error) {
 	}
 
 out:
-	env.reinstallAll()
-	fmt.Println("[ENV] Freeze >>> finished")
+	err = env.reinstallAll()
+	if err != nil {
+		fmt.Println("[ENV] Freeze >>> finished")
+	}
 
 	return
 }
@@ -1372,10 +1374,16 @@ func (env *Env) build(pkg *Package) (err error) {
 	return
 }
 
-func (env *Env) reinstallAll() {
+func (env *Env) reinstallAll() (err error) {
 	for _, pkg := range env.pkgs {
+		err = env.build(pkg)
+		if err != nil {
+			return
+		}
+
 		if len(pkg.DepsMissing) == 0 {
 			_ = pkg.GoInstall()
 		}
 	}
+	return
 }
