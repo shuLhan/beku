@@ -823,6 +823,9 @@ func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
 
 	for x := 0; x < len(pkg.Deps); x++ {
 		_, dep = env.GetPackageFromDB(pkg.Deps[x], "")
+		if dep == nil {
+			continue
+		}
 
 		if len(dep.Deps) > 0 {
 			env.filterUnusedDeps(dep, tobeRemoved)
