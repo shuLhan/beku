@@ -562,11 +562,12 @@ func testUpdate(t *testing.T) {
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 		},
 		expPkg: &Package{
-			vcsMode:    VCSModeGit,
-			ImportPath: testGitRepo,
-			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
-			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			vcsMode:     VCSModeGit,
+			ImportPath:  testGitRepo,
+			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
+			RemoteName:  gitDefRemoteName,
+			RemoteURL:   "git@github.com:shuLhan/beku_test.git",
+			VersionNext: "c9f69fb",
 		},
 	}, {
 		desc: "Update version",
