@@ -236,6 +236,40 @@ func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 }
 
 //
+// Run command on package root directory.
+//
+func (pkg *Package) Run(cmds []string) (err error) {
+	if len(cmds) == 0 {
+		return
+	}
+
+	cmd := exec.Command(cmds[0])
+
+	if len(cmds) > 1 {
+		cmd.Args = append(cmd.Args, cmds[1:]...)
+	}
+
+	path := os.Getenv(envPATH)
+	if len(path) == 0 {
+		path = defPATH
+	}
+
+	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
+	cmd.Env = append(cmd.Env, "PATH="+path)
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	fmt.Printf("[PKG] Run %s >>> %s %s %s\n", pkg.ImportPath, cmd.Dir,
+		cmd.Env, cmd.Args)
+
+	err = cmd.Run()
+
+	return
+
+}
+
+//
 // Scan will set the package version, `isTag` status, and remote URL using
 // metadata in package repository.
 //
@@ -270,6 +304,47 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 
 	for x := 0; x < len(imports); x++ {
 		pkg.addDep(env, imports[x])
+	}
+
+	return
+}
+
+//
+// ScanBuild files on package root directory. The following build files is
+// known by beku,
+//
+// * Godeps: gdm
+// * Gopkg.toml: dep
+// * Makefile: make
+//
+// Otherwise, it would use "go install"
+//
+func (pkg *Package) ScanBuild() (cmd buildMode) {
+	f, err := os.Open(pkg.FullPath)
+	if err != nil {
+		return
+	}
+
+	fis, err := f.Readdir(0)
+	if err != nil {
+		return
+	}
+
+	for x := range fis {
+		if fis[x].IsDir() {
+			continue
+		}
+		if fis[x].Name() == buildFileDep {
+			cmd |= buildModeDep
+			continue
+		}
+		if fis[x].Name() == buildFileGdm {
+			cmd |= buildModeGdm
+			continue
+		}
+		if fis[x].Name() == buildFileMake {
+			cmd |= buildModeMake
+		}
 	}
 
 	return

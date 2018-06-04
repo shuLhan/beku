@@ -1300,31 +1300,74 @@ func (env *Env) SyncAll() (err error) {
 
 //
 // (1) Update missing packages.
-// (2) Re-scan package dependencies.
-// (3) Install missing dependencies.
-// (4) Run `go install` only if no missing package.
+// (2) Run build command if its applicable
+// (3) Run `go install` only if no missing package.
 //
 func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 	// (1)
 	env.updateMissing(newPkg, true)
 
-	// (2)
-	err = curPkg.ScanDeps(env)
+	err = env.build(curPkg)
 	if err != nil {
 		return
 	}
 
-	err = env.installMissing(curPkg)
-	if err != nil {
-		return
-	}
-
-	// (4)
+	// (3)
 	if len(curPkg.DepsMissing) == 0 {
 		_ = curPkg.GoInstall()
 	}
 
 	fmt.Println("[ENV] postSync >>> Package installed:\n", curPkg)
+
+	return
+}
+
+//
+// (3) Re-scan package dependencies.
+// (4) Install missing dependencies.
+//
+func (env *Env) build(pkg *Package) (err error) {
+	cmd := pkg.ScanBuild()
+
+	if cmd&buildModeDep > 0 {
+		if Debug >= DebugL2 {
+			buildCmdDep = append(buildCmdDep, "-v")
+		}
+		err = pkg.Run(buildCmdDep)
+	} else if cmd&buildModeGdm > 0 {
+		if Debug >= DebugL2 {
+			buildCmdDep = append(buildCmdDep, "-v")
+		}
+		err = pkg.Run(buildCmdGdm)
+	}
+	if err != nil {
+		fmt.Fprintf(defStderr, "[ENV] build %s >>> %s\n",
+			pkg.ImportPath, err.Error())
+		err = nil
+	}
+
+	if cmd&buildModeMake > 0 {
+		err = pkg.Run(buildCmdMake)
+		if err != nil {
+			fmt.Fprintf(defStderr, "[ENV] build %s >>> %s\n",
+				pkg.ImportPath, err.Error())
+			err = nil
+		}
+	}
+
+	if cmd == 0 {
+		// (3)
+		err = pkg.ScanDeps(env)
+		if err != nil {
+			return
+		}
+
+		// (4)
+		err = env.installMissing(pkg)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }
