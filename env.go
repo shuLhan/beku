@@ -1348,15 +1348,6 @@ func (env *Env) build(pkg *Package) (err error) {
 		err = nil
 	}
 
-	if cmd&buildModeMake > 0 {
-		err = pkg.Run(buildCmdMake)
-		if err != nil {
-			fmt.Fprintf(defStderr, "[ENV] build %s >>> %s\n",
-				pkg.ImportPath, err.Error())
-			err = nil
-		}
-	}
-
 	if cmd == 0 {
 		// (3)
 		err = pkg.ScanDeps(env)

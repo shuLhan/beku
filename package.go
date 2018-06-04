@@ -342,9 +342,6 @@ func (pkg *Package) ScanBuild() (cmd buildMode) {
 			cmd |= buildModeGdm
 			continue
 		}
-		if fis[x].Name() == buildFileMake {
-			cmd |= buildModeMake
-		}
 	}
 
 	return
