@@ -18,6 +18,12 @@ import (
 // gitCheckoutVersion will set the HEAD to version stated in package.
 //
 func (pkg *Package) gitCheckoutVersion(version string) (err error) {
+	if len(version) == 0 {
+		fmt.Printf("[PKG] gitCheckoutVersion %s >>> empty version\n",
+			pkg.ImportPath)
+		return
+	}
+
 	cmd := exec.Command("git", "stash", "push", "-q")
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
