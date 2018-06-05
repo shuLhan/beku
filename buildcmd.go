@@ -9,14 +9,17 @@ type buildMode uint
 const (
 	buildModeDep buildMode = 1 << iota
 	buildModeGdm
+	buildModeGovendor
 )
 
 const (
-	buildFileDep = "Gopkg.toml"
-	buildFileGdm = "Godeps"
+	buildFileDep      = "Gopkg.toml"
+	buildFileGdm      = "Godeps"
+	buildFileGovendor = "vendor/vendor.json"
 )
 
 var (
-	buildCmdDep = []string{"dep", "ensure"}
-	buildCmdGdm = []string{"gdm", "restore"}
+	buildCmdDep      = []string{"dep", "ensure"}
+	buildCmdGdm      = []string{"gdm", "restore"}
+	buildCmdGovendor = []string{"govendor", "sync"}
 )

@@ -1368,7 +1368,10 @@ func (env *Env) build(pkg *Package) (err error) {
 			buildCmdGdm = append(buildCmdGdm, "-v")
 		}
 		err = pkg.Run(env, buildCmdGdm)
+	} else if cmd&buildModeGovendor > 0 {
+		err = pkg.Run(env, buildCmdGovendor)
 	}
+
 	if err != nil {
 		fmt.Fprintf(defStderr, "[ENV] build %s >>> %s\n",
 			pkg.ImportPath, err.Error())

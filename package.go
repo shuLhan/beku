@@ -322,6 +322,10 @@ func (pkg *Package) ScanBuild() (cmd buildMode) {
 		cmd |= buildModeGdm
 		return
 	}
+	ok = IsFileExist(pkg.FullPath, buildFileGovendor)
+	if ok {
+		cmd |= buildModeGovendor
+	}
 
 	return
 }
