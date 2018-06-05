@@ -1350,7 +1350,7 @@ func (env *Env) build(pkg *Package) (err error) {
 		err = pkg.Run(env, buildCmdDep)
 	} else if cmd&buildModeGdm > 0 {
 		if Debug >= DebugL2 {
-			buildCmdDep = append(buildCmdDep, "-v")
+			buildCmdGdm = append(buildCmdGdm, "-v")
 		}
 		err = pkg.Run(env, buildCmdGdm)
 	}
