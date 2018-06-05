@@ -38,10 +38,24 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 		return
 	}
 
+	cmd = exec.Command("git", "clean", "-qdff")
+	cmd.Dir = pkg.FullPath
+	cmd.Stdout = defStdout
+	cmd.Stderr = defStderr
+
+	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
+		cmd.Dir, cmd.Args)
+
+	_ = cmd.Run()
+
 	cmd = exec.Command("git", "checkout", "-t", "origin/master", "-B", "master")
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
+
+	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
+		cmd.Dir, cmd.Args)
+
 	_ = cmd.Run()
 
 	//nolint:gas
