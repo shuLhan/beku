@@ -481,7 +481,7 @@ func testGoInstall(t *testing.T) {
 
 		testResetOutput(t, true)
 
-		err := c.pkg.GoInstall()
+		err := c.pkg.GoInstall(testEnv)
 
 		testResetOutput(t, false)
 		stdout, stderr := testGetOutput(t)

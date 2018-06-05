@@ -238,7 +238,7 @@ func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 //
 // Run command on package root directory.
 //
-func (pkg *Package) Run(cmds []string) (err error) {
+func (pkg *Package) Run(env *Env, cmds []string) (err error) {
 	if len(cmds) == 0 {
 		return
 	}
@@ -249,13 +249,8 @@ func (pkg *Package) Run(cmds []string) (err error) {
 		cmd.Args = append(cmd.Args, cmds[1:]...)
 	}
 
-	path := os.Getenv(envPATH)
-	if len(path) == 0 {
-		path = defPATH
-	}
-
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
-	cmd.Env = append(cmd.Env, "PATH="+path)
+	cmd.Env = append(cmd.Env, "PATH="+env.path)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -516,7 +511,7 @@ func (pkg *Package) load(sec *ini.Section) {
 // (1) Set PATH to let go install that require gcc work when invoked from
 // non-interactive shell (e.g. buildbot).
 //
-func (pkg *Package) GoInstall() (err error) {
+func (pkg *Package) GoInstall(env *Env) (err error) {
 	//nolint:gas
 	cmd := exec.Command("go", "install")
 	if Debug >= DebugL2 {
@@ -524,13 +519,8 @@ func (pkg *Package) GoInstall() (err error) {
 	}
 	cmd.Args = append(cmd.Args, "./...")
 
-	path := os.Getenv(envPATH)
-	if len(path) == 0 {
-		path = defPATH
-	}
-
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
-	cmd.Env = append(cmd.Env, "PATH="+path)
+	cmd.Env = append(cmd.Env, "PATH="+env.path)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr

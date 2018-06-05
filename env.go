@@ -27,6 +27,7 @@ import (
 // packages, and list of missing packages.
 //
 type Env struct {
+	path         string
 	prefix       string
 	dirBin       string
 	dirPkg       string
@@ -66,12 +67,17 @@ func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
 	Debug = debugMode(debug)
 
 	env = &Env{
+		path:         os.Getenv(envPATH),
 		dirGoRootSrc: filepath.Join(build.Default.GOROOT, dirSrc),
 		dirBin:       filepath.Join(build.Default.GOPATH, dirBin),
 		dirPkg: filepath.Join(build.Default.GOPATH, dirPkg,
 			build.Default.GOOS+"_"+build.Default.GOARCH),
 		noDeps: noDeps,
 		vendor: vendor,
+	}
+
+	if len(env.path) == 0 {
+		env.path = defPATH
 	}
 
 	if vendor {
@@ -1322,7 +1328,7 @@ func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
 
 	// (3)
 	if len(curPkg.DepsMissing) == 0 {
-		_ = curPkg.GoInstall()
+		_ = curPkg.GoInstall(env)
 	}
 
 	fmt.Println("[ENV] postSync >>> Package installed:\n", curPkg)
@@ -1341,12 +1347,12 @@ func (env *Env) build(pkg *Package) (err error) {
 		if Debug >= DebugL2 {
 			buildCmdDep = append(buildCmdDep, "-v")
 		}
-		err = pkg.Run(buildCmdDep)
+		err = pkg.Run(env, buildCmdDep)
 	} else if cmd&buildModeGdm > 0 {
 		if Debug >= DebugL2 {
 			buildCmdDep = append(buildCmdDep, "-v")
 		}
-		err = pkg.Run(buildCmdGdm)
+		err = pkg.Run(env, buildCmdGdm)
 	}
 	if err != nil {
 		fmt.Fprintf(defStderr, "[ENV] build %s >>> %s\n",
@@ -1379,7 +1385,7 @@ func (env *Env) reinstallAll() (err error) {
 		}
 
 		if len(pkg.DepsMissing) == 0 {
-			_ = pkg.GoInstall()
+			_ = pkg.GoInstall(env)
 		}
 	}
 	return
