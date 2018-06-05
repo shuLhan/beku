@@ -1,4 +1,4 @@
-# Beku v0.3.0 (2018-05-xx)
+# Beku v0.3.0 (2018-05-06)
 
 ## New Features
 
@@ -19,7 +19,7 @@ known by beku: gdm, govendor, dep.
 
 ## New Features
 
-* Add operation to exclude package from databasea
+* Add operation to exclude package from database
 * Add option "--noconfirm" to by pass confirmation
 
 ## Bug Fixes
