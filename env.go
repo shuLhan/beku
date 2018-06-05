@@ -1272,12 +1272,12 @@ func (env *Env) SyncAll() (err error) {
 		}
 
 		if pkg.Version == pkg.VersionNext {
-			fmt.Printf("[ENV] SyncAll %s >>> No update.\n",
+			fmt.Printf("[ENV] SyncAll %s >>> No update.\n\n",
 				pkg.ImportPath)
 			continue
 		}
 
-		fmt.Printf("[ENV] SyncAll %s >>> Latest version is %s\n",
+		fmt.Printf("[ENV] SyncAll %s >>> Latest version is %s\n\n",
 			pkg.ImportPath, pkg.VersionNext)
 
 		compareURL := GetCompareURL(pkg.RemoteURL, pkg.Version,
