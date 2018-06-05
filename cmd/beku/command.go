@@ -29,6 +29,7 @@ const (
 	flagOperationSync     = "Synchronize package. If no package is given, it will do rescan."
 
 	flagOptionNoConfirm = "No confirmation will be asked on any operation."
+	flagOptionNoDeps    = "Do not install any missing dependencies."
 	flagOptionRecursive = "Remove package including their dependencies."
 	flagOptionSyncInto  = "Download package into `directory`."
 	flagOptionUpdate    = "Update all packages to latest version."
@@ -42,6 +43,7 @@ type command struct {
 	syncInto  string
 	firstTime bool
 	noConfirm bool
+	noDeps    bool
 	vendor    bool
 }
 
@@ -50,6 +52,8 @@ func (cmd *command) usage() {
 common options:
 	--noconfirm
 		` + flagOptionNoConfirm + `
+	-d,--nodeps
+		` + flagOptionNoDeps + `
 	-V,--vendor
 		` + flagOptionVendor + `
 operations:
@@ -100,6 +104,20 @@ func (cmd *command) parseDatabaseFlags(arg string) (operation, error) {
 	return opNone, errInvalidOptions
 }
 
+func (cmd *command) parseFreezeFlags(arg string) (operation, error) {
+	if len(arg) == 0 {
+		return opNone, nil
+	}
+
+	switch arg[0] {
+	case 'd':
+		cmd.noDeps = true
+		return opNone, nil
+	}
+
+	return opNone, errInvalidOptions
+}
+
 func (cmd *command) parseSyncFlags(arg string) (operation, error) {
 	if len(arg) == 0 {
 		return opNone, nil
@@ -108,6 +126,9 @@ func (cmd *command) parseSyncFlags(arg string) (operation, error) {
 	switch arg[0] {
 	case 'u':
 		return opUpdate, nil
+	case 'd':
+		cmd.noDeps = true
+		return opNone, nil
 	}
 
 	return opNone, errInvalidOptions
@@ -140,6 +161,11 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 	)
 
 	switch arg[0] {
+	case 'd':
+		if len(arg) > 1 {
+			return opNone, errInvalidOptions
+		}
+		cmd.noDeps = true
 	case 's':
 		if len(arg) > 1 {
 			return opNone, errInvalidOptions
@@ -151,10 +177,11 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 		}
 		op = opHelp
 	case 'B':
-		if len(arg) > 1 {
-			return opNone, errInvalidOptions
+		op, err = cmd.parseFreezeFlags(arg[1:])
+		if err != nil {
+			return opNone, err
 		}
-		op = opFreeze
+		op |= opFreeze
 	case 'D':
 		op, err = cmd.parseDatabaseFlags(arg[1:])
 		if err != nil {
@@ -209,6 +236,8 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 		op = opSyncInto
 	case "noconfirm":
 		cmd.noConfirm = true
+	case "nodeps":
+		cmd.noDeps = true
 	case "query":
 		op = opQuery
 	case "recursive":
@@ -364,7 +393,7 @@ func newCommand() (cmd *command, err error) {
 		return
 	}
 
-	cmd.env, err = beku.NewEnvironment(cmd.vendor)
+	cmd.env, err = beku.NewEnvironment(cmd.vendor, cmd.noDeps)
 	if err != nil {
 		return
 	}

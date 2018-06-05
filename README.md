@@ -30,6 +30,11 @@ package database into "{prefix}/var/beku/beku.db".
 No confirmation will be asked on any operation. Useful when running beku
 inside a script.
 
+	--nodeps
+
+Do not install any missing dependencies.  This options can be used on freeze
+or sync operations.
+
 	-V, --vendor
 
 Operate in vendor mode.  This option used only when first scanning

@@ -110,7 +110,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	testEnv, err = NewEnvironment(false)
+	testEnv, err = NewEnvironment(false, false)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

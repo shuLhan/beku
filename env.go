@@ -45,13 +45,14 @@ type Env struct {
 	fmtMaxPath   int
 	dirty        bool
 	NoConfirm    bool
+	noDeps       bool
 	vendor       bool
 }
 
 //
 // NewEnvironment will gather all information in user system.
 //
-func NewEnvironment(vendor bool) (env *Env, err error) {
+func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
 	if !vendor {
 		if len(build.Default.GOPATH) == 0 {
 			vendor = true
@@ -69,6 +70,7 @@ func NewEnvironment(vendor bool) (env *Env, err error) {
 		dirBin:       filepath.Join(build.Default.GOPATH, dirBin),
 		dirPkg: filepath.Join(build.Default.GOPATH, dirPkg,
 			build.Default.GOOS+"_"+build.Default.GOARCH),
+		noDeps: noDeps,
 		vendor: vendor,
 	}
 
@@ -1095,7 +1097,11 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 // installMissing will install all missing packages.
 //
 func (env *Env) installMissing(pkg *Package) (err error) {
-	fmt.Printf("[ENV] installMissing %s\n", pkg.ImportPath)
+	if env.noDeps {
+		return
+	}
+
+	fmt.Printf("[ENV] installMissing %s >>> %s\n", pkg.ImportPath, pkg.DepsMissing)
 
 	for _, misImportPath := range pkg.DepsMissing {
 		_, misPkg := env.GetPackageFromDB(misImportPath, "")
