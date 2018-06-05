@@ -1358,18 +1358,18 @@ func (env *Env) postSync(pkg *Package) (err error) {
 func (env *Env) build(pkg *Package) (err error) {
 	cmd := pkg.ScanBuild()
 
-	if cmd&buildModeDep > 0 {
+	if cmd&vendorModeDep > 0 {
 		if Debug >= DebugL2 {
-			buildCmdDep = append(buildCmdDep, "-v")
+			vendorCmdDep = append(vendorCmdDep, "-v")
 		}
-		err = pkg.Run(env, buildCmdDep)
-	} else if cmd&buildModeGdm > 0 {
+		err = pkg.Run(env, vendorCmdDep)
+	} else if cmd&vendorModeGdm > 0 {
 		if Debug >= DebugL2 {
-			buildCmdGdm = append(buildCmdGdm, "-v")
+			vendorCmdGdm = append(vendorCmdGdm, "-v")
 		}
-		err = pkg.Run(env, buildCmdGdm)
-	} else if cmd&buildModeGovendor > 0 {
-		err = pkg.Run(env, buildCmdGovendor)
+		err = pkg.Run(env, vendorCmdGdm)
+	} else if cmd&vendorModeGovendor > 0 {
+		err = pkg.Run(env, vendorCmdGovendor)
 	}
 
 	if err != nil {

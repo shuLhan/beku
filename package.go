@@ -311,20 +311,20 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 // * Godeps: gdm
 // * Gopkg.toml: dep
 //
-func (pkg *Package) ScanBuild() (cmd buildMode) {
-	ok := IsFileExist(pkg.FullPath, buildFileDep)
+func (pkg *Package) ScanBuild() (cmd vendorMode) {
+	ok := IsFileExist(pkg.FullPath, vendorFileDep)
 	if ok {
-		cmd |= buildModeDep
+		cmd |= vendorModeDep
 		return
 	}
-	ok = IsFileExist(pkg.FullPath, buildFileGdm)
+	ok = IsFileExist(pkg.FullPath, vendorFileGdm)
 	if ok {
-		cmd |= buildModeGdm
+		cmd |= vendorModeGdm
 		return
 	}
-	ok = IsFileExist(pkg.FullPath, buildFileGovendor)
+	ok = IsFileExist(pkg.FullPath, vendorFileGovendor)
 	if ok {
-		cmd |= buildModeGovendor
+		cmd |= vendorModeGovendor
 	}
 
 	return
