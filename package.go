@@ -310,33 +310,17 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 //
 // * Godeps: gdm
 // * Gopkg.toml: dep
-// * Makefile: make
-//
-// Otherwise, it would use "go install"
 //
 func (pkg *Package) ScanBuild() (cmd buildMode) {
-	f, err := os.Open(pkg.FullPath)
-	if err != nil {
+	ok := IsFileExist(pkg.FullPath, buildFileDep)
+	if ok {
+		cmd |= buildModeDep
 		return
 	}
-
-	fis, err := f.Readdir(0)
-	if err != nil {
+	ok = IsFileExist(pkg.FullPath, buildFileGdm)
+	if ok {
+		cmd |= buildModeGdm
 		return
-	}
-
-	for x := range fis {
-		if fis[x].IsDir() {
-			continue
-		}
-		if fis[x].Name() == buildFileDep {
-			cmd |= buildModeDep
-			continue
-		}
-		if fis[x].Name() == buildFileGdm {
-			cmd |= buildModeGdm
-			continue
-		}
 	}
 
 	return

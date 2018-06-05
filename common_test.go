@@ -89,6 +89,42 @@ func TestIsDirEmpty(t *testing.T) {
 	}
 }
 
+func TestIsFileExist(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		desc, parent, relpath string
+		exp                   bool
+	}{{
+		desc:    "With directory",
+		relpath: "testdata",
+	}, {
+		desc:    "With non existen path",
+		parent:  "/random",
+		relpath: "file",
+	}, {
+		desc:    "With file exist without parent",
+		relpath: "LICENSE",
+		exp:     true,
+	}, {
+		desc:    "With file exist",
+		parent:  wd,
+		relpath: "LICENSE",
+		exp:     true,
+	}}
+
+	for _, c := range cases {
+		t.Log(c.desc)
+
+		got := IsFileExist(c.parent, c.relpath)
+
+		test.Assert(t, "", c.exp, got, true)
+	}
+}
+
 func TestIsIgnoredDir(t *testing.T) {
 	cases := []struct {
 		name string
