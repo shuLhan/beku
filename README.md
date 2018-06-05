@@ -30,7 +30,7 @@ package database into "{prefix}/var/beku/beku.db".
 No confirmation will be asked on any operation. Useful when running beku
 inside a script.
 
-	--nodeps
+	-d, --nodeps
 
 Do not install any missing dependencies.  This options can be used on freeze
 or sync operations.
@@ -71,7 +71,7 @@ excluded package.  Excluded package will be ignored on future operations.
 	$ beku -De github.com/shuLhan/beku
 
 Exclude package "github.com/shuLhan/beku" from future scanning,
-installation, or removal.
+installation, or removal operations.
 
 
 ## Query Operation
@@ -123,6 +123,24 @@ If package already exist, it will reset the HEAD to the version that is set
 on database file.
 
 If no parameter is given, beku will do a rescan, checking for new packages.
+
+After downloading a package, beku will check for known vendor files and run
+vendor command on the package directory to install their dependencies on
+package's vendor directory.  The following vendor file will be detected,
+
+* `Godeps`, will invoke [gdm](https://github.com/sparrc/gdm)
+* `Gopkg.toml`, will invoke [dep](https://github.com/golang/dep)
+* `vendor/vendor.json`, will invoke [govendor](https://github.com/kardianos/govendor)
+
+If no vendor files found, beku will install the dependencies manually.
+
+Installation of vendor tools is not handled by beku automatically, user must
+install them manually, either by using `go get` or by using `beku -S`, e.g.
+
+	$ beku -S https://github.com/sparrc/gdm
+	$ beku -S https://github.com/golang/dep
+	$ beku -S https://github.com/kardianos/govendor
+
 
 ### Options
 

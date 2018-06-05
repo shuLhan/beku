@@ -1,4 +1,21 @@
-# Beku v0.2.0
+# Beku v0.3.0 (2018-05-xx)
+
+## New Features
+
+* Use vendor tools to install dependencies.  The following vendor tools is
+known by beku: gdm, govendor, dep.
+* Add option "-d" or "--nodeps" to disable installing dependencies
+* Add common option "-V, --vendor" to work with vendor directory
+* Able to install missing dependencies
+* Handle custom import URL
+
+## Bug Fixes
+
+* Fix panic if package not found in database
+* Clean non-empty directory on installation, after confirmed by user
+* Save database on first time sync
+
+# Beku v0.2.0 (2018-05-31)
 
 ## New Features
 
@@ -12,7 +29,7 @@
 * package: GoInstall: set default PATH if it's empty
 
 
-# Beku v0.1.0
+# Beku v0.1.0 (2018-05-27)
 
 In this version, beku can handle the following operations,
 
