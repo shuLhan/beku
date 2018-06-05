@@ -1227,7 +1227,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		env.dirty = true
 	}
 
-	err = env.postSync(curPkg, newPkg)
+	err = env.postSync(curPkg)
 
 	return
 }
@@ -1263,17 +1263,22 @@ func (env *Env) SyncAll() (err error) {
 	fmt.Println("[ENV] SyncAll >>> Updating all packages ...")
 
 	for _, pkg := range env.pkgs {
-		fmt.Printf("[ENV] SyncAll >>> %s %s\n", pkg.ImportPath, pkg.Version)
+		fmt.Printf("[ENV] SyncAll %s >>> Current version is %s\n",
+			pkg.ImportPath, pkg.Version)
+
 		err = pkg.Fetch()
 		if err != nil {
 			return
 		}
+
 		if pkg.Version == pkg.VersionNext {
-			fmt.Println("[ENV] SyncAll >>> No update.")
+			fmt.Printf("[ENV] SyncAll %s >>> No update.\n",
+				pkg.ImportPath)
 			continue
 		}
 
-		fmt.Printf("[ENV] SyncAll >>> Latest version is %s\n", pkg.VersionNext)
+		fmt.Printf("[ENV] SyncAll %s >>> Latest version is %s\n",
+			pkg.ImportPath, pkg.VersionNext)
 
 		compareURL := GetCompareURL(pkg.RemoteURL, pkg.Version,
 			pkg.VersionNext)
@@ -1303,11 +1308,21 @@ func (env *Env) SyncAll() (err error) {
 		if err != nil {
 			return
 		}
-		pkg.Version = pkg.VersionNext
-		pkg.state = packageStateDirty
+		if pkg.Version != pkg.VersionNext {
+			pkg.Version = pkg.VersionNext
+			pkg.state = packageStateDirty
+		}
 	}
 
 	env.dirty = true
+
+	for _, pkg := range env.pkgs {
+		if pkg.state&packageStateDirty > 0 {
+			env.postSync(pkg)
+		}
+	}
+
+	fmt.Println("[ENV] SyncAll >>> Update completed.")
 
 	return
 }
@@ -1317,21 +1332,21 @@ func (env *Env) SyncAll() (err error) {
 // (2) Run build command if its applicable
 // (3) Run `go install` only if no missing package.
 //
-func (env *Env) postSync(curPkg, newPkg *Package) (err error) {
+func (env *Env) postSync(pkg *Package) (err error) {
 	// (1)
-	env.updateMissing(newPkg, true)
+	env.updateMissing(pkg, true)
 
-	err = env.build(curPkg)
+	err = env.build(pkg)
 	if err != nil {
 		return
 	}
 
 	// (3)
-	if len(curPkg.DepsMissing) == 0 {
-		_ = curPkg.GoInstall(env)
+	if len(pkg.DepsMissing) == 0 {
+		_ = pkg.GoInstall(env)
 	}
 
-	fmt.Println("[ENV] postSync >>> Package installed:\n", curPkg)
+	fmt.Println("[ENV] postSync >>> Package installed:\n", pkg)
 
 	return
 }
