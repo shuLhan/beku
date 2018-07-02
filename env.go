@@ -211,7 +211,7 @@ func (env *Env) Freeze() (err error) {
 	}
 
 	if len(env.pkgsUnused) == 0 {
-		fmt.Println("[ENV] Freeze >>> No unused packages found.")
+		fmt.Println("\n[ENV] Freeze >>> No unused packages found.")
 		goto out
 	}
 
@@ -1391,6 +1391,8 @@ func (env *Env) build(pkg *Package) (err error) {
 
 func (env *Env) reinstallAll() (err error) {
 	for _, pkg := range env.pkgs {
+		fmt.Printf("\n[ENV] reinstallAll >>> %s\n", pkg.ImportPath)
+
 		err = env.build(pkg)
 		if err != nil {
 			return
