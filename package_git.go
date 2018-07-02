@@ -17,6 +17,9 @@ import (
 //
 // gitCheckoutVersion will set the HEAD to version stated in package.
 //
+// We are not using "git stash", because they introduce many problems when
+// rebuilding the package after update.
+//
 func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 	if len(version) == 0 {
 		fmt.Printf("[PKG] gitCheckoutVersion %s >>> empty version\n",
@@ -24,21 +27,7 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 		return
 	}
 
-	cmd := exec.Command("git", "stash", "push", "-q")
-	cmd.Dir = pkg.FullPath
-	cmd.Stdout = defStdout
-	cmd.Stderr = defStderr
-
-	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
-		cmd.Dir, cmd.Args)
-
-	err = cmd.Run()
-	if err != nil {
-		err = fmt.Errorf("gitCheckoutVersion %s: %s", pkg.FullPath, err)
-		return
-	}
-
-	cmd = exec.Command("git", "clean", "-qdff")
+	cmd := exec.Command("git", "clean", "-qdff")
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -72,16 +61,6 @@ func (pkg *Package) gitCheckoutVersion(version string) (err error) {
 		err = fmt.Errorf("gitCheckoutVersion %s: %s", pkg.FullPath, err)
 		return
 	}
-
-	cmd = exec.Command("git", "stash", "pop", "-q")
-	cmd.Dir = pkg.FullPath
-	cmd.Stdout = defStdout
-	cmd.Stderr = defStderr
-
-	fmt.Printf("[PKG] gitCheckoutVersion %s >>> %s %s\n", pkg.ImportPath,
-		cmd.Dir, cmd.Args)
-
-	_ = cmd.Run()
 
 	return
 }
