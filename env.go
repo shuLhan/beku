@@ -1364,11 +1364,6 @@ func (env *Env) build(pkg *Package) (err error) {
 			vendorCmdDep = append(vendorCmdDep, "-v")
 		}
 		err = pkg.Run(env, vendorCmdDep)
-	} else if cmd&vendorModeGdm > 0 {
-		if Debug >= DebugL2 {
-			vendorCmdGdm = append(vendorCmdGdm, "-v")
-		}
-		err = pkg.Run(env, vendorCmdGdm)
 	} else if cmd&vendorModeGovendor > 0 {
 		err = pkg.Run(env, vendorCmdGovendor)
 	}

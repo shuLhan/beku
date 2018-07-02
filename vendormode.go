@@ -8,18 +8,15 @@ type vendorMode uint
 
 const (
 	vendorModeDep vendorMode = 1 << iota
-	vendorModeGdm
 	vendorModeGovendor
 )
 
 const (
 	vendorFileDep      = "Gopkg.toml"
-	vendorFileGdm      = "Godeps"
 	vendorFileGovendor = "vendor/vendor.json"
 )
 
 var (
 	vendorCmdDep      = []string{"dep", "ensure"}
-	vendorCmdGdm      = []string{"gdm", "restore"}
 	vendorCmdGovendor = []string{"govendor", "sync"}
 )

@@ -308,18 +308,13 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 // ScanBuild files on package root directory. The following build files is
 // known by beku,
 //
-// * Godeps: gdm
 // * Gopkg.toml: dep
+// * vendor/vendor.json: govendor
 //
 func (pkg *Package) ScanBuild() (cmd vendorMode) {
 	ok := IsFileExist(pkg.FullPath, vendorFileDep)
 	if ok {
 		cmd |= vendorModeDep
-		return
-	}
-	ok = IsFileExist(pkg.FullPath, vendorFileGdm)
-	if ok {
-		cmd |= vendorModeGdm
 		return
 	}
 	ok = IsFileExist(pkg.FullPath, vendorFileGovendor)
