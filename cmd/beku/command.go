@@ -28,6 +28,7 @@ const (
 	flagOperationRemove   = "Remove package."
 	flagOperationSync     = "Synchronize package. If no package is given, it will do rescan."
 
+	flagOptionExclude   = "Exclude package from further operation"
 	flagOptionNoConfirm = "No confirmation will be asked on any operation."
 	flagOptionNoDeps    = "Do not install any missing dependencies."
 	flagOptionRecursive = "Remove package including their dependencies."
@@ -66,6 +67,10 @@ operations:
 	beku {-D|--database}
 		` + flagOperationDatabase + `
 
+	options:
+		[-e|--exclude]
+			` + flagOptionExclude + `
+
 	beku {-Q|--query} [pkg ...]
 		` + flagOperationQuery + `
 
@@ -79,11 +84,10 @@ operations:
 	beku {-S|--sync} <pkg[@version]> [options]
 		` + flagOperationSync + `
 
-	option:
+	options:
 		[-u|--update]
 			` + flagOptionUpdate + `
 
-	options:
 		[--into <directory>]
 			` + flagOptionSyncInto + `
 `
