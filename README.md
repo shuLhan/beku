@@ -128,19 +128,26 @@ After downloading a package, beku will check for known vendor files and run
 vendor command on the package directory to install their dependencies on
 package's vendor directory.  The following vendor file will be detected,
 
-* `Godeps`, will invoke [gdm](https://github.com/sparrc/gdm)
 * `Gopkg.toml`, will invoke [dep](https://github.com/golang/dep)
-* `vendor/vendor.json`, will invoke [govendor](https://github.com/kardianos/govendor)
 
 If no vendor files found, beku will install the dependencies manually.
 
 Installation of vendor tools is not handled by beku automatically, user must
 install them manually, either by using `go get` or by using `beku -S`, e.g.
 
-	$ beku -S https://github.com/sparrc/gdm
 	$ beku -S https://github.com/golang/dep
-	$ beku -S https://github.com/kardianos/govendor
 
+The following vendor management tool will not be supported until
+they can fix their issue(s),
+
+* govendor [2], cannot handle transitive dependencies (error when building
+Consul)
+* gdm [3].  gdm is not vendor tool, its use GOPATH the same as beku.  Using
+gdm will result in inconsistent build if two or more package depends on the
+same dependency.  For example, package A and B depends on X, package A
+depends on X v0.4.0, while package B depends on X v0.5.0, while our repository
+is depends on version of X v0.6.0.  Running `gdm` on A and then on B, will
+change the X to v0.5.0.
 
 ### Options
 
@@ -194,3 +201,5 @@ user.
 # References
 
 [1] https://www.archlinux.org/pacman/
+[2] https://github.com/kardianos/govendor/issues/348
+[3] https://github.com/sparrc/gdm

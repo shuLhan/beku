@@ -317,10 +317,6 @@ func (pkg *Package) ScanBuild() (cmd vendorMode) {
 		cmd |= vendorModeDep
 		return
 	}
-	ok = IsFileExist(pkg.FullPath, vendorFileGovendor)
-	if ok {
-		cmd |= vendorModeGovendor
-	}
 
 	return
 }

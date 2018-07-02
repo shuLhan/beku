@@ -1364,8 +1364,6 @@ func (env *Env) build(pkg *Package) (err error) {
 			vendorCmdDep = append(vendorCmdDep, "-v")
 		}
 		err = pkg.Run(env, vendorCmdDep)
-	} else if cmd&vendorModeGovendor > 0 {
-		err = pkg.Run(env, vendorCmdGovendor)
 	}
 
 	if err != nil {
