@@ -126,7 +126,7 @@ func testParseFlags(t *testing.T) {
 	}, {
 		args: []string{"-Q", "-h"},
 		expCmd: &command{
-			op: opQuery | opHelp,
+			op: opHelp,
 		},
 	}, {
 		args: []string{"A", "-Q", "B"},

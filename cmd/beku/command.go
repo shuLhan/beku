@@ -12,6 +12,13 @@ import (
 	"github.com/shuLhan/beku"
 )
 
+const (
+	verMajor    = 0
+	verMinor    = 3
+	verPatch    = 0
+	verMetadata = "-dev"
+)
+
 var (
 	errInvalidOptions  = errors.New("error: invalid options")
 	errMultiOperations = errors.New("error: only at operation may be used at a time")
@@ -27,6 +34,7 @@ const (
 	flagOperationQuery    = "Query the package database."
 	flagOperationRemove   = "Remove package."
 	flagOperationSync     = "Synchronize package. If no package is given, it will do rescan."
+	flagOperationVersion  = "Print beku version."
 
 	flagOptionExclude   = "Exclude package from further operation"
 	flagOptionNoConfirm = "No confirmation will be asked on any operation."
@@ -61,6 +69,9 @@ operations:
 	beku {-h|--help}
 		` + flagOperationHelp + `
 
+	beku {--version}
+		` + flagOperationVersion + `
+
 	beku {-B|--freeze}
 		` + flagOperationFreeze + `
 
@@ -93,6 +104,10 @@ operations:
 `
 
 	fmt.Fprint(os.Stderr, help)
+}
+
+func (cmd *command) version() {
+	fmt.Printf("beku v%d.%d.%d%s\n", verMajor, verMinor, verPatch, verMetadata)
 }
 
 func (cmd *command) parseDatabaseFlags(arg string) (operation, error) {
@@ -254,6 +269,8 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 		op = opUpdate
 	case "vendor":
 		cmd.vendor = true
+	case "version":
+		op = opVersion
 	default:
 		return opNone, errInvalidOptions
 	}
@@ -266,7 +283,7 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 //
 // parseFlags for multiple operations, invalid options, or empty targets.
 //
-// (0) "-h" or "--help" flag is a stopper.
+// (0) "-h", "--help", "--version" flag is a stopper.
 // (1) Only one operation is allowed.
 // (2) "-R" or "-S" must have target
 //
@@ -313,7 +330,8 @@ func (cmd *command) parseFlags(args []string) (err error) {
 			break
 		}
 		// (0)
-		if op == opHelp {
+		if op == opHelp || op == opVersion {
+			cmd.op = op
 			return
 		}
 	}

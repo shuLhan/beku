@@ -35,6 +35,9 @@ func main() {
 	case opHelp:
 		cmd.usage()
 		os.Exit(1)
+	case opVersion:
+		cmd.version()
+		os.Exit(0)
 	case opDatabase | opExclude:
 		cmd.env.Exclude(cmd.pkgs)
 	case opFreeze:

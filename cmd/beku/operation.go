@@ -19,4 +19,5 @@ const (
 	opSync
 	opSyncInto
 	opUpdate
+	opVersion
 )
