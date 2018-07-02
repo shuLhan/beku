@@ -233,7 +233,7 @@ func (env *Env) Freeze() (err error) {
 
 out:
 	err = env.reinstallAll()
-	if err != nil {
+	if err == nil {
 		fmt.Println("[ENV] Freeze >>> finished")
 	}
 
