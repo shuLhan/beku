@@ -415,6 +415,15 @@ func newCommand() (cmd *command, err error) {
 		return
 	}
 
+	switch cmd.op {
+	case opHelp:
+		cmd.usage()
+		os.Exit(1)
+	case opVersion:
+		cmd.version()
+		os.Exit(0)
+	}
+
 	cmd.env, err = beku.NewEnvironment(cmd.vendor, cmd.noDeps)
 	if err != nil {
 		return
