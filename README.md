@@ -142,12 +142,14 @@ they can fix their issue(s),
 
 * govendor [2], cannot handle transitive dependencies (error when building
 Consul)
+
 * gdm [3].  gdm is not vendor tool, its use GOPATH the same as beku.  Using
 gdm will result in inconsistent build if two or more package depends on the
 same dependency.  For example, package A and B depends on X, package A
-depends on X v0.4.0, while package B depends on X v0.5.0, while our repository
-is depends on version of X v0.6.0.  Running `gdm` on A and then on B, will
-change the X to v0.5.0.
+depends on X v0.4.0 and package B depends on X v0.5.0, while our repository
+is depends on X v0.6.0.  Running beku with the following order: our repo,
+`gdm` on A, and then `gdm` on B, will result in package X will be set to
+v0.5.0, not v0.6.0.
 
 ### Options
 
@@ -201,5 +203,7 @@ user.
 # References
 
 [1] https://www.archlinux.org/pacman/
+
 [2] https://github.com/kardianos/govendor/issues/348
+
 [3] https://github.com/sparrc/gdm
