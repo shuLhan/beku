@@ -182,7 +182,7 @@ func (env *Env) Freeze() (err error) {
 	)
 
 	for _, pkg := range env.pkgs {
-		fmt.Printf("[ENV] Freeze >>> %s@%s\n", pkg.ImportPath, pkg.Version)
+		fmt.Printf("\n[ENV] Freeze >>> %s@%s\n", pkg.ImportPath, pkg.Version)
 
 		localPkg, err = env.GetPackage(pkg.ImportPath)
 		if err != nil {
@@ -1333,6 +1333,7 @@ func (env *Env) SyncAll() (err error) {
 // (3) Run `go install` only if no missing package.
 //
 func (env *Env) postSync(pkg *Package) (err error) {
+	fmt.Printf("\n[ENV] postSync %s\n", pkg.ImportPath)
 	// (1)
 	env.updateMissing(pkg, true)
 
