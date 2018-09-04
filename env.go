@@ -1353,38 +1353,18 @@ func (env *Env) postSync(pkg *Package) (err error) {
 }
 
 //
-// (3) Re-scan package dependencies.
-// (4) Install missing dependencies.
+// (1) Re-scan package dependencies.
+// (2) Install missing dependencies.
 //
 func (env *Env) build(pkg *Package) (err error) {
-	cmd := pkg.ScanBuild()
-
-	if cmd&vendorModeDep > 0 {
-		if Debug >= DebugL2 {
-			vendorCmdDep = append(vendorCmdDep, "-v")
-		}
-		err = pkg.Run(env, vendorCmdDep)
-	}
-
+	// (1)
+	err = pkg.ScanDeps(env)
 	if err != nil {
-		fmt.Fprintf(defStderr, "[ENV] build %s >>> %s\n",
-			pkg.ImportPath, err.Error())
-		err = nil
+		return
 	}
 
-	if cmd == 0 {
-		// (3)
-		err = pkg.ScanDeps(env)
-		if err != nil {
-			return
-		}
-
-		// (4)
-		err = env.installMissing(pkg)
-		if err != nil {
-			return
-		}
-	}
+	// (2)
+	err = env.installMissing(pkg)
 
 	return
 }

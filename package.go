@@ -305,23 +305,6 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 }
 
 //
-// ScanBuild files on package root directory. The following build files is
-// known by beku,
-//
-// * Gopkg.toml: dep
-// * vendor/vendor.json: govendor
-//
-func (pkg *Package) ScanBuild() (cmd vendorMode) {
-	ok := IsFileExist(pkg.FullPath, vendorFileDep)
-	if ok {
-		cmd |= vendorModeDep
-		return
-	}
-
-	return
-}
-
-//
 // GetRecursiveImports will get all import path recursively using `go list`
 // and return it as slice of string without any duplication.
 //
