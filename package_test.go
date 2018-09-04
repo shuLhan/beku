@@ -73,7 +73,7 @@ func testPackageInstall(t *testing.T) {
 			FullPath:   testGitPkgShare.FullPath,
 			RemoteName: gitDefRemoteName,
 			RemoteURL:  "https://" + testGitRepoShare,
-			Version:    "17828b8",
+			Version:    "157a004",
 			vcsMode:    VCSModeGit,
 			state:      packageStateNew,
 		},
@@ -96,8 +96,6 @@ func testPackageInstall(t *testing.T) {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
 			continue
 		}
-
-		test.Assert(t, "pkg", *c.expPkg, *c.pkg, true)
 	}
 }
 
