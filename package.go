@@ -49,7 +49,7 @@ type Package struct {
 func NewPackage(env *Env, pkgName, importPath string) (
 	pkg *Package, err error,
 ) {
-	repoRoot, err := vcs.RepoRootForImportPath(pkgName, Debug >= DebugL2)
+	repoRoot, err := vcs.RepoRootForImportPath(importPath, Debug >= DebugL2)
 	if err != nil {
 		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> error: %s\n", err.Error())
 		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> skip %s\n", pkgName)

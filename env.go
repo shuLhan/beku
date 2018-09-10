@@ -1211,6 +1211,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	// (2)
 	_, curPkg := env.GetPackageFromDB(newPkg.ImportPath, newPkg.RemoteURL)
 	if curPkg != nil {
+		newPkg.RemoteURL = curPkg.RemoteURL
 		ok, err = env.update(curPkg, newPkg)
 	} else {
 		ok, err = env.install(newPkg)
