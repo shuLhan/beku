@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/shuLhan/share/lib/ini"
+	libio "github.com/shuLhan/share/lib/io"
 )
 
 //
@@ -143,7 +144,7 @@ func (env *Env) cleanUnused() {
 
 		fmt.Println("[ENV] cleanUnused >>>", pkgPath)
 		_ = os.RemoveAll(pkgPath)
-		_ = RmdirEmptyAll(pkgPath)
+		_ = libio.RmdirEmptyAll(pkgPath)
 	}
 }
 
@@ -225,7 +226,7 @@ func (env *Env) Freeze() (err error) {
 	if env.NoConfirm {
 		env.cleanUnused()
 	} else {
-		ok = confirm(os.Stdin, msgContinue, false)
+		ok = libio.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if ok {
 			env.cleanUnused()
 		}
@@ -255,7 +256,7 @@ func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
 
 	_, err = os.Stat(dirGit)
 	if err != nil {
-		if IsDirEmpty(fullPath) {
+		if libio.IsDirEmpty(fullPath) {
 			err = nil
 		} else {
 			err = fmt.Errorf(errDirNotEmpty, fullPath)
@@ -708,7 +709,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	if env.NoConfirm {
 		ok = true
 	} else {
-		ok = confirm(os.Stdin, msgContinue, false)
+		ok = libio.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
 		}
@@ -786,7 +787,7 @@ This package is required by,
 	}
 
 	if !env.NoConfirm {
-		ok := confirm(os.Stdin, msgContinue, false)
+		ok := libio.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
 		}
@@ -811,7 +812,7 @@ This package is required by,
 			return
 		}
 
-		_ = RmdirEmptyAll(pkgImportPath)
+		_ = libio.RmdirEmptyAll(pkgImportPath)
 	}
 
 	return
@@ -1022,10 +1023,10 @@ func (env *Env) String() string {
 // install a package.
 //
 func (env *Env) install(pkg *Package) (ok bool, err error) {
-	if !IsDirEmpty(pkg.FullPath) {
+	if !libio.IsDirEmpty(pkg.FullPath) {
 		fmt.Printf("[ENV] install >>> Directory %s is not empty.\n", pkg.FullPath)
 		if !env.NoConfirm {
-			ok = confirm(os.Stdin, msgCleanDir, false)
+			ok = libio.ConfirmYesNo(os.Stdin, msgCleanDir, false)
 			if !ok {
 				return
 			}
@@ -1071,7 +1072,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	if env.NoConfirm {
 		ok = true
 	} else {
-		ok = confirm(os.Stdin, msgUpdateView, false)
+		ok = libio.ConfirmYesNo(os.Stdin, msgUpdateView, false)
 		if ok {
 			err = curPkg.CompareVersion(newPkg)
 			if err != nil {
@@ -1083,7 +1084,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	if env.NoConfirm {
 		ok = true
 	} else {
-		ok = confirm(os.Stdin, msgUpdateProceed, true)
+		ok = libio.ConfirmYesNo(os.Stdin, msgUpdateProceed, true)
 		if !ok {
 			return
 		}
@@ -1298,7 +1299,7 @@ func (env *Env) SyncAll() (err error) {
 	fmt.Println(buf.String())
 
 	if !env.NoConfirm {
-		ok := confirm(os.Stdin, msgContinue, false)
+		ok := libio.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
 		}

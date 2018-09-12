@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/shuLhan/share/lib/test"
+	"github.com/shuLhan/share/lib/test/mock"
 	"github.com/shuLhan/tekstus/diff"
 )
 
@@ -346,12 +347,13 @@ github.com/ksubedi/gomove           0.2.17
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		testResetOutput(t, true)
+		mock.Reset(true)
 
 		testEnv.Query(c.pkgs)
 
-		testResetOutput(t, false)
-		stdout, stderr := testGetOutput(t)
+		mock.Reset(false)
+		stdout := mock.Output()
+		stderr := mock.Error()
 
 		test.Assert(t, "expStdout", c.expStdout, stdout, true)
 		test.Assert(t, "expStderr", c.expStderr, stderr, true)

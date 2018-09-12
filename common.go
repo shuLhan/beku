@@ -5,12 +5,8 @@
 package beku
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -65,46 +61,6 @@ func GetCompareURL(remoteURL, oldVer, newVer string) (url string) {
 }
 
 //
-// IsDirEmpty will return true if directory is not exist or empty; otherwise
-// it will return false.
-//
-func IsDirEmpty(dir string) (ok bool) {
-	d, err := os.Open(dir)
-	if err != nil {
-		ok = true
-		return
-	}
-
-	_, err = d.Readdirnames(1)
-	if err != nil {
-		if err == io.EOF {
-			ok = true
-		}
-	}
-
-	_ = d.Close()
-
-	return
-}
-
-//
-// IsFileExist will return true if relative path is exist on parent directory;
-// otherwise it will return false.
-//
-func IsFileExist(parent, relpath string) bool {
-	path := filepath.Join(parent, relpath)
-
-	fi, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	if fi.IsDir() {
-		return false
-	}
-	return true
-}
-
-//
 // IsIgnoredDir will return true if directory start with "_" or ".", or
 // equal with "vendor" or "testdata"; otherwise it will return false.
 //
@@ -136,87 +92,6 @@ func IsTagVersion(version string) bool {
 	if strings.IndexByte(version, sepVersion) > 0 {
 		return true
 	}
-	return false
-}
-
-//
-// RmdirEmptyAll remove directory in path if it's empty until one of the
-// parent is not empty.
-//
-func RmdirEmptyAll(path string) error {
-	if len(path) == 0 {
-		return nil
-	}
-	fi, err := os.Stat(path)
-	if err != nil {
-		return RmdirEmptyAll(filepath.Dir(path))
-	}
-	if !fi.IsDir() {
-		return nil
-	}
-	if !IsDirEmpty(path) {
-		return nil
-	}
-	err = os.Remove(path)
-	if err != nil {
-		return err
-	}
-
-	return RmdirEmptyAll(filepath.Dir(path))
-}
-
-//
-// confirm display a question to standard output and read for answer
-// from "in" for simple "y" or "n" answer.
-// If "in" is nil, it will set to standard input.
-// If "defIsYes" is true and answer is empty (only new line), then it will
-// return true.
-//
-func confirm(in io.Reader, msg string, defIsYes bool) bool {
-	var (
-		r         *bufio.Reader
-		b, answer byte
-		err       error
-	)
-
-	if in == nil {
-		r = bufio.NewReader(os.Stdin)
-	} else {
-		r = bufio.NewReader(in)
-	}
-
-	yon := "[y/N]"
-
-	if defIsYes {
-		yon = "[Y/n]"
-	}
-
-	fmt.Printf("%s %s ", msg, yon)
-
-	for {
-		b, err = r.ReadByte()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			break
-		}
-		if b == ' ' || b == '\t' {
-			continue
-		}
-		if b == '\n' {
-			break
-		}
-		if answer == 0 {
-			answer = b
-		}
-	}
-
-	if answer == 'y' || answer == 'Y' {
-		return true
-	}
-	if answer == 0 {
-		return defIsYes
-	}
-
 	return false
 }
 

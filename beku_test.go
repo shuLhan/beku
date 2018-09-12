@@ -7,10 +7,10 @@ package beku
 import (
 	"fmt"
 	"go/build"
-	"io"
-	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/shuLhan/share/lib/test/mock"
 )
 
 const (
@@ -31,63 +31,6 @@ var (
 	testStderr      *os.File
 )
 
-func testInitOutput() (err error) {
-	testStdout, err = ioutil.TempFile("", "")
-	if err != nil {
-		return
-	}
-
-	testStderr, err = ioutil.TempFile("", "")
-	if err != nil {
-		return
-	}
-
-	defStdout = testStdout
-	defStderr = testStderr
-
-	return
-}
-
-func testGetOutput(t *testing.T) (stdout, stderr string) {
-	bout, err := ioutil.ReadAll(defStdout)
-	if err != nil {
-		t.Fatal(err)
-	}
-	berr, err := ioutil.ReadAll(testStderr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	stdout = string(bout)
-	stderr = string(berr)
-
-	return
-}
-
-func testResetOutput(t *testing.T, truncate bool) {
-	_, err := testStdout.Seek(0, io.SeekStart)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = testStderr.Seek(0, io.SeekStart)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if truncate {
-		testStdout.Truncate(0)
-		testStderr.Truncate(0)
-	}
-}
-
-func testPrintOutput(t *testing.T) {
-	testResetOutput(t, false)
-	stdout, stderr := testGetOutput(t)
-	t.Log(">>> stdout:\n", stdout)
-	t.Log(">>> stderr:\n", stderr)
-}
-
 func TestMain(m *testing.M) {
 	orgGOPATH := build.Default.GOPATH
 
@@ -104,11 +47,8 @@ func TestMain(m *testing.M) {
 		build.Default.GOPATH = orgGOPATH
 	}()
 
-	err = testInitOutput()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	defStdout = mock.Stdout()
+	defStderr = mock.Stderr()
 
 	testEnv, err = NewEnvironment(false, false)
 	if err != nil {

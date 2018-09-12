@@ -14,7 +14,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/shuLhan/share/lib/git"
 	"github.com/shuLhan/share/lib/ini"
+	libio "github.com/shuLhan/share/lib/io"
 	"golang.org/x/tools/go/vcs"
 )
 
@@ -84,7 +86,7 @@ func NewPackage(env *Env, pkgName, importPath string) (
 func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 	switch pkg.vcsMode {
 	case VCSModeGit:
-		err = pkg.gitCheckoutVersion(newVersion)
+		err = git.CheckoutRevision(pkg.FullPath, "", "", newVersion)
 	}
 
 	return
@@ -97,7 +99,7 @@ func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 	switch pkg.vcsMode {
 	case VCSModeGit:
-		err = pkg.gitCompareVersion(newPkg)
+		err = git.LogRevisions(pkg.FullPath, pkg.Version, newPkg.Version)
 	}
 
 	return
@@ -110,7 +112,15 @@ func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 func (pkg *Package) Fetch() (err error) {
 	switch pkg.vcsMode {
 	case VCSModeGit:
-		err = pkg.gitFetch()
+		err = git.FetchAll(pkg.FullPath)
+		if err != nil {
+			return
+		}
+		if pkg.isTag {
+			pkg.VersionNext, err = git.LatestTag(pkg.FullPath)
+		} else {
+			pkg.VersionNext, err = git.LatestCommit(pkg.FullPath, "")
+		}
 	}
 
 	return
@@ -209,7 +219,7 @@ func (pkg *Package) Remove() (err error) {
 		return
 	}
 
-	_ = RmdirEmptyAll(pkg.FullPath)
+	_ = libio.RmdirEmptyAll(pkg.FullPath)
 
 	return
 }

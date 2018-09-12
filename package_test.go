@@ -13,6 +13,7 @@ import (
 
 	"github.com/shuLhan/share/lib/ini"
 	"github.com/shuLhan/share/lib/test"
+	"github.com/shuLhan/share/lib/test/mock"
 )
 
 func testPackageRemove(t *testing.T) {
@@ -80,17 +81,15 @@ func testPackageInstall(t *testing.T) {
 	}, {
 		desc:   `Install again`,
 		pkg:    testGitPkgShare,
-		expErr: fmt.Sprintf("gitInstall: gitClone: "+errDirNotEmpty, testGitPkgShare.FullPath),
+		expErr: "gitInstall: Clone: exit status 128",
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		testResetOutput(t, true)
+		mock.Reset(true)
 
 		err := c.pkg.Install()
-
-		testPrintOutput(t)
 
 		if err != nil {
 			test.Assert(t, "err", c.expErr, err.Error(), true)
@@ -477,12 +476,13 @@ func testGoInstall(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		testResetOutput(t, true)
+		mock.Reset(true)
 
 		err := c.pkg.GoInstall(testEnv)
 
-		testResetOutput(t, false)
-		stdout, stderr := testGetOutput(t)
+		mock.Reset(false)
+		stdout := mock.Output()
+		stderr := mock.Error()
 
 		if err != nil {
 			errLines := strings.Split(stderr, "\n")
@@ -522,7 +522,7 @@ func testPackageString(t *testing.T) {
    RemoteName = origin
     RemoteURL = https://` + testGitRepo + `
       Version = v0.2.0
-  VersionNext = c9f69fb
+  VersionNext = 
         IsTag = true
          Deps = []
    RequiredBy = []
@@ -560,12 +560,11 @@ func testUpdate(t *testing.T) {
 			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 		},
 		expPkg: &Package{
-			vcsMode:     VCSModeGit,
-			ImportPath:  testGitRepo,
-			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
-			RemoteName:  gitDefRemoteName,
-			RemoteURL:   "git@github.com:shuLhan/beku_test.git",
-			VersionNext: "c9f69fb",
+			vcsMode:    VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
 		},
 	}, {
 		desc: "Update version",
@@ -586,14 +585,13 @@ func testUpdate(t *testing.T) {
 			isTag:      true,
 		},
 		expPkg: &Package{
-			vcsMode:     VCSModeGit,
-			ImportPath:  testGitRepo,
-			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
-			RemoteName:  gitDefRemoteName,
-			RemoteURL:   "git@github.com:shuLhan/beku_test.git",
-			Version:     "v0.1.0",
-			VersionNext: "c9f69fb",
-			isTag:       true,
+			vcsMode:    VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			Version:    "v0.1.0",
+			isTag:      true,
 		},
 	}, {
 		desc: "Update version back",
@@ -614,26 +612,26 @@ func testUpdate(t *testing.T) {
 			isTag:      true,
 		},
 		expPkg: &Package{
-			vcsMode:     VCSModeGit,
-			ImportPath:  testGitRepo,
-			FullPath:    filepath.Join(testEnv.dirSrc, testGitRepo),
-			RemoteName:  gitDefRemoteName,
-			RemoteURL:   "git@github.com:shuLhan/beku_test.git",
-			Version:     "c9f69fb",
-			VersionNext: "c9f69fb",
-			isTag:       false,
+			vcsMode:    VCSModeGit,
+			ImportPath: testGitRepo,
+			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
+			RemoteName: gitDefRemoteName,
+			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			Version:    "c9f69fb",
+			isTag:      false,
 		},
 	}}
 
 	for _, c := range cases {
 		t.Log(c.desc)
 
-		testResetOutput(t, true)
+		mock.Reset(true)
 
 		err := c.curPkg.Update(c.newPkg)
 
-		testResetOutput(t, false)
-		stdout, stderr := testGetOutput(t)
+		mock.Reset(false)
+		stdout := mock.Output()
+		stderr := mock.Error()
 
 		if err != nil {
 			t.Log("stderr:", stderr)
