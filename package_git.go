@@ -58,7 +58,8 @@ func (pkg *Package) gitInstall() (err error) {
 	}
 
 	if pkg.isTag {
-		err = git.CheckoutRevision(pkg.FullPath, "", "", pkg.Version)
+		err = git.CheckoutRevision(pkg.FullPath, pkg.RemoteName,
+			pkg.RemoteBranch, pkg.Version)
 		if err != nil {
 			err = fmt.Errorf("gitInstall: %s", err)
 			return
@@ -74,6 +75,7 @@ func (pkg *Package) gitInstall() (err error) {
 func (pkg *Package) gitScan() (err error) {
 	pkg.Version, err = git.LatestVersion(pkg.FullPath)
 	if err != nil {
+		err = fmt.Errorf("gitScan: %s", err)
 		return
 	}
 
@@ -144,7 +146,8 @@ func (pkg *Package) gitUpdate(newPkg *Package) (err error) {
 		return
 	}
 
-	err = git.CheckoutRevision(pkg.FullPath, "", "", newPkg.Version)
+	err = git.CheckoutRevision(pkg.FullPath, pkg.RemoteName,
+		pkg.RemoteBranch, newPkg.Version)
 	if err != nil {
 		err = fmt.Errorf("gitUpdate: %s", err)
 	}

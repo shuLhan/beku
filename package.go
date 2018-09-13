@@ -30,19 +30,20 @@ const (
 // tag or not, and VCS mode.
 //
 type Package struct {
-	ImportPath  string
-	FullPath    string
-	ScanPath    string
-	RemoteName  string
-	RemoteURL   string
-	Version     string
-	VersionNext string
-	DepsMissing []string
-	Deps        []string
-	RequiredBy  []string
-	vcsMode     string
-	state       packageState
-	isTag       bool
+	ImportPath   string
+	FullPath     string
+	ScanPath     string
+	RemoteName   string
+	RemoteURL    string
+	RemoteBranch string
+	Version      string
+	VersionNext  string
+	DepsMissing  []string
+	Deps         []string
+	RequiredBy   []string
+	vcsMode      string
+	state        packageState
+	isTag        bool
 }
 
 //
@@ -87,7 +88,13 @@ func NewPackage(env *Env, pkgName, importPath string) (
 func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 	switch pkg.vcsMode {
 	case VCSModeGit:
-		err = git.CheckoutRevision(pkg.FullPath, "", "", newVersion)
+		if len(pkg.RemoteBranch) == 0 {
+			err = pkg.gitGetBranch()
+			if err != nil {
+				return
+			}
+		}
+		err = git.CheckoutRevision(pkg.FullPath, pkg.RemoteName, pkg.RemoteBranch, newVersion)
 	}
 
 	return
@@ -340,8 +347,7 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 	}
 
 	if debug.Value >= 1 {
-		fmt.Printf("[PKG] GetRecursiveImports %s >>> %s %s\n",
-			pkg.ImportPath, cmd.Dir, cmd.Args)
+		fmt.Printf("= GetRecursiveImports %s %s\n", cmd.Dir, cmd.Args)
 	}
 
 	out, err := cmd.Output()
@@ -473,6 +479,8 @@ func (pkg *Package) load(sec *ini.Section) {
 			pkg.RemoteName = v.Value
 		case keyRemoteURL:
 			pkg.RemoteURL = v.Value
+		case keyRemoteBranch:
+			pkg.RemoteBranch = v.Value
 		case keyVersion:
 			pkg.Version = v.Value
 			pkg.isTag = IsTagVersion(pkg.Version)
@@ -506,8 +514,7 @@ func (pkg *Package) GoInstall(env *Env) (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf("[PKG] GoInstall %s >>> %s %s %s\n", pkg.ImportPath,
-		cmd.Dir, cmd.Env, cmd.Args)
+	fmt.Printf("= GoInstall %s\n%s\n%s\n", cmd.Dir, cmd.Env, cmd.Args)
 
 	err = cmd.Run()
 
