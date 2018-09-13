@@ -533,6 +533,7 @@ func (pkg *Package) String() string {
           VCS = %s
    RemoteName = %s
     RemoteURL = %s
+ RemoteBranch = %s
       Version = %s
   VersionNext = %s
         IsTag = %v
@@ -540,8 +541,8 @@ func (pkg *Package) String() string {
    RequiredBy = %v
   DepsMissing = %v
 `, pkg.ImportPath, pkg.FullPath, pkg.ScanPath, pkg.vcsMode, pkg.RemoteName,
-		pkg.RemoteURL, pkg.Version, pkg.VersionNext, pkg.isTag,
-		pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
+		pkg.RemoteURL, pkg.RemoteBranch, pkg.Version, pkg.VersionNext,
+		pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
 
 	return buf.String()
 }
