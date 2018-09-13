@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/shuLhan/beku"
+	"github.com/shuLhan/share/lib/debug"
 )
 
 const (
@@ -441,7 +442,7 @@ func newCommand() (cmd *command, err error) {
 		}
 	}
 
-	if beku.Debug >= beku.DebugL2 {
+	if debug.Value >= 2 {
 		fmt.Printf("Environment: %s", cmd.env.String())
 	}
 

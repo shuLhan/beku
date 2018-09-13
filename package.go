@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/git"
 	"github.com/shuLhan/share/lib/ini"
 	libio "github.com/shuLhan/share/lib/io"
@@ -51,14 +52,14 @@ type Package struct {
 func NewPackage(env *Env, pkgName, importPath string) (
 	pkg *Package, err error,
 ) {
-	repoRoot, err := vcs.RepoRootForImportPath(importPath, Debug >= DebugL2)
+	repoRoot, err := vcs.RepoRootForImportPath(importPath, debug.Value >= 2)
 	if err != nil {
 		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> error: %s\n", err.Error())
 		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> skip %s\n", pkgName)
 		return
 	}
 
-	if Debug >= DebugL2 {
+	if debug.Value >= 2 {
 		fmt.Printf("[PKG] NewPackage >>> %+v\n", *repoRoot)
 	}
 
@@ -143,7 +144,7 @@ func (pkg *Package) GoClean() (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Printf("[PKG] GoClean %s >>> %s %s\n", pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
 
@@ -208,7 +209,7 @@ func (pkg *Package) Remove() (err error) {
 		return
 	}
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Printf("[PKG] Remove %s >>> %s\n", pkg.ImportPath,
 			pkg.FullPath)
 	}
@@ -298,7 +299,7 @@ func (pkg *Package) Scan() (err error) {
 // only external dependencies.
 //
 func (pkg *Package) ScanDeps(env *Env) (err error) {
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Println("[PKG] ScanDeps", pkg.ImportPath)
 	}
 
@@ -330,7 +331,7 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 		cmd.Dir = pkg.ScanPath
 	}
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Printf("[PKG] GetRecursiveImports %s >>> %s %s\n",
 			pkg.ImportPath, cmd.Dir, cmd.Args)
 	}
@@ -393,7 +394,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 
 	// (1)
 	if strings.HasPrefix(importPath, pkg.ImportPath) {
-		if Debug >= DebugL2 {
+		if debug.Value >= 2 {
 			fmt.Printf("[PKG] addDep %s >>> skip self import: %s\n",
 				pkg.ImportPath, importPath)
 		}
@@ -416,7 +417,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		if pkgs[0] != env.pkgsStd[x] {
 			continue
 		}
-		if Debug >= DebugL2 {
+		if debug.Value >= 2 {
 			fmt.Printf("[PKG] addDep %s >>> skip std: %s\n",
 				pkg.ImportPath, importPath)
 		}
@@ -435,7 +436,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		return true
 	}
 
-	if Debug >= DebugL2 {
+	if debug.Value >= 2 {
 		fmt.Printf("[PKG] addDep %s >>> missing: %s\n",
 			pkg.ImportPath, importPath)
 	}
@@ -486,7 +487,7 @@ func (pkg *Package) load(sec *ini.Section) {
 func (pkg *Package) GoInstall(env *Env) (err error) {
 	//nolint:gas
 	cmd := exec.Command("go", "install")
-	if Debug >= DebugL2 {
+	if debug.Value >= 2 {
 		cmd.Args = append(cmd.Args, "-v")
 	}
 	cmd.Args = append(cmd.Args, "./...")
@@ -610,7 +611,7 @@ func (pkg *Package) pushDep(importPath string) bool {
 
 	pkg.Deps = append(pkg.Deps, importPath)
 
-	if Debug >= DebugL2 {
+	if debug.Value >= 2 {
 		fmt.Printf("[PKG] pushDep %s >>> %s\n", pkg.ImportPath,
 			importPath)
 	}

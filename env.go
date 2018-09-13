@@ -15,9 +15,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/ini"
 	libio "github.com/shuLhan/share/lib/io"
 )
@@ -63,9 +63,6 @@ func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
 	if len(build.Default.GOROOT) == 0 {
 		return nil, ErrGOROOT
 	}
-
-	debug, _ := strconv.Atoi(os.Getenv(envDEBUG))
-	Debug = debugMode(debug)
 
 	env = &Env{
 		path:         os.Getenv(envPATH),
@@ -436,7 +433,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 // (2) skip directory without `.git`
 //
 func (env *Env) scanPackages(srcPath string) (err error) {
-	if Debug >= DebugL2 {
+	if debug.Value >= 2 {
 		fmt.Println("[ENV] scanPackages >>>", srcPath)
 	}
 
@@ -507,7 +504,7 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		return
 	}
 
-	if Debug >= DebugL2 {
+	if debug.Value >= 2 {
 		fmt.Println("[ENV] newPackage >>>", pkg.ImportPath)
 	}
 
@@ -575,7 +572,7 @@ func (env *Env) Load(file string) (err error) {
 		env.dbFile = file
 	}
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Println("[ENV] Load >>>", env.dbFile)
 	}
 
@@ -802,7 +799,7 @@ This package is required by,
 
 		pkgImportPath := filepath.Join(env.dirPkg, importPath)
 
-		if Debug >= DebugL1 {
+		if debug.Value >= 1 {
 			fmt.Println("[ENV] Remove >>> Removing", pkgImportPath)
 		}
 
@@ -928,7 +925,7 @@ func (env *Env) Save(file string) (err error) {
 		}
 	}
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Println("[ENV] Save >>>", file)
 	}
 
@@ -1056,7 +1053,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		newPkg.isTag = curPkg.isTag
 	}
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Println("[ENV] update >>>", newPkg)
 	}
 
@@ -1137,7 +1134,7 @@ func (env *Env) installMissing(pkg *Package) (err error) {
 func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 	var updated bool
 
-	if Debug >= DebugL1 {
+	if debug.Value >= 1 {
 		fmt.Println("[ENV] updateMissing >>>", newPkg.ImportPath)
 	}
 

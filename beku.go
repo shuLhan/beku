@@ -25,8 +25,7 @@ const (
 	dirTestdata = "testdata"
 	dirVendor   = "vendor"
 
-	envDEBUG = "BEKU_DEBUG"
-	envPATH  = "PATH"
+	envPATH = "PATH"
 
 	msgCleanDir      = "Clean destination directory?"
 	msgContinue      = "Continue?"
@@ -59,12 +58,6 @@ var (
 	errDirNotEmpty   = "directory %s is not empty"
 	errExcluded      = "Package '%s' is in excluded list\n"
 	errVCS           = "Unknown VCS mode %s"
-)
-
-var (
-	// Debug level for this package. Set from environment variable
-	// BEKU_DEBUG.
-	Debug debugMode
 )
 
 var (
