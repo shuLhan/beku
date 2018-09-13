@@ -15,8 +15,8 @@ import (
 
 const (
 	verMajor    = 0
-	verMinor    = 4
-	verPatch    = 1
+	verMinor    = 5
+	verPatch    = 0
 	verMetadata = "-dev"
 )
 
