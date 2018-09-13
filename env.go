@@ -182,7 +182,7 @@ func (env *Env) Freeze() (err error) {
 	for _, pkg := range env.pkgs {
 		fmt.Printf("\n[ENV] Freeze >>> %s@%s\n", pkg.ImportPath, pkg.Version)
 
-		localPkg, err = env.GetPackage(pkg.ImportPath)
+		localPkg, err = env.GetLocalPackage(pkg.ImportPath)
 		if err != nil {
 			return
 		}
@@ -239,9 +239,9 @@ out:
 }
 
 //
-// GetPackage will return installed package from system.
+// GetLocalPackage will return installed package from system.
 //
-func (env *Env) GetPackage(importPath string) (pkg *Package, err error) {
+func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 	fullPath := filepath.Join(env.dirSrc, importPath)
 	dirGit := filepath.Join(fullPath, gitDir)
 
