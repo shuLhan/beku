@@ -207,6 +207,9 @@ func (pkg *Package) IsEqual(other *Package) bool {
 	if pkg.RemoteURL != other.RemoteURL {
 		return false
 	}
+	if pkg.RemoteBranch != other.RemoteBranch {
+		return false
+	}
 	if pkg.Version != other.Version {
 		return false
 	}
