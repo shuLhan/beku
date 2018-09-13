@@ -182,10 +182,6 @@ func (pkg *Package) Install() (err error) {
 		err = pkg.gitInstall()
 	}
 
-	if err != nil {
-		return
-	}
-
 	return
 }
 
