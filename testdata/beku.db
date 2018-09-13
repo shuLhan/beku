@@ -5,6 +5,7 @@ vendor = false
 vcs = git
 remote-name = origin
 remote-url = https://github.com/alecthomas/gometalinter
+remote-branch = master
 version = 0725fc6
 deps = github.com/stretchr/testify
 deps = gotest.tools
@@ -15,6 +16,7 @@ deps = github.com/google/go-cmp
 vcs = git
 remote-name = origin
 remote-url = https://github.com/codegangsta/cli
+remote-branch = master
 version = 8e01ec4
 required-by = github.com/ksubedi/gomove
 missing = github.com/BurntSushi/toml
@@ -25,6 +27,7 @@ missing = gopkg.in/yaml.v2
 vcs = git
 remote-name = origin
 remote-url = https://github.com/go-fsnotify/fsnotify
+remote-branch = master
 version = v1.4.7
 deps = golang.org/x/sys
 
@@ -32,6 +35,7 @@ deps = golang.org/x/sys
 vcs = git
 remote-name = origin
 remote-url = https://github.com/go-log/log
+remote-branch = master
 version = v0.1.0
 deps = github.com/sirupsen/logrus
 deps = golang.org/x/net
@@ -41,6 +45,7 @@ missing = google.golang.org/appengine/log
 vcs = git
 remote-name = origin
 remote-url = https://github.com/golang/lint
+remote-branch = master
 version = c5fb716
 deps = golang.org/x/tools
 
@@ -48,12 +53,14 @@ deps = golang.org/x/tools
 vcs = git
 remote-name = origin
 remote-url = https://github.com/golang/protobuf
+remote-branch = master
 version = bbd03ef
 
 [package "github.com/google/go-github"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/google/go-github
+remote-branch = master
 version = 08e68b5
 deps = github.com/google/go-querystring
 deps = golang.org/x/net
@@ -66,6 +73,7 @@ missing = google.golang.org/appengine/log
 vcs = git
 remote-name = origin
 remote-url = https://github.com/google/go-querystring
+remote-branch = master
 version = 53e6ce1
 required-by = github.com/google/go-github
 
@@ -73,24 +81,28 @@ required-by = github.com/google/go-github
 vcs = git
 remote-name = origin
 remote-url = https://github.com/hashicorp/consul
+remote-branch = master
 version = v1.1.0
 
 [package "github.com/influxdata/chronograf"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/influxdata/chronograf
+remote-branch = master
 version = 0204873d5
 
 [package "github.com/jguer/go-alpm"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/jguer/go-alpm
+remote-branch = master
 version = 6150b61
 
 [package "github.com/json-iterator/go"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/json-iterator/go
+remote-branch = master
 version = 1.1.3
 required-by = github.com/shuLhan/gontacts
 missing = github.com/modern-go/concurrent
@@ -100,12 +112,14 @@ missing = github.com/modern-go/reflect2
 vcs = git
 remote-name = origin
 remote-url = https://github.com/kevinburke/go-bindata
+remote-branch = master
 version = 2197b05
 
 [package "github.com/kisielk/errcheck"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/kisielk/errcheck
+remote-branch = master
 version = 23699b7
 deps = github.com/kisielk/gotool
 deps = golang.org/x/tools
@@ -114,6 +128,7 @@ deps = golang.org/x/tools
 vcs = git
 remote-name = origin
 remote-url = https://github.com/kisielk/gotool
+remote-branch = master
 version = d6ce626
 required-by = github.com/kisielk/errcheck
 
@@ -121,12 +136,14 @@ required-by = github.com/kisielk/errcheck
 vcs = git
 remote-name = origin
 remote-url = https://github.com/loadimpact/k6
+remote-branch = master
 version = 1ddf285
 
 [package "github.com/mattn/go-colorable"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/mattn/go-colorable
+remote-branch = master
 version = efa5899
 deps = github.com/mattn/go-isatty
 required-by = github.com/mgutz/ansi
@@ -136,6 +153,7 @@ required-by = github.com/ksubedi/gomove
 vcs = git
 remote-name = origin
 remote-url = https://github.com/mattn/go-isatty
+remote-branch = master
 version = 6ca4dbf
 required-by = github.com/mattn/go-colorable
 required-by = github.com/mgutz/ansi
@@ -145,6 +163,7 @@ required-by = github.com/ksubedi/gomove
 vcs = git
 remote-name = origin
 remote-url = https://github.com/mgutz/ansi
+remote-branch = master
 version = 9520e82
 deps = github.com/mattn/go-colorable
 deps = github.com/mattn/go-isatty
@@ -154,42 +173,49 @@ required-by = github.com/ksubedi/gomove
 vcs = git
 remote-name = origin
 remote-url = https://github.com/miekg/dns
+remote-branch = master
 version = 906238e
 
 [package "github.com/mikkeloscar/aur"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/mikkeloscar/aur
+remote-branch = master
 version = 9050804
 
 [package "github.com/mikkeloscar/gopkgbuild"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/mikkeloscar/gopkgbuild
+remote-branch = master
 version = 32274fc
 
 [package "github.com/mitchellh/hashstructure"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/mitchellh/hashstructure
+remote-branch = master
 version = 2bca23e
 
 [package "github.com/naoina/denco"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/naoina/denco
+remote-branch = master
 version = a2656d3
 
 [package "github.com/pborman/uuid"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/pborman/uuid
+remote-branch = master
 version = c65b2f8
 
 [package "github.com/pkg/errors"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/pkg/errors
+remote-branch = master
 version = 816c908
 required-by = gotest.tools
 required-by = github.com/alecthomas/gometalinter
@@ -198,6 +224,7 @@ required-by = github.com/alecthomas/gometalinter
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/beku.git
+remote-branch = master
 version = 3fb3f96
 deps = github.com/shuLhan/share
 
@@ -205,6 +232,7 @@ deps = github.com/shuLhan/share
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/dsv.git
+remote-branch = master
 version = bbe8681
 deps = github.com/shuLhan/numerus
 deps = github.com/shuLhan/tabula
@@ -214,12 +242,14 @@ deps = github.com/shuLhan/tekstus
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/go-bindata.git
+remote-branch = master
 version = eb5746d
 
 [package "github.com/shuLhan/gontacts"]
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/gontacts.git
+remote-branch = master
 version = d4786e8
 deps = github.com/json-iterator/go
 
@@ -227,12 +257,14 @@ deps = github.com/json-iterator/go
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/haminer.git
+remote-branch = master
 version = 42be4cb
 
 [package "github.com/shuLhan/numerus"]
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/numerus.git
+remote-branch = master
 version = 104dd6b
 required-by = github.com/shuLhan/dsv
 required-by = github.com/shuLhan/tabula
@@ -242,6 +274,7 @@ required-by = github.com/shuLhan/tekstus
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/share.git
+remote-branch = master
 version = b2c8fd7
 required-by = github.com/shuLhan/beku
 
@@ -249,6 +282,7 @@ required-by = github.com/shuLhan/beku
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/tabula.git
+remote-branch = master
 version = 14d5c16
 deps = github.com/shuLhan/numerus
 deps = github.com/shuLhan/tekstus
@@ -258,6 +292,7 @@ required-by = github.com/shuLhan/dsv
 vcs = git
 remote-name = origin
 remote-url = git@github.com:shuLhan/tekstus.git
+remote-branch = master
 version = 651065d
 deps = github.com/shuLhan/numerus
 required-by = github.com/shuLhan/dsv
@@ -267,6 +302,7 @@ required-by = github.com/shuLhan/tabula
 vcs = git
 remote-name = origin
 remote-url = https://github.com/sirupsen/logrus
+remote-branch = master
 version = 68cec9f
 required-by = github.com/go-log/log
 missing = gopkg.in/gemnasium/logrus-airbrake-hook.v2
@@ -275,12 +311,14 @@ missing = gopkg.in/gemnasium/logrus-airbrake-hook.v2
 vcs = git
 remote-name = origin
 remote-url = https://github.com/skratchdot/open-golang
+remote-branch = master
 version = 75fb7ed
 
 [package "github.com/yosssi/ace"]
 vcs = git
 remote-name = origin
 remote-url = https://github.com/yosssi/ace
+remote-branch = master
 version = v0.0.5
 missing = github.com/yosssi/gohtml
 
@@ -288,12 +326,14 @@ missing = github.com/yosssi/gohtml
 vcs = git
 remote-name = origin
 remote-url = https://github.com/zyedidia/micro
+remote-branch = master
 version = nightly
 
 [package "golang.org/x/net"]
 vcs = git
 remote-name = origin
 remote-url = https://golang.org/x/net
+remote-branch = master
 version = 2491c5d
 deps = golang.org/x/text
 required-by = github.com/go-log/log
@@ -307,6 +347,7 @@ missing = golang.org/x/crypto/ssh/terminal
 vcs = git
 remote-name = origin
 remote-url = https://go.googlesource.com/oauth2
+remote-branch = master
 version = cdc340f
 deps = golang.org/x/net
 required-by = github.com/google/go-github
@@ -316,6 +357,7 @@ missing = cloud.google.com/go/compute/metadata
 vcs = git
 remote-name = origin
 remote-url = https://go.googlesource.com/sys
+remote-branch = master
 version = 37707fd
 required-by = github.com/go-fsnotify/fsnotify
 
@@ -323,6 +365,7 @@ required-by = github.com/go-fsnotify/fsnotify
 vcs = git
 remote-name = origin
 remote-url = https://go.googlesource.com/tools
+remote-branch = master
 version = c1547a3f
 deps = golang.org/x/net
 required-by = github.com/golang/lint
@@ -337,6 +380,7 @@ required-by = github.com/ksubedi/gomove
 vcs = git
 remote-name = origin
 remote-url = https://go.googlesource.com/tour
+remote-branch = master
 version = 65fff99
 deps = golang.org/x/net
 deps = golang.org/x/tools
@@ -345,6 +389,7 @@ deps = golang.org/x/tools
 vcs = git
 remote-name = origin
 remote-url = https://github.com/stretchr/testify
+remote-branch = master
 version = v1.2.1
 required-by = github.com/alecthomas/gometalinter
 
@@ -352,6 +397,7 @@ required-by = github.com/alecthomas/gometalinter
 vcs = git
 remote-name = origin
 remote-url = https://github.com/gotestyourself/gotestyourself
+remote-branch = master
 version = v2.0.0
 deps = github.com/pkg/errors
 deps = golang.org/x/tools
@@ -363,6 +409,7 @@ missing = github.com/spf13/pflag
 vcs = git
 remote-name = origin
 remote-url = https://github.com/google/go-cmp
+remote-branch = master
 version = v0.2.0
 required-by = github.com/alecthomas/gometalinter
 required-by = gotest.tools
@@ -371,6 +418,7 @@ required-by = gotest.tools
 vcs = git
 remote-name = origin
 remote-url = https://github.com/golang/text
+remote-branch = master
 version = v0.3.0
 deps = golang.org/x/tools
 deps = golang.org/x/text
@@ -379,6 +427,7 @@ deps = golang.org/x/text
 vcs = git
 remote-name = origin
 remote-url = https://github.com/ksubedi/gomove
+remote-branch = master
 version = 0.2.17
 deps = github.com/codegangsta/cli
 deps = github.com/mattn/go-colorable

@@ -69,14 +69,15 @@ func testPackageInstall(t *testing.T) {
 		desc: `Without version`,
 		pkg:  testGitPkgShare,
 		expPkg: &Package{
-			ImportPath: testGitRepoShare,
-			ScanPath:   testGitPkgShare.FullPath,
-			FullPath:   testGitPkgShare.FullPath,
-			RemoteName: gitDefRemoteName,
-			RemoteURL:  "https://" + testGitRepoShare,
-			Version:    "157a004",
-			vcsMode:    VCSModeGit,
-			state:      packageStateNew,
+			ImportPath:   testGitRepoShare,
+			ScanPath:     testGitPkgShare.FullPath,
+			FullPath:     testGitPkgShare.FullPath,
+			RemoteName:   gitDefRemoteName,
+			RemoteURL:    "https://" + testGitRepoShare,
+			RemoteBranch: "master",
+			Version:      "157a004",
+			vcsMode:      VCSModeGit,
+			state:        packageStateNew,
 		},
 	}, {
 		desc:   `Install again`,
@@ -521,6 +522,7 @@ func testPackageString(t *testing.T) {
           VCS = git
    RemoteName = origin
     RemoteURL = https://` + testGitRepo + `
+ RemoteBranch = master
       Version = v0.2.0
   VersionNext = 
         IsTag = true
