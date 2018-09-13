@@ -199,7 +199,7 @@ func (env *Env) Freeze() (err error) {
 			continue
 		}
 
-		err = localPkg.Update(pkg)
+		err = pkg.Freeze()
 		if err != nil {
 			return
 		}

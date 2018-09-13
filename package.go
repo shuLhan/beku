@@ -127,6 +127,14 @@ func (pkg *Package) Fetch() (err error) {
 	return
 }
 
+func (pkg *Package) Freeze() (err error) {
+	switch pkg.vcsMode {
+	case VCSModeGit:
+		err = pkg.gitFreeze()
+	}
+	return
+}
+
 //
 // GoClean will remove the package binaries and archives.
 //

@@ -6,9 +6,29 @@ package beku
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/git"
 )
+
+func (pkg *Package) gitFreeze() (err error) {
+	err = git.FetchAll(pkg.FullPath)
+	if err != nil {
+		return
+	}
+	if len(pkg.RemoteBranch) == 0 {
+		err = pkg.gitGetBranch()
+		if err != nil {
+			return
+		}
+	}
+
+	err = git.CheckoutRevision(pkg.FullPath, pkg.RemoteName,
+		pkg.RemoteBranch, pkg.Version)
+
+	return
+}
 
 //
 // gitInstall the package into source directory.
@@ -58,7 +78,50 @@ func (pkg *Package) gitScan() (err error) {
 	}
 
 	pkg.RemoteURL, err = git.GetRemoteURL(pkg.FullPath, "")
+	if err != nil {
+		err = fmt.Errorf("gitScan: %s", err)
+		return
+	}
 
+	err = pkg.gitGetBranch()
+
+	return
+}
+
+func (pkg *Package) gitGetBranch() (err error) {
+	branches, err := git.RemoteBranches(pkg.FullPath)
+	if err != nil {
+		err = fmt.Errorf("gitGetBranch: %s", err)
+		return
+	}
+
+	// Select branch by version, master, or the last branch.
+	midx := -1
+	vidx := -1
+	for x := 0; x < len(branches); x++ {
+		if branches[x] == gitDefBranch {
+			midx = x
+		}
+		if branches[x][0] == 'v' {
+			if vidx < 0 {
+				vidx = x
+				continue
+			}
+			if strings.Compare(branches[vidx], branches[x]) == -1 {
+				vidx = x
+			}
+		}
+	}
+	if midx >= 0 {
+		pkg.RemoteBranch = branches[midx]
+	} else if vidx >= 0 {
+		pkg.RemoteBranch = branches[vidx]
+	} else {
+		pkg.RemoteBranch = branches[len(branches)-1]
+	}
+	if debug.Value >= 1 {
+		fmt.Printf("= gitGetBranch: %s\n", pkg.RemoteBranch)
+	}
 	return
 }
 
