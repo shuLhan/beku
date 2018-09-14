@@ -1049,7 +1049,7 @@ func (env *Env) install(pkg *Package) (ok bool, err error) {
 }
 
 func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
-	err = curPkg.Fetch()
+	err = curPkg.FetchLatestVersion()
 	if err != nil {
 		return
 	}
@@ -1271,7 +1271,7 @@ func (env *Env) SyncAll() (err error) {
 		fmt.Printf("[ENV] SyncAll %s >>> Current version is %s\n",
 			pkg.ImportPath, pkg.Version)
 
-		err = pkg.Fetch()
+		err = pkg.FetchLatestVersion()
 		if err != nil {
 			return
 		}

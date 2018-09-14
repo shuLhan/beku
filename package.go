@@ -112,10 +112,10 @@ func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 }
 
 //
-// Fetch will try to update the package and get the latest version (tag or
+// FetchLatestVersion will try to update the package and get the latest version (tag or
 // commit).
 //
-func (pkg *Package) Fetch() (err error) {
+func (pkg *Package) FetchLatestVersion() (err error) {
 	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = git.FetchAll(pkg.FullPath)
