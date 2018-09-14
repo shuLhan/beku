@@ -32,7 +32,6 @@ const (
 type Package struct {
 	ImportPath   string
 	FullPath     string
-	ScanPath     string
 	RemoteName   string
 	RemoteURL    string
 	RemoteBranch string
@@ -71,8 +70,7 @@ func NewPackage(env *Env, pkgName, importPath string) (
 
 	pkg = &Package{
 		ImportPath: repoRoot.Root,
-		FullPath:   filepath.Join(env.dirSrc, repoRoot.Root),
-		ScanPath:   filepath.Join(env.dirSrc, importPath),
+		FullPath:   filepath.Join(env.dirSrc, importPath),
 		RemoteName: gitDefRemoteName,
 		RemoteURL:  repoRoot.Repo,
 		vcsMode:    repoRoot.VCS.Cmd,
@@ -341,10 +339,6 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 	cmd.Dir = pkg.FullPath
 	cmd.Stderr = defStderr
 
-	if len(pkg.ScanPath) > 0 {
-		cmd.Dir = pkg.ScanPath
-	}
-
 	if debug.Value >= 1 {
 		fmt.Printf("= GetRecursiveImports %s %s\n", cmd.Dir, cmd.Args)
 	}
@@ -533,7 +527,6 @@ func (pkg *Package) String() string {
 	fmt.Fprintf(&buf, `
 [package "%s"]
      FullPath = %s
-     ScanPath = %s
           VCS = %s
    RemoteName = %s
     RemoteURL = %s
@@ -544,7 +537,7 @@ func (pkg *Package) String() string {
          Deps = %v
    RequiredBy = %v
   DepsMissing = %v
-`, pkg.ImportPath, pkg.FullPath, pkg.ScanPath, pkg.vcsMode, pkg.RemoteName,
+`, pkg.ImportPath, pkg.FullPath, pkg.vcsMode, pkg.RemoteName,
 		pkg.RemoteURL, pkg.RemoteBranch, pkg.Version, pkg.VersionNext,
 		pkg.isTag, pkg.Deps, pkg.RequiredBy, pkg.DepsMissing)
 

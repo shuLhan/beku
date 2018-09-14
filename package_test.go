@@ -70,7 +70,6 @@ func testPackageInstall(t *testing.T) {
 		pkg:  testGitPkgInstall,
 		expPkg: &Package{
 			ImportPath:   testGitRepo,
-			ScanPath:     testGitPkgInstall.FullPath,
 			FullPath:     testGitPkgInstall.FullPath,
 			RemoteName:   gitDefRemoteName,
 			RemoteURL:    testGitPkgInstall.RemoteURL,
@@ -518,7 +517,6 @@ func testPackageString(t *testing.T) {
 		exp: `
 [package "github.com/shuLhan/beku_test"]
      FullPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
-     ScanPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
           VCS = git
    RemoteName = origin
     RemoteURL = ` + testGitRepoSrcLocal + `

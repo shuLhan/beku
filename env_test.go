@@ -497,7 +497,6 @@ func testEnvScan(t *testing.T) {
 		expPkgs: []*Package{{
 			ImportPath:   testGitRepo,
 			FullPath:     filepath.Join(testEnv.dirSrc, testGitRepo),
-			ScanPath:     filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName:   "origin",
 			RemoteURL:    testGitRepoSrcLocal,
 			RemoteBranch: "master",
