@@ -442,7 +442,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 // (2) skip directory without `.git`
 //
 func (env *Env) scanPackages(srcPath string) (err error) {
-	if debug.Value >= 2 {
+	if debug.Value >= 1 {
 		fmt.Println("[ENV] scanPackages >>>", srcPath)
 	}
 
@@ -513,7 +513,7 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		return
 	}
 
-	if debug.Value >= 2 {
+	if debug.Value >= 1 {
 		fmt.Println("[ENV] newPackage >>>", pkg.ImportPath)
 	}
 
