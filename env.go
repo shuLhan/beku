@@ -1323,7 +1323,9 @@ func (env *Env) SyncAll() (err error) {
 
 	for _, pkg := range env.pkgs {
 		if pkg.state&packageStateDirty > 0 {
-			env.postSync(pkg)
+			_ = env.postSync(pkg)
+			// Ignore error. Go install may failed due to missing
+			// dependencies.
 		}
 	}
 
