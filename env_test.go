@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/test"
 	"github.com/shuLhan/share/lib/test/mock"
 	"github.com/shuLhan/tekstus/diff"
@@ -448,7 +449,9 @@ func testEnvSave(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		fmt.Printf("diffs: %s\n", diffs)
+		if debug.Value >= 1 {
+			fmt.Printf("diffs: %s\n", diffs)
+		}
 	}
 }
 
@@ -496,7 +499,7 @@ func testEnvScan(t *testing.T) {
 			FullPath:     filepath.Join(testEnv.dirSrc, testGitRepo),
 			ScanPath:     filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName:   "origin",
-			RemoteURL:    "https://github.com/shuLhan/beku_test",
+			RemoteURL:    testGitRepoSrcLocal,
 			RemoteBranch: "master",
 			Version:      "v0.2.0",
 			isTag:        true,

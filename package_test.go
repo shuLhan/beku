@@ -27,7 +27,7 @@ func testPackageRemove(t *testing.T) {
 		pkgName: testPkgNotExist,
 	}, {
 		desc: `Package exist`,
-		pkg:  testGitPkgShare,
+		pkg:  testGitPkgInstall,
 	}}
 
 	for _, c := range cases {
@@ -67,13 +67,13 @@ func testPackageInstall(t *testing.T) {
 		expPkg *Package
 	}{{
 		desc: `Without version`,
-		pkg:  testGitPkgShare,
+		pkg:  testGitPkgInstall,
 		expPkg: &Package{
-			ImportPath:   testGitRepoShare,
-			ScanPath:     testGitPkgShare.FullPath,
-			FullPath:     testGitPkgShare.FullPath,
+			ImportPath:   testGitRepo,
+			ScanPath:     testGitPkgInstall.FullPath,
+			FullPath:     testGitPkgInstall.FullPath,
 			RemoteName:   gitDefRemoteName,
-			RemoteURL:    "https://" + testGitRepoShare,
+			RemoteURL:    testGitPkgInstall.RemoteURL,
 			RemoteBranch: "master",
 			Version:      "157a004",
 			vcsMode:      VCSModeGit,
@@ -81,7 +81,7 @@ func testPackageInstall(t *testing.T) {
 		},
 	}, {
 		desc:   `Install again`,
-		pkg:    testGitPkgShare,
+		pkg:    testGitPkgInstall,
 		expErr: "gitInstall: Clone: exit status 128",
 	}}
 
@@ -285,16 +285,16 @@ func testPushRequiredBy(t *testing.T) {
 		expRequiredBy []string
 	}{{
 		desc:       "Not exist yet",
-		importPath: testGitRepoShare,
+		importPath: testGitRepo,
 		exp:        true,
 		expRequiredBy: []string{
-			testGitRepoShare,
+			testGitRepo,
 		},
 	}, {
 		desc:       "Already exist",
-		importPath: testGitRepoShare,
+		importPath: testGitRepo,
 		expRequiredBy: []string{
-			testGitRepoShare,
+			testGitRepo,
 		},
 	}}
 
@@ -326,12 +326,12 @@ func testPackageRemoveRequiredBy(t *testing.T) {
 		importPath: testPkgNotExist,
 		exp:        false,
 		expRequiredBy: []string{
-			testGitRepoShare,
+			testGitRepo,
 		},
 	}, {
 		desc:       `With importPath found`,
 		pkg:        testGitPkgCur,
-		importPath: testGitRepoShare,
+		importPath: testGitRepo,
 		exp:        true,
 	}}
 
@@ -521,7 +521,7 @@ func testPackageString(t *testing.T) {
      ScanPath = ` + filepath.Join(testEnv.dirSrc, testGitRepo) + `
           VCS = git
    RemoteName = origin
-    RemoteURL = https://` + testGitRepo + `
+    RemoteURL = ` + testGitRepoSrcLocal + `
  RemoteBranch = master
       Version = v0.2.0
   VersionNext = 
@@ -559,14 +559,14 @@ func testUpdate(t *testing.T) {
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			RemoteURL:  testGitRepoSrcLocal,
 		},
 		expPkg: &Package{
 			vcsMode:    VCSModeGit,
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			RemoteURL:  testGitRepoSrcLocal,
 		},
 	}, {
 		desc: "Update version",
@@ -582,7 +582,7 @@ func testUpdate(t *testing.T) {
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			RemoteURL:  testGitRepoSrcLocal,
 			Version:    "v0.1.0",
 			isTag:      true,
 		},
@@ -591,7 +591,7 @@ func testUpdate(t *testing.T) {
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			RemoteURL:  testGitRepoSrcLocal,
 			Version:    "v0.1.0",
 			isTag:      true,
 		},
@@ -609,7 +609,7 @@ func testUpdate(t *testing.T) {
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			RemoteURL:  testGitRepoSrcLocal,
 			Version:    "c9f69fb",
 			isTag:      true,
 		},
@@ -618,7 +618,7 @@ func testUpdate(t *testing.T) {
 			ImportPath: testGitRepo,
 			FullPath:   filepath.Join(testEnv.dirSrc, testGitRepo),
 			RemoteName: gitDefRemoteName,
-			RemoteURL:  "git@github.com:shuLhan/beku_test.git",
+			RemoteURL:  testGitRepoSrcLocal,
 			Version:    "c9f69fb",
 			isTag:      false,
 		},
@@ -765,7 +765,7 @@ func testPackageGoClean(t *testing.T) {
 }
 
 func testPackagePost(t *testing.T) {
-	err := testGitPkgShare.Remove()
+	err := testGitPkgInstall.Remove()
 	if err != nil {
 		t.Fatal(err)
 	}
