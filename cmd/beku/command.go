@@ -143,15 +143,20 @@ func (cmd *command) parseSyncFlags(arg string) (operation, error) {
 		return opNone, nil
 	}
 
-	switch arg[0] {
-	case 'u':
-		return opUpdate, nil
-	case 'd':
-		cmd.noDeps = true
-		return opNone, nil
+	var op operation
+
+	for _, c := range arg {
+		switch c {
+		case 'u':
+			op |= opUpdate
+		case 'd':
+			cmd.noDeps = true
+		default:
+			return opNone, errInvalidOptions
+		}
 	}
 
-	return opNone, errInvalidOptions
+	return op, nil
 }
 
 func (cmd *command) parseRemoveFlags(arg string) (operation, error) {

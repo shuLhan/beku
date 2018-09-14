@@ -17,6 +17,10 @@
 
 ## Bug Fixes
 
+- cmd/beku: fix parsing multiple subcommand on Sync
+  Sync operation should accept both update and no dependency options in one
+  line as in "-Sud".
+
 - Scan: Update package version only if current and new package both are tag
 
 - env: fix get package from database that return first match by prefix
