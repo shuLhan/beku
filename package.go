@@ -14,11 +14,12 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/tools/go/vcs"
+
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/git"
 	"github.com/shuLhan/share/lib/ini"
 	libio "github.com/shuLhan/share/lib/io"
-	"golang.org/x/tools/go/vcs"
 )
 
 const (
@@ -256,35 +257,6 @@ func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 		pkg.RequiredBy = requiredBy
 	}
 	return
-}
-
-//
-// Run command on package root directory.
-//
-func (pkg *Package) Run(env *Env, cmds []string) (err error) {
-	if len(cmds) == 0 {
-		return
-	}
-
-	cmd := exec.Command(cmds[0])
-
-	if len(cmds) > 1 {
-		cmd.Args = append(cmd.Args, cmds[1:]...)
-	}
-
-	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
-	cmd.Env = append(cmd.Env, "PATH="+env.path)
-	cmd.Dir = pkg.FullPath
-	cmd.Stdout = defStdout
-	cmd.Stderr = defStderr
-
-	fmt.Printf("[PKG] Run %s >>> %s %s %s\n", pkg.ImportPath, cmd.Dir,
-		cmd.Env, cmd.Args)
-
-	err = cmd.Run()
-
-	return
-
 }
 
 //
