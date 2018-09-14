@@ -536,9 +536,12 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		}
 	} else {
 		if curPkg.Version != pkg.Version {
-			curPkg.VersionNext = pkg.Version
-			curPkg.state = packageStateChange
-			env.countUpdate++
+			if (curPkg.isTag && pkg.isTag) ||
+				(!curPkg.isTag && !pkg.isTag) {
+				curPkg.VersionNext = pkg.Version
+				curPkg.state = packageStateChange
+				env.countUpdate++
+			}
 		}
 	}
 
