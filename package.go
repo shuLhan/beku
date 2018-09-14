@@ -464,7 +464,7 @@ func (pkg *Package) load(sec *ini.Section) {
 // (1) Set PATH to let go install that require gcc work when invoked from
 // non-interactive shell (e.g. buildbot).
 //
-func (pkg *Package) GoInstall(env *Env) (err error) {
+func (pkg *Package) GoInstall(envPath string) (err error) {
 	//nolint:gas
 	cmd := exec.Command("go", "install")
 	if debug.Value >= 2 {
@@ -473,7 +473,7 @@ func (pkg *Package) GoInstall(env *Env) (err error) {
 	cmd.Args = append(cmd.Args, "./...")
 
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
-	cmd.Env = append(cmd.Env, "PATH="+env.path)
+	cmd.Env = append(cmd.Env, "PATH="+envPath)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr

@@ -478,7 +478,7 @@ func testGoInstall(t *testing.T) {
 
 		mock.Reset(true)
 
-		err := c.pkg.GoInstall(testEnv)
+		err := c.pkg.GoInstall(testEnv.path)
 
 		mock.Reset(false)
 		stdout := mock.Output()

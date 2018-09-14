@@ -1349,7 +1349,7 @@ func (env *Env) postSync(pkg *Package) (err error) {
 
 	// (3)
 	if len(pkg.DepsMissing) == 0 {
-		_ = pkg.GoInstall(env)
+		_ = pkg.GoInstall(env.path)
 	}
 
 	fmt.Println("[ENV] postSync >>> Package installed:\n", pkg)
@@ -1384,7 +1384,7 @@ func (env *Env) reinstallAll() (err error) {
 		}
 
 		if len(pkg.DepsMissing) == 0 {
-			_ = pkg.GoInstall(env)
+			_ = pkg.GoInstall(env.path)
 		}
 	}
 	return
