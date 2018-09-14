@@ -34,7 +34,7 @@ func testPackageRemove(t *testing.T) {
 		t.Log(c.desc)
 
 		if len(c.pkgName) > 0 {
-			c.pkg, _ = NewPackage(testEnv, c.pkgName, c.pkgName)
+			c.pkg, _ = NewPackage(testEnv.dirSrc, c.pkgName)
 		}
 
 		err := c.pkg.Remove()
@@ -743,7 +743,7 @@ func testPackageGoClean(t *testing.T) {
 		t.Log(c.desc)
 
 		if len(c.pkgName) > 0 {
-			c.pkg, _ = NewPackage(testEnv, c.pkgName, c.pkgName)
+			c.pkg, _ = NewPackage(testEnv.dirSrc, c.pkgName)
 		}
 
 		err = c.pkg.GoClean()

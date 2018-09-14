@@ -50,13 +50,12 @@ type Package struct {
 // NewPackage create a package set the package version, tag status, and
 // dependencies.
 //
-func NewPackage(env *Env, pkgName, importPath string) (
+func NewPackage(gopathSrc, importPath string) (
 	pkg *Package, err error,
 ) {
-	repoRoot, err := vcs.RepoRootForImportPath(importPath, debug.Value >= 2)
+	repoRoot, err := vcs.RepoRootForImportPath(importPath, debug.Value >= 1)
 	if err != nil {
 		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> error: %s\n", err.Error())
-		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> skip %s\n", pkgName)
 		return
 	}
 
@@ -71,7 +70,7 @@ func NewPackage(env *Env, pkgName, importPath string) (
 
 	pkg = &Package{
 		ImportPath: repoRoot.Root,
-		FullPath:   filepath.Join(env.dirSrc, importPath),
+		FullPath:   filepath.Join(gopathSrc, repoRoot.Root),
 		RemoteName: gitDefRemoteName,
 		RemoteURL:  repoRoot.Repo,
 		vcsMode:    repoRoot.VCS.Cmd,

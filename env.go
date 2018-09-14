@@ -266,7 +266,7 @@ func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 		return
 	}
 
-	pkg, err = NewPackage(env, importPath, importPath)
+	pkg, err = NewPackage(env.dirSrc, importPath)
 	if err != nil {
 		return
 	}
@@ -338,7 +338,7 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 			continue
 		}
 
-		pkg, err = NewPackage(env, importPath, importPath)
+		pkg, err = NewPackage(env.dirSrc, importPath)
 		if err != nil {
 			return
 		}
@@ -502,7 +502,7 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		return
 	}
 
-	pkg, err := NewPackage(env, pkgName, pkgName)
+	pkg, err := NewPackage(env.dirSrc, pkgName)
 	if err != nil {
 		return
 	}
@@ -1202,7 +1202,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		return
 	}
 
-	newPkg, err := NewPackage(env, pkgName, importPath)
+	newPkg, err := NewPackage(env.dirSrc, importPath)
 	if err != nil {
 		return
 	}
