@@ -118,7 +118,7 @@ func (pkg *Package) gitGetBranch() (err error) {
 		pkg.RemoteBranch = branches[midx]
 	} else if vidx >= 0 {
 		pkg.RemoteBranch = branches[vidx]
-	} else {
+	} else if len(branches) > 0 {
 		pkg.RemoteBranch = branches[len(branches)-1]
 	}
 	if debug.Value >= 1 {
