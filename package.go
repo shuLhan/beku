@@ -531,6 +531,13 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 		pkg.FullPath = newPkg.FullPath
 	}
 
+	if len(pkg.RemoteBranch) == 0 {
+		err = pkg.gitGetBranch()
+		if err != nil {
+			return
+		}
+	}
+
 	switch pkg.vcsMode {
 	case VCSModeGit:
 		err = pkg.gitUpdate(newPkg)
