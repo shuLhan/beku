@@ -534,14 +534,15 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		if len(pkg.ImportPath) > env.fmtMaxPath {
 			env.fmtMaxPath = len(pkg.ImportPath)
 		}
-	} else {
-		if curPkg.Version != pkg.Version {
-			if (curPkg.isTag && pkg.isTag) ||
-				(!curPkg.isTag && !pkg.isTag) {
-				curPkg.VersionNext = pkg.Version
-				curPkg.state = packageStateChange
-				env.countUpdate++
-			}
+
+		return nil
+	}
+
+	if curPkg.Version != pkg.Version {
+		if (curPkg.isTag && pkg.isTag) || (!curPkg.isTag && !pkg.isTag) {
+			curPkg.VersionNext = pkg.Version
+			curPkg.state = packageStateChange
+			env.countUpdate++
 		}
 	}
 
@@ -715,9 +716,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 
 	fmt.Println()
 
-	if env.NoConfirm {
-		ok = true
-	} else {
+	if !env.NoConfirm {
 		ok = libio.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
@@ -1081,9 +1080,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	fmt.Printf("[ENV] update >>> Updating package from,\n%s\nto,\n%s\n",
 		curPkg.String(), newPkg.String())
 
-	if env.NoConfirm {
-		ok = true
-	} else {
+	if !env.NoConfirm {
 		ok = libio.ConfirmYesNo(os.Stdin, msgUpdateView, false)
 		if ok {
 			err = curPkg.CompareVersion(newPkg)
@@ -1093,9 +1090,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		}
 	}
 
-	if env.NoConfirm {
-		ok = true
-	} else {
+	if !env.NoConfirm {
 		ok = libio.ConfirmYesNo(os.Stdin, msgUpdateProceed, true)
 		if !ok {
 			return
