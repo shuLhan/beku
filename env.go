@@ -1066,6 +1066,12 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		newPkg.Version = curPkg.VersionNext
 		newPkg.isTag = curPkg.isTag
 	}
+	if len(newPkg.RemoteBranch) == 0 {
+		err = newPkg.gitGetBranch()
+		if err != nil {
+			return
+		}
+	}
 
 	if debug.Value >= 1 {
 		fmt.Println("[ENV] update >>>", newPkg)
