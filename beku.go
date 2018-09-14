@@ -79,10 +79,7 @@ var (
 	keyVCSMode      = "vcs"
 	keyVersion      = "version"
 
-	gitCfgRemote     = "remote"
-	gitCfgRemoteURL  = "url"
 	gitDefBranch     = "master"
 	gitDefRemoteName = "origin"
 	gitDir           = ".git"
-	gitRefHEAD       = "HEAD"
 )

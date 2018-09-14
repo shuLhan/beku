@@ -16,11 +16,10 @@ import (
 )
 
 const (
-	testDBLoad         = "testdata/beku.db"
-	testDBSaveExclude  = "testdata/beku.db.exclude"
-	testGitRepo        = "github.com/shuLhan/beku_test"
-	testGitRepoVersion = "c9f69fb"
-	testPkgNotExist    = "github.com/shuLhan/notexist"
+	testDBLoad        = "testdata/beku.db"
+	testDBSaveExclude = "testdata/beku.db.exclude"
+	testGitRepo       = "github.com/shuLhan/beku_test"
+	testPkgNotExist   = "github.com/shuLhan/notexist"
 )
 
 var (
@@ -28,8 +27,6 @@ var (
 	testGitPkgCur     *Package
 	testGitPkgNew     *Package
 	testGitPkgInstall *Package
-	testStdout        *os.File
-	testStderr        *os.File
 
 	testGitRepoSrcLocal = "/testdata/beku_test.git"
 )
