@@ -513,7 +513,11 @@ func (pkg *Package) GoInstall(env *Env) (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	fmt.Printf("= GoInstall %s\n%s\n%s\n", cmd.Dir, cmd.Env, cmd.Args)
+	if debug.Value == 0 {
+		fmt.Printf("= GoInstall %s\n", cmd.Dir)
+	} else {
+		fmt.Printf("= GoInstall %s\n%s\n%s\n", cmd.Dir, cmd.Env, cmd.Args)
+	}
 
 	err = cmd.Run()
 
