@@ -280,14 +280,20 @@ func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 //
 func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
 	for x := 0; x < len(env.pkgs); x++ {
-		if strings.HasPrefix(importPath, env.pkgs[x].ImportPath) {
-			return x, env.pkgs[x]
-		}
-
 		if remoteURL == env.pkgs[x].RemoteURL {
 			return x, env.pkgs[x]
 		}
+		if importPath == env.pkgs[x].ImportPath {
+			return x, env.pkgs[x]
+		}
 	}
+
+	for x := 0; x < len(env.pkgs); x++ {
+		if strings.HasPrefix(importPath, env.pkgs[x].ImportPath) {
+			return x, env.pkgs[x]
+		}
+	}
+
 	return -1, nil
 }
 
