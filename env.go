@@ -973,7 +973,9 @@ func (env *Env) savePackages() {
 		sec.Set(keyVCSMode, pkg.vcsMode)
 		sec.Set(keyRemoteName, pkg.RemoteName)
 		sec.Set(keyRemoteURL, pkg.RemoteURL)
-		sec.Set(keyRemoteBranch, pkg.RemoteBranch)
+		if len(pkg.RemoteBranch) > 0 {
+			sec.Set(keyRemoteBranch, pkg.RemoteBranch)
+		}
 		sec.Set(keyVersion, pkg.Version)
 
 		for _, dep := range pkg.Deps {
