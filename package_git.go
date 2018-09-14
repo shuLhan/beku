@@ -104,12 +104,14 @@ func (pkg *Package) gitGetBranch() (err error) {
 		return
 	}
 
-	// Select branch by version, master, or the last branch.
+	// Select branch by name "master", or by version, or the last branch
+	// if no match.
 	midx := -1
 	vidx := -1
 	for x := 0; x < len(branches); x++ {
 		if branches[x] == gitDefBranch {
 			midx = x
+			continue
 		}
 		if branches[x][0] == 'v' {
 			if vidx < 0 {
