@@ -13,7 +13,7 @@ import (
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/test"
 	"github.com/shuLhan/share/lib/test/mock"
-	"github.com/shuLhan/tekstus/diff"
+	"github.com/shuLhan/share/lib/text/diff"
 )
 
 func testEnvAddExclude(t *testing.T) {

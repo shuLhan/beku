@@ -1,9 +1,5 @@
-github.com/shuLhan/numerus v0.1.0 h1:oCywZLE3iTb/9T8qhFCkANg59Qy4cJ3nES5+S8WO6/U=
-github.com/shuLhan/numerus v0.1.0/go.mod h1:zF6WAVSsJebxdZxwyHWhqibDiCXnfitT4oHfcHve7+Y=
-github.com/shuLhan/share v0.0.0-20180914204133-9388affb8020 h1:+uCHPbrG1658tKIYUvED5jgfnDh9vKMJ50lOMp01u3w=
-github.com/shuLhan/share v0.0.0-20180914204133-9388affb8020/go.mod h1:L4OhM+hxrUdsb+Im+o06N/wz4hzfu29/R9lqueL4HJI=
-github.com/shuLhan/tekstus v0.1.0 h1:O08rXaR8yEZhVTKtgpLfZhEvkRe4svhMhm532tPn4Is=
-github.com/shuLhan/tekstus v0.1.0/go.mod h1:Pn7xUNXikqBQ1Fqtx2XFZEL1u8nZZPYxfP/8M4+LxaE=
+github.com/shuLhan/share v0.0.0-20180917185021-1cae4ca316af h1:4anaErm2vW2TPfSP3kE9lgdixWmGOa6zkqP3acnqv6I=
+github.com/shuLhan/share v0.0.0-20180917185021-1cae4ca316af/go.mod h1:L4OhM+hxrUdsb+Im+o06N/wz4hzfu29/R9lqueL4HJI=
 golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
-golang.org/x/tools v0.0.0-20180911133044-677d2ff680c1 h1:dzEuQYa6+a3gROnSlgly5ERUm4SZKJt+dh+4iSbO+bI=
-golang.org/x/tools v0.0.0-20180911133044-677d2ff680c1/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e h1:FDhOuMEY4JVRztM/gsbk+IKUQ8kj74bxZrgw87eMMVc=
+golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
