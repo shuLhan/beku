@@ -187,11 +187,6 @@ func (env *Env) Freeze() (err error) {
 			return
 		}
 		if localPkg == nil {
-			err = pkg.Scan()
-			if err != nil {
-				return
-			}
-
 			err = pkg.Install()
 			if err != nil {
 				return
