@@ -43,8 +43,7 @@ func (pkg *Package) gitInstall() (err error) {
 	var rev string
 	if len(pkg.Version) == 0 {
 		rev, err = git.LatestTag(pkg.FullPath)
-		if err == nil {
-			pkg.Version = rev
+		if len(rev) > 0 && err == nil {
 			pkg.isTag = IsTagVersion(rev)
 		} else {
 			rev, err = git.LatestCommit(pkg.FullPath, "")
@@ -52,9 +51,8 @@ func (pkg *Package) gitInstall() (err error) {
 				err = fmt.Errorf("gitInstall: %s", err)
 				return
 			}
-
-			pkg.Version = rev
 		}
+		pkg.Version = rev
 	}
 
 	if len(pkg.RemoteBranch) == 0 {
