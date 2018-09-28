@@ -603,7 +603,7 @@ func (env *Env) loadBeku() {
 
 	for _, v := range secBeku.Vars {
 		if v.KeyLower == keyVendor {
-			if v.IsValueBoolTrue() {
+			if ini.IsValueBoolTrue(v.Value) {
 				env.vendor = true
 				_ = env.initVendor()
 			}
