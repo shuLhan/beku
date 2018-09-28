@@ -270,7 +270,7 @@ func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 }
 
 //
-// GetPackageFromDB will return index and pointer to package in database.
+// GetPackageFromDB will return index and package in database.
 // If no package found, it will return -1 and nil.
 //
 func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
@@ -1027,6 +1027,8 @@ func (env *Env) String() string {
 
 //
 // install a package.
+// If destination directory is not empty, it will ask for user confirmation to
+// clean the directory first.
 //
 func (env *Env) install(pkg *Package) (ok bool, err error) {
 	if !libio.IsDirEmpty(pkg.FullPath) {
@@ -1173,13 +1175,6 @@ func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 // Sync will download and install a package including their dependencies. If
 // the importPath is defined, it will be downloaded into that directory.
 //
-// (1) First, we check if pkgName contains version.
-// (2) And then we check if package already installed, by comparing with
-// database.
-// (2.1) If package already installed, do an update.
-// (2.2) If package is not installed, clone the repository into `importPath`,
-// and checkout the latest tag or the latest commit.
-//
 func (env *Env) Sync(pkgName, importPath string) (err error) {
 	err = ErrPackageName
 
@@ -1191,7 +1186,6 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		version string
 	)
 
-	// (1)
 	pkgName, version = parsePkgVersion(pkgName)
 	if len(pkgName) == 0 {
 		return
@@ -1217,7 +1211,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 		newPkg.isTag = IsTagVersion(version)
 	}
 
-	// (2)
+	// Check if package already installed, by checking out from database.
 	_, curPkg := env.GetPackageFromDB(newPkg.ImportPath, newPkg.RemoteURL)
 	if curPkg != nil {
 		newPkg.RemoteURL = curPkg.RemoteURL
