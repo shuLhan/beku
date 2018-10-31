@@ -341,10 +341,12 @@ func (cmd *command) parseFlags(args []string) (err error) {
 			return
 		}
 	}
-	if cmd.op == opNone || cmd.op == opExclude || cmd.op == opRecursive ||
-		cmd.op == opSyncInto || cmd.op == opUpdate {
+
+	switch cmd.op {
+	case opNone, opExclude, opRecursive, opSyncInto, opUpdate:
 		return errInvalidOptions
 	}
+
 	if cmd.op&opSyncInto == opSyncInto {
 		if cmd.op&opSync != opSync {
 			return errInvalidOptions
