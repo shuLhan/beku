@@ -1074,7 +1074,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		fmt.Println("[ENV] update >>>", newPkg)
 	}
 
-	if curPkg.IsEqual(newPkg) {
+	if curPkg.IsEqual(newPkg) || !newPkg.IsNewer(curPkg) {
 		fmt.Println("[ENV] update >>> All package is up todate.")
 		ok = true
 		return
@@ -1275,9 +1275,10 @@ func (env *Env) SyncAll() (err error) {
 			return
 		}
 
-		if pkg.Version == pkg.VersionNext {
+		if pkg.Version >= pkg.VersionNext {
 			fmt.Printf("[ENV] SyncAll %s >>> No update.\n\n",
 				pkg.ImportPath)
+			pkg.VersionNext = ""
 			continue
 		}
 

@@ -110,8 +110,8 @@ func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 }
 
 //
-// FetchLatestVersion will try to update the package and get the latest version (tag or
-// commit).
+// FetchLatestVersion will try to update the package and get the latest
+// version (tag or commit).
 //
 func (pkg *Package) FetchLatestVersion() (err error) {
 	switch pkg.vcsMode {
@@ -207,6 +207,18 @@ func (pkg *Package) IsEqual(other *Package) bool {
 	}
 
 	return true
+}
+
+//
+// IsNewer will return true if current package is using tag and have newer
+// version that other package.  If current package is not using tag, it's
+// always return true.
+//
+func (pkg *Package) IsNewer(older *Package) bool {
+	if !pkg.isTag {
+		return true
+	}
+	return pkg.Version >= older.Version
 }
 
 //
