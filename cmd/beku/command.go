@@ -17,7 +17,7 @@ const (
 	verMajor    = 0
 	verMinor    = 5
 	verPatch    = 0
-	verMetadata = "-dev"
+	verMetadata = ""
 )
 
 var (

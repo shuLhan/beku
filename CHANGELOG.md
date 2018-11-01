@@ -1,4 +1,4 @@
-# Beku v0.5.0 (2018-09-xx)
+# Beku v0.5.0 (2018-11-01)
 
 ## Enhancements
 
@@ -28,7 +28,7 @@
   the GetPackageFromDB will always return "a" when the parameter importPath
   is "a-a".
 
-* Fix sync "--into" command
+- Fix sync "--into" command
 
 # Beku v0.4.0 (2018-09-04)
 
