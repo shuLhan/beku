@@ -471,7 +471,7 @@ func (pkg *Package) load(sec *ini.Section) {
 //
 // GoInstall a package recursively ("./...").
 //
-// (1) Set PATH to let go install that require gcc work when invoked from
+// Set PATH to let go install that require gcc work when invoked from
 // non-interactive shell (e.g. buildbot).
 //
 func (pkg *Package) GoInstall(envPath string) (err error) {

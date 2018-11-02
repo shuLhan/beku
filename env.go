@@ -315,12 +315,10 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 		fullPath := filepath.Join(srcPath, dirName)
 		dirGit := filepath.Join(fullPath, gitDir)
 
-		// (1)
 		if IsIgnoredDir(dirName) {
 			continue
 		}
 
-		// (2)
 		_, err = os.Stat(dirGit)
 		if err != nil {
 			nextScan = append(nextScan, fullPath)
@@ -397,9 +395,6 @@ func (env *Env) Scan() (err error) {
 // until no subdirectory found. All path to subdirectories will be saved on
 // Environment `pkgsStd`.
 //
-// (0) skip file
-// (1) skip ignored directory
-//
 func (env *Env) scanStdPackages(srcPath string) error {
 	fis, err := ioutil.ReadDir(srcPath)
 	if err != nil {
@@ -408,7 +403,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 	}
 
 	for _, fi := range fis {
-		// (0)
+		// Skip non directory.
 		if !fi.IsDir() {
 			continue
 		}
@@ -416,7 +411,6 @@ func (env *Env) scanStdPackages(srcPath string) error {
 		dirName := fi.Name()
 		fullPath := filepath.Join(srcPath, dirName)
 
-		// (1)
 		if IsIgnoredDir(dirName) {
 			continue
 		}
@@ -431,10 +425,6 @@ func (env *Env) scanStdPackages(srcPath string) error {
 //
 // scanPackages will traverse each directory in `src` recursively until
 // it's found VCS metadata, e.g. `.git` directory.
-//
-// (0) skip file
-// (1) skip ignored directory
-// (2) skip directory without `.git`
 //
 func (env *Env) scanPackages(srcPath string) (err error) {
 	if debug.Value >= 1 {
@@ -463,12 +453,11 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 		fullPath := filepath.Join(srcPath, dirName)
 		dirGit := filepath.Join(fullPath, gitDir)
 
-		// (1)
 		if IsIgnoredDir(dirName) {
 			continue
 		}
 
-		// (2)
+		// Skip directory that contains ".git".
 		_, err = os.Stat(dirGit)
 		if err != nil {
 			nextRoot = append(nextRoot, fullPath)
@@ -1278,7 +1267,7 @@ func (env *Env) SyncAll() (err error) {
 		if pkg.Version >= pkg.VersionNext {
 			fmt.Printf("[ENV] SyncAll %s >>> No update.\n\n",
 				pkg.ImportPath)
-			pkg.VersionNext = ""
+			pkg.VersionNext = pkg.Version
 			continue
 		}
 
@@ -1334,14 +1323,9 @@ func (env *Env) SyncAll() (err error) {
 	return
 }
 
-//
-// (1) Update missing packages.
-// (2) Run build command if its applicable
-// (3) Run `go install` only if no missing package.
-//
 func (env *Env) postSync(pkg *Package) (err error) {
 	fmt.Printf("\n[ENV] postSync %s\n", pkg.ImportPath)
-	// (1)
+	// Update missing packages.
 	env.updateMissing(pkg, true)
 
 	err = env.build(pkg)
@@ -1349,7 +1333,7 @@ func (env *Env) postSync(pkg *Package) (err error) {
 		return
 	}
 
-	// (3)
+	// Run `go install` only if no missing package.
 	if len(pkg.DepsMissing) == 0 {
 		_ = pkg.GoInstall(env.path)
 	}
@@ -1359,21 +1343,15 @@ func (env *Env) postSync(pkg *Package) (err error) {
 	return
 }
 
-//
-// (1) Re-scan package dependencies.
-// (2) Install missing dependencies.
-//
 func (env *Env) build(pkg *Package) (err error) {
-	// (1)
+	// Re-scan package dependencies.
 	err = pkg.ScanDeps(env)
 	if err != nil {
 		return
 	}
 
-	// (2)
-	err = env.installMissing(pkg)
-
-	return
+	// Install missing dependencies.
+	return env.installMissing(pkg)
 }
 
 func (env *Env) reinstallAll() (err error) {

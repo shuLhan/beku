@@ -17,6 +17,13 @@ import (
 	"os"
 )
 
+const (
+	verMajor    = 0
+	verMinor    = 5
+	verPatch    = 1
+	verMetadata = ""
+)
+
 func main() {
 	cmd, err := newCommand()
 	if err != nil {

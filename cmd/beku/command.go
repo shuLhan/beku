@@ -13,13 +13,6 @@ import (
 	"github.com/shuLhan/share/lib/debug"
 )
 
-const (
-	verMajor    = 0
-	verMinor    = 5
-	verPatch    = 0
-	verMetadata = ""
-)
-
 var (
 	errInvalidOptions  = errors.New("error: invalid options")
 	errMultiOperations = errors.New("error: only at operation may be used at a time")
@@ -289,10 +282,6 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 //
 // parseFlags for multiple operations, invalid options, or empty targets.
 //
-// (0) "-h", "--help", "--version" flag is a stopper.
-// (1) Only one operation is allowed.
-// (2) "-R" or "-S" must have target
-//
 func (cmd *command) parseFlags(args []string) (err error) {
 	if len(args) == 0 {
 		return errNoOperation
@@ -335,7 +324,8 @@ func (cmd *command) parseFlags(args []string) (err error) {
 			}
 			break
 		}
-		// (0)
+
+		// "-h", "--help", "--version" flag is a stopper.
 		if op == opHelp || op == opVersion {
 			cmd.op = op
 			return
@@ -353,14 +343,14 @@ func (cmd *command) parseFlags(args []string) (err error) {
 		}
 	}
 
-	// (1)
+	// Only one operation is allowed.
 	op = cmd.op & (opDatabase | opFreeze | opQuery | opRemove | opSync)
 	if op != opDatabase && op != opFreeze && op != opQuery &&
 		op != opRemove && op != opSync {
 		return errMultiOperations
 	}
 
-	// (2)
+	// "-R" or "-S" must have target
 	if op == opRemove {
 		if len(cmd.pkgs) == 0 {
 			return errNoTarget
