@@ -54,9 +54,9 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	testGitPkgCur, _ = NewPackage(testEnv.dirSrc, testGitRepo)
-	testGitPkgNew, _ = NewPackage(testEnv.dirSrc, testGitRepo)
-	testGitPkgInstall, _ = NewPackage(testEnv.dirSrc, testGitRepo)
+	testGitPkgCur, _ = NewPackage(testEnv.dirSrc, testGitRepo, testGitRepo)
+	testGitPkgNew, _ = NewPackage(testEnv.dirSrc, testGitRepo, testGitRepo)
+	testGitPkgInstall, _ = NewPackage(testEnv.dirSrc, testGitRepo, testGitRepo)
 
 	wd, err := os.Getwd()
 	if err != nil {
