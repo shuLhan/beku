@@ -12,7 +12,16 @@ import (
 	"github.com/shuLhan/share/lib/git"
 )
 
+//
+// gitFreeze set the package remote name and URL, branch, and revision.
+//
 func (pkg *Package) gitFreeze() (err error) {
+	err = git.RemoteChange(pkg.FullPath, pkg.RemoteName, pkg.RemoteName,
+		pkg.RemoteURL)
+	if err != nil {
+		return
+	}
+
 	err = git.FetchAll(pkg.FullPath)
 	if err != nil {
 		return
