@@ -1350,19 +1350,3 @@ func (env *Env) build(pkg *Package) (err error) {
 	// Install missing dependencies.
 	return env.installMissing(pkg)
 }
-
-func (env *Env) reinstallAll() (err error) {
-	for _, pkg := range env.pkgs {
-		fmt.Printf("\n[ENV] reinstallAll >>> %s\n", pkg.ImportPath)
-
-		err = env.build(pkg)
-		if err != nil {
-			return
-		}
-
-		if len(pkg.DepsMissing) == 0 {
-			_ = pkg.GoInstall(env.path)
-		}
-	}
-	return
-}
