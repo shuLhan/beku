@@ -117,18 +117,18 @@ func (cmd *command) parseDatabaseFlags(arg string) (operation, error) {
 	return opNone, errInvalidOptions
 }
 
-func (cmd *command) parseFreezeFlags(arg string) (operation, error) {
+func (cmd *command) parseFreezeFlags(arg string) error {
 	if len(arg) == 0 {
-		return opNone, nil
+		return nil
 	}
 
 	switch arg[0] {
 	case 'd':
 		cmd.noDeps = true
-		return opNone, nil
+		return nil
 	}
 
-	return opNone, errInvalidOptions
+	return errInvalidOptions
 }
 
 func (cmd *command) parseSyncFlags(arg string) (operation, error) {
@@ -195,7 +195,7 @@ func (cmd *command) parseShortFlags(arg string) (operation, error) {
 		}
 		op = opHelp
 	case 'B':
-		op, err = cmd.parseFreezeFlags(arg[1:])
+		err = cmd.parseFreezeFlags(arg[1:])
 		if err != nil {
 			return opNone, err
 		}
