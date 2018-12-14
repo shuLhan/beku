@@ -34,7 +34,7 @@ coverbrowse: $(COVER_HTML)
 	xdg-open $<
 
 lint:
-	golangci-lint run ./...
+	golangci-lint run --enable-all ./...
 
 clean:
 	rm -rf $(COVER_OUT) $(COVER_HTML)
