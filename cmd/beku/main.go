@@ -20,7 +20,7 @@ import (
 const (
 	verMajor    = 0
 	verMinor    = 5
-	verPatch    = 1
+	verPatch    = 2
 	verMetadata = ""
 )
 
