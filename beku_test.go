@@ -22,7 +22,7 @@ const (
 	testPkgNotExist   = "github.com/shuLhan/notexist"
 )
 
-var (
+var ( // nolint: gochecknoglobals
 	testEnv           *Env
 	testGitPkgCur     *Package
 	testGitPkgNew     *Package

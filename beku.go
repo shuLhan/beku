@@ -39,6 +39,27 @@ const (
 	sepVersion       = '.'
 )
 
+const (
+	sectionBeku    = "beku"
+	sectionPackage = "package"
+
+	keyExclude = "exclude"
+	keyVendor  = "vendor"
+
+	keyDeps         = "deps"
+	keyDepsMissing  = "missing"
+	keyRemoteName   = "remote-name"
+	keyRemoteURL    = "remote-url"
+	keyRemoteBranch = "remote-branch"
+	keyRequiredBy   = "required-by"
+	keyVCSMode      = "vcs"
+	keyVersion      = "version"
+
+	gitDefBranch     = "master"
+	gitDefRemoteName = "origin"
+	gitDir           = ".git"
+)
+
 // List of error messages.
 var (
 	ErrGOROOT = errors.New("GOROOT is not defined")
@@ -60,26 +81,7 @@ var (
 	errVCS           = "Unknown VCS mode %s"
 )
 
-var (
+var ( // nolint: gochecknoglobals
 	defStdout = os.Stdout
 	defStderr = os.Stderr
-
-	sectionBeku    = "beku"
-	sectionPackage = "package"
-
-	keyExclude = "exclude"
-	keyVendor  = "vendor"
-
-	keyDeps         = "deps"
-	keyDepsMissing  = "missing"
-	keyRemoteName   = "remote-name"
-	keyRemoteURL    = "remote-url"
-	keyRemoteBranch = "remote-branch"
-	keyRequiredBy   = "required-by"
-	keyVCSMode      = "vcs"
-	keyVersion      = "version"
-
-	gitDefBranch     = "master"
-	gitDefRemoteName = "origin"
-	gitDir           = ".git"
 )
