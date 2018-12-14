@@ -82,8 +82,7 @@ func NewPackage(gopathSrc, name, importPath string) (pkg *Package, err error) {
 // CheckoutVersion will set the package version to new version.
 //
 func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		if len(pkg.RemoteBranch) == 0 {
 			err = pkg.gitGetBranch()
 			if err != nil {
@@ -101,8 +100,7 @@ func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 // CompareVersion will compare package version using current package as base.
 //
 func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		err = git.LogRevisions(pkg.FullPath, pkg.Version, newPkg.Version)
 	}
 
@@ -114,8 +112,7 @@ func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 // version (tag or commit).
 //
 func (pkg *Package) FetchLatestVersion() (err error) {
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		err = git.FetchAll(pkg.FullPath)
 		if err != nil {
 			return
@@ -131,8 +128,7 @@ func (pkg *Package) FetchLatestVersion() (err error) {
 }
 
 func (pkg *Package) Freeze() (err error) {
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitFreeze()
 	}
 	return
@@ -173,8 +169,7 @@ func (pkg *Package) GoClean() (err error) {
 // exist or to the latest commit, and scan dependencies.
 //
 func (pkg *Package) Install() (err error) {
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitInstall()
 	}
 
@@ -273,8 +268,7 @@ func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 // metadata in package repository.
 //
 func (pkg *Package) Scan() (err error) {
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitScan()
 	}
 
@@ -548,8 +542,7 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 		}
 	}
 
-	switch pkg.vcsMode {
-	case VCSModeGit:
+	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitUpdate(newPkg)
 	}
 	if err != nil {

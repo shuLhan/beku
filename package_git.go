@@ -130,7 +130,7 @@ func (pkg *Package) gitGetBranch() (err error) {
 			}
 		}
 	}
-	if midx >= 0 {
+	if midx >= 0 { // nolint: gocritic
 		pkg.RemoteBranch = branches[midx]
 	} else if vidx >= 0 {
 		pkg.RemoteBranch = branches[vidx]

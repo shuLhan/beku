@@ -109,8 +109,7 @@ func (cmd *command) parseDatabaseFlags(arg string) (operation, error) {
 		return opNone, nil
 	}
 
-	switch arg[0] {
-	case 'e':
+	if arg[0] == 'e' {
 		return opExclude, nil
 	}
 
@@ -122,8 +121,7 @@ func (cmd *command) parseFreezeFlags(arg string) error {
 		return nil
 	}
 
-	switch arg[0] {
-	case 'd':
+	if arg[0] == 'd' {
 		cmd.noDeps = true
 		return nil
 	}
@@ -159,8 +157,7 @@ func (cmd *command) parseRemoveFlags(arg string) (operation, error) {
 
 	var op operation
 
-	switch arg[0] {
-	case 's':
+	if arg[0] == 's' {
 		op = opRecursive
 		return op, nil
 	}
