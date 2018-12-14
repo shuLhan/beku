@@ -347,7 +347,7 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 
 	sort.Strings(imports)
 
-	return
+	return imports, nil
 }
 
 //
@@ -554,7 +554,7 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 	pkg.Version = newPkg.Version
 	pkg.isTag = IsTagVersion(newPkg.Version)
 
-	return
+	return nil
 }
 
 //

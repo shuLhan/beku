@@ -57,7 +57,7 @@ func GetCompareURL(remoteURL, oldVer, newVer string) (url string) {
 			repo, oldVer, newVer)
 	}
 
-	return
+	return url
 }
 
 //
@@ -133,5 +133,5 @@ func parsePkgVersion(pkgVersion string) (pkgName, version string) {
 		version = strings.TrimSpace(version)
 	}
 
-	return
+	return pkgName, version
 }

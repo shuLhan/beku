@@ -80,7 +80,7 @@ func (pkg *Package) gitInstall() (err error) {
 		}
 	}
 
-	return
+	return nil
 }
 
 //
@@ -140,7 +140,7 @@ func (pkg *Package) gitGetBranch() (err error) {
 	if debug.Value >= 1 {
 		fmt.Printf("= gitGetBranch: %s\n", pkg.RemoteBranch)
 	}
-	return
+	return nil
 }
 
 //

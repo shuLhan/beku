@@ -88,8 +88,11 @@ func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
 	}
 
 	err = env.scanStdPackages(env.dirGoRootSrc)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	return env, nil
 }
 
 func (env *Env) initGopath() {
@@ -232,7 +235,7 @@ func (env *Env) Freeze() (err error) {
 out:
 	fmt.Println("[ENV] Freeze >>> finished")
 
-	return
+	return nil
 }
 
 //
@@ -349,7 +352,7 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 		}
 	}
 
-	return
+	return nil
 }
 
 //
@@ -475,7 +478,7 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 		}
 	}
 
-	return
+	return nil
 }
 
 //
@@ -726,7 +729,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	}
 	env.dirty = true
 
-	return
+	return true, nil
 }
 
 //
@@ -804,7 +807,7 @@ This package is required by,
 		_ = libio.RmdirEmptyAll(pkgImportPath)
 	}
 
-	return
+	return nil
 }
 
 func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
@@ -934,8 +937,11 @@ func (env *Env) Save(file string) (err error) {
 	env.savePackages()
 
 	err = env.db.Save(file)
+	if err != nil {
+		return err
+	}
 
-	return
+	return nil
 }
 
 func (env *Env) saveBeku() {
@@ -1093,7 +1099,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 
 	env.dirty = true
 
-	return
+	return true, nil
 }
 
 //
@@ -1218,8 +1224,11 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	}
 
 	err = env.postSync(curPkg)
+	if err != nil {
+		return err
+	}
 
-	return
+	return nil
 }
 
 //
@@ -1317,7 +1326,7 @@ func (env *Env) SyncAll() (err error) {
 
 	fmt.Println("[ENV] SyncAll >>> Update completed.")
 
-	return
+	return nil
 }
 
 func (env *Env) postSync(pkg *Package) (err error) {

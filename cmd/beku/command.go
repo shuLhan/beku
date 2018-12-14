@@ -273,7 +273,7 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 
 	cmd.op |= op
 
-	return
+	return op, nil
 }
 
 //
@@ -440,5 +440,5 @@ func newCommand() (cmd *command, err error) {
 		fmt.Printf("Environment: %s", cmd.env.String())
 	}
 
-	return
+	return cmd, err
 }
