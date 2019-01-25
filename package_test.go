@@ -465,12 +465,14 @@ func testGoInstall(t *testing.T) {
 		expStdout  string
 		expStderr  string
 	}{{
-		desc: "Running #1",
-		pkg:  testGitPkgCur,
+		desc:      "Running #1",
+		pkg:       testGitPkgCur,
+		expStderr: `go: warning: "./..." matched no packages`,
 	}, {
 		desc:      "Running with verbose",
 		pkg:       testGitPkgCur,
 		isVerbose: true,
+		expStderr: `go: warning: "./..." matched no packages`,
 	}}
 
 	for _, c := range cases {
