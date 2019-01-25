@@ -1262,6 +1262,17 @@ func (env *Env) SyncAll() (err error) {
 	fmt.Println("[ENV] SyncAll >>> Updating all packages ...")
 
 	for _, pkg := range env.pkgs {
+		if libio.IsDirEmpty(pkg.FullPath) {
+			fmt.Printf("[ENV] SyncAll %s >>> Installing\n",
+				pkg.ImportPath)
+
+			err = pkg.Install()
+			if err != nil {
+				_ = pkg.Remove()
+				return
+			}
+		}
+
 		fmt.Printf("[ENV] SyncAll %s >>> Current version is %s\n",
 			pkg.ImportPath, pkg.Version)
 
