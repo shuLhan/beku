@@ -144,7 +144,6 @@ func (pkg *Package) GoClean() (err error) {
 		return
 	}
 
-	//nolint:gas
 	cmd := exec.Command("go", "clean", "-i", "-cache", "-testcache", "./...")
 	cmd.Dir = pkg.FullPath
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
@@ -309,7 +308,6 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 func (pkg *Package) GetRecursiveImports(env *Env) (
 	imports []string, err error,
 ) {
-	//nolint:gas
 	cmd := exec.Command("go", "list", "-e", "-f", `{{ join .Imports "\n"}}`, "./...")
 	cmd.Dir = pkg.FullPath
 	cmd.Stderr = defStderr
@@ -469,7 +467,6 @@ func (pkg *Package) load(sec *ini.Section) {
 // non-interactive shell (e.g. buildbot).
 //
 func (pkg *Package) GoInstall(envPath string) (err error) {
-	//nolint:gas
 	cmd := exec.Command("go", "install")
 	if debug.Value >= 2 {
 		cmd.Args = append(cmd.Args, "-v")
