@@ -15,7 +15,7 @@ import (
 
 // httpClient is the default HTTP client, but a variable so it can be
 // changed by tests, without modifying http.DefaultClient.
-var httpClient = http.DefaultClient
+var httpClient = http.DefaultClient //nolint: gochecknoglobals
 
 // httpGET returns the data from an HTTP GET request for the given URL.
 func httpGET(url string) ([]byte, error) {

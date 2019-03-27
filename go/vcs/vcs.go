@@ -30,10 +30,10 @@ import (
 )
 
 // Verbose enables verbose operation logging.
-var Verbose bool
+var Verbose bool //nolint: gochecknoglobals
 
 // ShowCmd controls whether VCS commands are printed.
-var ShowCmd bool
+var ShowCmd bool //nolint: gochecknoglobals
 
 // A Cmd describes how to use a version control system
 // like Mercurial, Git, or Subversion.
@@ -63,7 +63,7 @@ type TagCmd struct {
 }
 
 // vcsList lists the known version control systems
-var vcsList = []*Cmd{
+var vcsList = []*Cmd{ //nolint: gochecknoglobals
 	vcsHg,
 	vcsGit,
 	vcsSvn,
@@ -82,7 +82,7 @@ func ByCmd(cmd string) *Cmd {
 }
 
 // vcsHg describes how to use Mercurial.
-var vcsHg = &Cmd{
+var vcsHg = &Cmd{ //nolint: gochecknoglobals
 	Name: "Mercurial",
 	Cmd:  "hg",
 
@@ -108,7 +108,7 @@ var vcsHg = &Cmd{
 }
 
 // vcsGit describes how to use Git.
-var vcsGit = &Cmd{
+var vcsGit = &Cmd{ //nolint: gochecknoglobals
 	Name: "Git",
 	Cmd:  "git",
 
@@ -131,7 +131,7 @@ var vcsGit = &Cmd{
 }
 
 // vcsBzr describes how to use Bazaar.
-var vcsBzr = &Cmd{
+var vcsBzr = &Cmd{ //nolint: gochecknoglobals
 	Name: "Bazaar",
 	Cmd:  "bzr",
 
@@ -150,7 +150,7 @@ var vcsBzr = &Cmd{
 }
 
 // vcsSvn describes how to use Subversion.
-var vcsSvn = &Cmd{
+var vcsSvn = &Cmd{ //nolint: gochecknoglobals
 	Name: "Subversion",
 	Cmd:  "svn",
 
@@ -436,7 +436,7 @@ func RepoRootForImportPath(importPath string, verbose bool) (*RepoRoot, error) {
 	return rr, err
 }
 
-var errUnknownSite = errors.New("dynamic lookup required to find mapping")
+var errUnknownSite = errors.New("dynamic lookup required to find mapping") //nolint: gochecknoglobals
 
 // RepoRootForImportPathStatic attempts to map importPath to a
 // RepoRoot using the commonly-used VCS hosting sites in vcsPaths
@@ -601,7 +601,7 @@ type metaImport struct {
 }
 
 // errNoMatch is returned from matchGoImport when there's no applicable match.
-var errNoMatch = errors.New("no import match")
+var errNoMatch = errors.New("no import match") //nolint: gochecknoglobals
 
 // pathPrefix reports whether sub is a prefix of s,
 // only considering entire path components.
@@ -647,7 +647,7 @@ func expand(match map[string]string, s string) string {
 }
 
 // vcsPaths lists the known vcs paths.
-var vcsPaths = []*vcsPath{
+var vcsPaths = []*vcsPath{ //nolint: gochecknoglobals
 	// Github
 	{
 		prefix: "github.com/",
@@ -668,7 +668,7 @@ var vcsPaths = []*vcsPath{
 	// Launchpad
 	{
 		prefix: "launchpad.net/",
-		re:     `^(?P<root>launchpad\.net/((?P<project>[A-Za-z0-9_.\-]+)(?P<series>/[A-Za-z0-9_.\-]+)?|~[A-Za-z0-9_.\-]+/(\+junk|[A-Za-z0-9_.\-]+)/[A-Za-z0-9_.\-]+))(/[A-Za-z0-9_.\-]+)*$`,
+		re:     `^(?P<root>launchpad\.net/((?P<project>[A-Za-z0-9_.\-]+)(?P<series>/[A-Za-z0-9_.\-]+)?|~[A-Za-z0-9_.\-]+/(\+junk|[A-Za-z0-9_.\-]+)/[A-Za-z0-9_.\-]+))(/[A-Za-z0-9_.\-]+)*$`, //nolint:lll
 		vcs:    "bzr",
 		repo:   "https://{root}",
 		check:  launchpadVCS,
@@ -685,12 +685,12 @@ var vcsPaths = []*vcsPath{
 
 	// General syntax for any server.
 	{
-		re:   `^(?P<root>(?P<repo>([a-z0-9.\-]+\.)+[a-z0-9.\-]+(:[0-9]+)?/[A-Za-z0-9_.\-/]*?)\.(?P<vcs>bzr|git|hg|svn))(/[A-Za-z0-9_.\-]+)*$`,
+		re:   `^(?P<root>(?P<repo>([a-z0-9.\-]+\.)+[a-z0-9.\-]+(:[0-9]+)?/[A-Za-z0-9_.\-/]*?)\.(?P<vcs>bzr|git|hg|svn))(/[A-Za-z0-9_.\-]+)*$`, //nolint:lll
 		ping: true,
 	},
 }
 
-func init() {
+func init() { //nolint: gochecknoinits
 	// fill in cached regexps.
 	// Doing this eagerly discovers invalid regexp syntax
 	// without having to run a command that needs that regexp.

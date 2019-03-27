@@ -22,13 +22,13 @@ const (
 	testPkgNotExist   = "github.com/shuLhan/notexist"
 )
 
-var ( // nolint: gochecknoglobals
-	testEnv           *Env
-	testGitPkgCur     *Package
-	testGitPkgNew     *Package
-	testGitPkgInstall *Package
+var (
+	testEnv           *Env     //nolint: gochecknoglobals
+	testGitPkgCur     *Package //nolint: gochecknoglobals
+	testGitPkgNew     *Package //nolint: gochecknoglobals
+	testGitPkgInstall *Package //nolint: gochecknoglobals
 
-	testGitRepoSrcLocal = "/testdata/beku_test.git"
+	testGitRepoSrcLocal = "/testdata/beku_test.git" //nolint: gochecknoglobals
 )
 
 func TestMain(m *testing.M) {

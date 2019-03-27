@@ -14,12 +14,12 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/tools/go/vcs"
+
 	"github.com/shuLhan/share/lib/debug"
 	"github.com/shuLhan/share/lib/git"
 	"github.com/shuLhan/share/lib/ini"
 	libio "github.com/shuLhan/share/lib/io"
-
-	"github.com/shuLhan/beku/go/vcs"
 )
 
 const (

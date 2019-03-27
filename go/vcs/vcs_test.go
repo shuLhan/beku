@@ -52,7 +52,8 @@ func TestRepoRootForImportPath(t *testing.T) {
 		}
 		want := test.want
 		if got.VCS.Name != want.VCS.Name || got.Repo != want.Repo {
-			t.Errorf("RepoRootForImportPath(%q) = VCS(%s) Repo(%s), want VCS(%s) Repo(%s)", test.path, got.VCS, got.Repo, want.VCS, want.Repo)
+			t.Errorf("RepoRootForImportPath(%q) = VCS(%s) Repo(%s), want VCS(%s) Repo(%s)",
+				test.path, got.VCS, got.Repo, want.VCS, want.Repo)
 		}
 	}
 }
@@ -95,12 +96,13 @@ func TestFromDir(t *testing.T) {
 			continue
 		}
 		if got.VCS.Name != want.VCS.Name || got.Root != want.Root {
-			t.Errorf("FromDir(%q, %q) = VCS(%s) Root(%s), want VCS(%s) Root(%s)", dir, tempDir, got.VCS, got.Root, want.VCS, want.Root)
+			t.Errorf("FromDir(%q, %q) = VCS(%s) Root(%s), want VCS(%s) Root(%s)",
+				dir, tempDir, got.VCS, got.Root, want.VCS, want.Root)
 		}
 	}
 }
 
-var parseMetaGoImportsTests = []struct {
+var parseMetaGoImportsTests = []struct { //nolint: gochecknoglobals
 	in  string
 	out []metaImport
 }{
