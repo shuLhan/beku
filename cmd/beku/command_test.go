@@ -12,7 +12,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-func testParseFlags(t *testing.T) {
+func TestParseFlags(t *testing.T) {
 	cases := []struct {
 		args   []string
 		expErr string
@@ -264,7 +264,7 @@ func testParseFlags(t *testing.T) {
 	}
 }
 
-func testNewCommand(t *testing.T) {
+func TestNewCommand(t *testing.T) {
 	cases := []struct {
 		desc   string
 		gopath string
@@ -277,8 +277,9 @@ func testNewCommand(t *testing.T) {
 			"beku", "-S", "A",
 		},
 		expCmd: &command{
-			op:   opSync,
-			pkgs: []string{"A"},
+			op:        opSync,
+			pkgs:      []string{"A"},
+			firstTime: true,
 		},
 	}, {
 		desc:   "With sync operation and no database found",
@@ -330,9 +331,4 @@ func testNewCommand(t *testing.T) {
 		build.Default.GOPATH = orgGOPATH
 		os.Args = orgArgs
 	}
-}
-
-func TestCommand(t *testing.T) {
-	t.Run("parseFlags", testParseFlags)
-	t.Run("newCommand", testNewCommand)
 }
