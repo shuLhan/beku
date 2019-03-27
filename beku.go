@@ -66,22 +66,22 @@ var (
 
 	// ErrVersion define an error when directory have VCS metadata (e.g.
 	// `.git` directory) but did not have any tag or commit.
-	ErrVersion = errors.New("No tag or commit found")
+	ErrVersion = errors.New("no tag or commit found")
 
 	// ErrRemote define an error when package remote URL is empty or
 	// invalid.
-	ErrRemote = errors.New("Empty or invalid remote URL found")
+	ErrRemote = errors.New("empty or invalid remote URL found")
 
 	// ErrPackageName define an error if package name is empty or invalid.
-	ErrPackageName = errors.New("Empty or invalid package name")
+	ErrPackageName = errors.New("empty or invalid package name")
 
 	errDBPackageName = "missing package name, line %d at %s"
 	errDirNotEmpty   = "directory %s is not empty"
-	errExcluded      = "Package '%s' is in excluded list\n"
-	errVCS           = "Unknown VCS mode %s"
+	errExcluded      = "package '%s' is in excluded list\n"
+	errVCS           = "unknown VCS mode %s"
 )
 
-var ( // nolint: gochecknoglobals
-	defStdout = os.Stdout
-	defStderr = os.Stderr
+var (
+	defStdout = os.Stdout //nolint: gochecknoglobals
+	defStderr = os.Stderr //nolint: gochecknoglobals
 )
