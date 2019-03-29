@@ -16,7 +16,7 @@ import (
 	"github.com/shuLhan/share/lib/text/diff"
 )
 
-func testEnvAddExclude(t *testing.T) {
+func TestEnvAddExclude(t *testing.T) {
 	testEnv.pkgsExclude = nil
 
 	cases := []struct {
@@ -47,7 +47,7 @@ func testEnvAddExclude(t *testing.T) {
 	}
 }
 
-func testEnvExclude(t *testing.T) {
+func TestEnvExclude(t *testing.T) {
 	testEnv.pkgsExclude = nil
 	testEnv.pkgs = nil
 	testEnv.pkgsMissing = nil
@@ -183,7 +183,7 @@ func testEnvExclude(t *testing.T) {
 	}
 }
 
-func testEnvLoad(t *testing.T) {
+func TestEnvLoad(t *testing.T) {
 	testEnv.pkgsExclude = nil
 	testEnv.pkgs = nil
 	testEnv.pkgsMissing = nil
@@ -218,7 +218,7 @@ func testEnvLoad(t *testing.T) {
 	}
 }
 
-func testEnvGetPackageFromDB(t *testing.T) {
+func TestEnvGetPackageFromDB(t *testing.T) {
 	cases := []struct {
 		desc       string
 		importPath string
@@ -281,7 +281,7 @@ func testEnvGetPackageFromDB(t *testing.T) {
 	}
 }
 
-func testEnvQuery(t *testing.T) {
+func TestEnvQuery(t *testing.T) {
 	cases := []struct {
 		desc      string
 		pkgs      []string
@@ -365,7 +365,7 @@ github.com/ksubedi/gomove           0.2.17
 	}
 }
 
-func testEnvFilterUnusedDeps(t *testing.T) {
+func TestEnvFilterUnusedDeps(t *testing.T) {
 	cases := []struct {
 		importPath string
 		exp        map[string]bool
@@ -410,7 +410,7 @@ func testEnvFilterUnusedDeps(t *testing.T) {
 	}
 }
 
-func testEnvSave(t *testing.T) {
+func TestEnvSave(t *testing.T) {
 	cases := []struct {
 		desc       string
 		dirty      bool
@@ -455,7 +455,7 @@ func testEnvSave(t *testing.T) {
 	}
 }
 
-func testEnvUpdateMissing(t *testing.T) {
+func TestEnvUpdateMissing(t *testing.T) {
 	cases := []struct {
 		newPkg     *Package
 		expPkg     string
@@ -487,7 +487,11 @@ func testEnvUpdateMissing(t *testing.T) {
 	}
 }
 
-func testEnvScan(t *testing.T) {
+func TestEnvScan(t *testing.T) {
+	testEnv.pkgs = nil
+	testEnv.pkgsMissing = nil
+	testEnv.db = nil
+
 	cases := []struct {
 		desc       string
 		expPkgs    []*Package
@@ -521,7 +525,7 @@ func testEnvScan(t *testing.T) {
 	}
 }
 
-func testEnvSync(t *testing.T) {
+func TestEnvSync(t *testing.T) {
 	cases := []struct {
 		desc       string
 		pkgName    string
@@ -541,22 +545,4 @@ func testEnvSync(t *testing.T) {
 			continue
 		}
 	}
-}
-
-func TestEnv(t *testing.T) {
-	t.Run("addExclude", testEnvAddExclude)
-	t.Run("Exclude", testEnvExclude)
-	t.Run("Load", testEnvLoad)
-	t.Run("GetPackageFromDB", testEnvGetPackageFromDB)
-	t.Run("Query", testEnvQuery)
-	t.Run("filterUnusedDeps", testEnvFilterUnusedDeps)
-	t.Run("Save", testEnvSave)
-	t.Run("updateMissing", testEnvUpdateMissing)
-
-	testEnv.pkgs = nil
-	testEnv.pkgsMissing = nil
-	testEnv.db = nil
-
-	t.Run("Scan", testEnvScan)
-	t.Run("Sync", testEnvSync)
 }

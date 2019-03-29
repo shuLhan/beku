@@ -16,7 +16,7 @@ import (
 	"github.com/shuLhan/share/lib/test/mock"
 )
 
-func testPackageRemove(t *testing.T) {
+func TestPackageRemove(t *testing.T) {
 	cases := []struct {
 		desc    string
 		pkgName string
@@ -59,7 +59,7 @@ func testPackageRemove(t *testing.T) {
 	}
 }
 
-func testPackageInstall(t *testing.T) {
+func TestPackageInstall(t *testing.T) {
 	cases := []struct {
 		desc   string
 		pkg    *Package
@@ -98,7 +98,7 @@ func testPackageInstall(t *testing.T) {
 	}
 }
 
-func testIsEqual(t *testing.T) {
+func TestIsEqual(t *testing.T) {
 	cases := []struct {
 		desc  string
 		pkg   *Package
@@ -178,7 +178,7 @@ func testIsEqual(t *testing.T) {
 	}
 }
 
-func testAddDep(t *testing.T) {
+func TestAddDep(t *testing.T) {
 	cases := []struct {
 		desc           string
 		envPkgs        []*Package
@@ -276,7 +276,7 @@ func testAddDep(t *testing.T) {
 	testGitPkgCur.DepsMissing = nil
 }
 
-func testPushRequiredBy(t *testing.T) {
+func TestPushRequiredBy(t *testing.T) {
 	cases := []struct {
 		desc          string
 		importPath    string
@@ -312,7 +312,7 @@ func testPushRequiredBy(t *testing.T) {
 	}
 }
 
-func testPackageRemoveRequiredBy(t *testing.T) {
+func TestPackageRemoveRequiredBy(t *testing.T) {
 	cases := []struct {
 		desc          string
 		pkg           *Package
@@ -345,7 +345,7 @@ func testPackageRemoveRequiredBy(t *testing.T) {
 	}
 }
 
-func testPackageLoad(t *testing.T) {
+func TestPackageLoad(t *testing.T) {
 	cases := []struct {
 		desc    string
 		pkgName string
@@ -455,7 +455,7 @@ func testPackageLoad(t *testing.T) {
 	}
 }
 
-func testGoInstall(t *testing.T) {
+func TestGoInstall(t *testing.T) {
 	cases := []struct {
 		desc       string
 		pkg        *Package
@@ -510,7 +510,7 @@ func testGoInstall(t *testing.T) {
 	}
 }
 
-func testPackageString(t *testing.T) {
+func TestPackageString(t *testing.T) {
 	cases := []struct {
 		pkg *Package
 		exp string
@@ -538,7 +538,7 @@ func testPackageString(t *testing.T) {
 	}
 }
 
-func testUpdate(t *testing.T) {
+func TestUpdate(t *testing.T) {
 	cases := []struct {
 		desc   string
 		curPkg *Package
@@ -652,7 +652,7 @@ func testUpdate(t *testing.T) {
 	}
 }
 
-func testUpdateMissingDep(t *testing.T) {
+func TestUpdateMissingDep(t *testing.T) {
 	cases := []struct {
 		desc      string
 		curPkg    *Package
@@ -725,7 +725,7 @@ func testUpdateMissingDep(t *testing.T) {
 	}
 }
 
-func testPackageGoClean(t *testing.T) {
+func TestPackageGoClean(t *testing.T) {
 	cases := []struct {
 		desc      string
 		pkgName   string
@@ -767,28 +767,9 @@ func testPackageGoClean(t *testing.T) {
 	}
 }
 
-func testPackagePost(t *testing.T) {
-	err := testGitPkgInstall.Remove()
+func TestPackagePost(t *testing.T) {
+	err := testGitPkgInstall.Remove(testEnv.path)
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func TestPackage(t *testing.T) {
-	t.Run("Remove", testPackageRemove)
-	t.Run("Install", testPackageInstall)
-
-	t.Run("GoInstall", testGoInstall)
-	t.Run("IsEqual", testIsEqual)
-	t.Run("addDep", testAddDep)
-	t.Run("pushRequiredBy", testPushRequiredBy)
-	t.Run("RemoveRequiredBy", testPackageRemoveRequiredBy)
-	t.Run("load", testPackageLoad)
-	t.Run("String", testPackageString)
-	t.Run("Update", testUpdate)
-	t.Run("UpdateMissingDep", testUpdateMissingDep)
-
-	t.Run("GoClean", testPackageGoClean)
-
-	t.Run("Post", testPackagePost)
 }

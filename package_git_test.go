@@ -10,7 +10,7 @@ import (
 	"github.com/shuLhan/share/lib/test"
 )
 
-func testGitScan(t *testing.T) {
+func TestGitScan(t *testing.T) {
 	cases := []struct {
 		desc       string
 		expErr     string
@@ -40,7 +40,7 @@ func testGitScan(t *testing.T) {
 	}
 }
 
-func testGitScanDeps(t *testing.T) {
+func TestGitScanDeps(t *testing.T) {
 	cases := []struct {
 		expErr         string
 		expDeps        []string
@@ -65,9 +65,4 @@ func testGitScanDeps(t *testing.T) {
 		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing,
 			testEnv.pkgsMissing, true)
 	}
-}
-
-func TestPackageGit(t *testing.T) {
-	t.Run("Scan", testGitScan)
-	t.Run("ScanDeps", testGitScanDeps)
 }
