@@ -1,3 +1,42 @@
+#  Beku v0.6.0 (2019-03-30)
+
+##  New Features
+
+-  Make Go command works with Go v1.12 and later.
+   This means turning off GO111MODULE when running Go command.
+
+-  Install package if missing when issuing SyncAll
+
+##  Enhancement
+
+-  Use copy of "golang.org/x/tools/go/vcs".
+
+   The indirect dependencies of package "golang.org/x/tools/go/vcs" is
+   overwhelming.  Using "go get" on this package alone will pull up all
+   dependency of "golang.org/x/tools".
+
+   To minimize unneeded download of unneeded packages we copy the package
+   vcs to our own repository including their license file.
+
+
+#  Beku v0.5.2 (2018-12-14)
+
+##  Enhancement
+
+-  No need to reinstall all packages after freezing
+
+##  Bug Fix
+
+-  git: set package remote URL according to value in database
+
+
+#  Beku v0.5.1 (2018-11-02)
+
+##  Bug Fix
+
+-  Fix sync all that cause version set to true
+
+
 # Beku v0.5.0 (2018-11-01)
 
 ## Enhancements

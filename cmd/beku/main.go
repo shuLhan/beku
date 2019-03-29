@@ -19,8 +19,8 @@ import (
 
 const (
 	verMajor    = 0
-	verMinor    = 5
-	verPatch    = 2
+	verMinor    = 6
+	verPatch    = 0
 	verMetadata = ""
 )
 
