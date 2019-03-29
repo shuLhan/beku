@@ -146,6 +146,7 @@ func (pkg *Package) GoClean() (err error) {
 
 	cmd := exec.Command("go", "clean", "-i", "-cache", "-testcache", "./...")
 	cmd.Dir = pkg.FullPath
+	cmd.Env = append(cmd.Env, "GO111MODULE=off")
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
@@ -473,6 +474,7 @@ func (pkg *Package) GoInstall(envPath string) (err error) {
 	}
 	cmd.Args = append(cmd.Args, "./...")
 
+	cmd.Env = append(cmd.Env, "GO111MODULE=off")
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Env = append(cmd.Env, "PATH="+envPath)
 	cmd.Dir = pkg.FullPath

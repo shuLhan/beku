@@ -768,7 +768,7 @@ func TestPackageGoClean(t *testing.T) {
 }
 
 func TestPackagePost(t *testing.T) {
-	err := testGitPkgInstall.Remove(testEnv.path)
+	err := testGitPkgInstall.Remove()
 	if err != nil {
 		t.Fatal(err)
 	}
