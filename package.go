@@ -474,9 +474,14 @@ func (pkg *Package) GoInstall(envPath string) (err error) {
 	}
 	cmd.Args = append(cmd.Args, "./...")
 
+	envGOCACHE := os.Getenv("GOCACHE")
+	envHOME := os.Getenv("HOME")
+
 	cmd.Env = append(cmd.Env, "GO111MODULE=off")
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Env = append(cmd.Env, "PATH="+envPath)
+	cmd.Env = append(cmd.Env, "GOCACHE="+envGOCACHE)
+	cmd.Env = append(cmd.Env, "HOME="+envHOME)
 	cmd.Dir = pkg.FullPath
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
