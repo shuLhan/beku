@@ -177,10 +177,7 @@ func (env *Env) Exclude(importPaths []string) {
 // database and remove non-registered from "src" and "pkg" directories.
 //
 func (env *Env) Freeze() (err error) {
-	var (
-		localPkg *Package
-		ok       bool
-	)
+	var localPkg *Package
 
 	for _, pkg := range env.pkgs {
 		fmt.Printf("\n[ENV] Freeze >>> %s@%s\n", pkg.ImportPath, pkg.Version)
@@ -216,22 +213,12 @@ func (env *Env) Freeze() (err error) {
 		goto out
 	}
 
-	fmt.Println("[ENV] Freeze >>> The following packages will be cleaned,")
+	fmt.Println("[ENV] Freeze >>> The following packages is unused,")
 	for _, pkg := range env.pkgsUnused {
 		fmt.Printf("  * %s\n", pkg.ImportPath)
 	}
 
 	fmt.Println()
-
-	if env.NoConfirm {
-		env.cleanUnused()
-	} else {
-		ok = libio.ConfirmYesNo(os.Stdin, msgContinue, false)
-		if ok {
-			env.cleanUnused()
-		}
-	}
-
 out:
 	fmt.Println("[ENV] Freeze >>> finished")
 
