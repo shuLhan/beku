@@ -572,38 +572,24 @@ func (env *Env) Load(file string) (err error) {
 }
 
 func (env *Env) loadBeku() {
-	secBeku := env.db.GetSection(sectionBeku, "")
-	if secBeku == nil {
-		return
-	}
+	env.vendor = env.db.GetBool(sectionBeku, "", keyVendor, false)
 
-	for _, v := range secBeku.Vars {
-		if v.KeyLower == keyVendor {
-			if ini.IsValueBoolTrue(v.Value) {
-				env.vendor = true
-				_ = env.initVendor()
-			}
-		}
-		if v.KeyLower == keyExclude {
-			env.addExclude(v.Value)
-		}
+	for _, v := range env.db.Gets(sectionBeku, "", keyExclude) {
+		env.addExclude(v)
 	}
 }
 
 func (env *Env) loadPackages() {
-	sections := env.db.GetSections(sectionPackage)
+	sections := env.db.Subs(sectionPackage)
 	for _, sec := range sections {
-		if len(sec.Sub) == 0 {
-			fmt.Fprintln(os.Stderr, errDBPackageName, sec.LineNum, env.dbFile)
-			continue
-		}
-		if env.IsExcluded(sec.Sub) {
+		subName := sec.SubName()
+		if env.IsExcluded(subName) {
 			continue
 		}
 
 		pkg := &Package{
-			ImportPath: sec.Sub,
-			FullPath:   filepath.Join(env.dirSrc, sec.Sub),
+			ImportPath: subName,
+			FullPath:   filepath.Join(env.dirSrc, subName),
 			state:      packageStateLoad,
 		}
 
@@ -932,47 +918,36 @@ func (env *Env) Save(file string) (err error) {
 }
 
 func (env *Env) saveBeku() {
-	secBeku := ini.NewSection(sectionBeku, "")
-
 	if env.vendor {
-		secBeku.Set(keyVendor, "true")
+		env.db.Set(sectionBeku, "", keyVendor, "true")
 	} else {
-		secBeku.Set(keyVendor, "false")
+		env.db.Set(sectionBeku, "", keyVendor, "false")
 	}
 
 	for _, exclude := range env.pkgsExclude {
-		secBeku.Add(keyExclude, exclude)
+		env.db.Set(sectionBeku, "", keyExclude, exclude)
 	}
-
-	secBeku.AddNewLine()
-	env.db.AddSection(secBeku)
 }
 
 func (env *Env) savePackages() {
 	for _, pkg := range env.pkgs {
-		sec := ini.NewSection(sectionPackage, pkg.ImportPath)
-
-		sec.Set(keyVCSMode, pkg.vcsMode)
-		sec.Set(keyRemoteName, pkg.RemoteName)
-		sec.Set(keyRemoteURL, pkg.RemoteURL)
+		env.db.Set(sectionPackage, pkg.ImportPath, keyVCSMode, pkg.vcsMode)
+		env.db.Set(sectionPackage, pkg.ImportPath, keyRemoteName, pkg.RemoteName)
+		env.db.Set(sectionPackage, pkg.ImportPath, keyRemoteURL, pkg.RemoteURL)
 		if len(pkg.RemoteBranch) > 0 {
-			sec.Set(keyRemoteBranch, pkg.RemoteBranch)
+			env.db.Set(sectionPackage, pkg.ImportPath, keyRemoteBranch, pkg.RemoteBranch)
 		}
-		sec.Set(keyVersion, pkg.Version)
+		env.db.Set(sectionPackage, pkg.ImportPath, keyVersion, pkg.Version)
 
 		for _, dep := range pkg.Deps {
-			sec.Add(keyDeps, dep)
+			env.db.Set(sectionPackage, pkg.ImportPath, keyDeps, dep)
 		}
 		for _, req := range pkg.RequiredBy {
-			sec.Add(keyRequiredBy, req)
+			env.db.Set(sectionPackage, pkg.ImportPath, keyRequiredBy, req)
 		}
 		for _, mis := range pkg.DepsMissing {
-			sec.Add(keyDepsMissing, mis)
+			env.db.Set(sectionPackage, pkg.ImportPath, keyDepsMissing, mis)
 		}
-
-		sec.AddNewLine()
-
-		env.db.AddSection(sec)
 	}
 }
 

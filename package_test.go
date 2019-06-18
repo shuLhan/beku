@@ -447,7 +447,7 @@ func TestPackageLoad(t *testing.T) {
 		t.Log(c.desc)
 
 		pkg := new(Package)
-		sec := cfg.GetSection(sectionPackage, c.pkgName)
+		sec := cfg.Section(sectionPackage, c.pkgName)
 
 		pkg.load(sec)
 

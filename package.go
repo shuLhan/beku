@@ -433,31 +433,32 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 // load package metadata from database (INI Section).
 //
 func (pkg *Package) load(sec *ini.Section) {
-	for _, v := range sec.Vars {
-		switch v.KeyLower {
-		case keyVCSMode:
-			switch v.Value {
-			case VCSModeGit:
-				pkg.vcsMode = VCSModeGit
-			default:
-				pkg.vcsMode = VCSModeGit
-			}
-		case keyRemoteName:
-			pkg.RemoteName = v.Value
-		case keyRemoteURL:
-			pkg.RemoteURL = v.Value
-		case keyRemoteBranch:
-			pkg.RemoteBranch = v.Value
-		case keyVersion:
-			pkg.Version = v.Value
-			pkg.isTag = IsTagVersion(pkg.Version)
-		case keyDeps:
-			pkg.pushDep(v.Value)
-		case keyDepsMissing:
-			pkg.pushMissing(v.Value)
-		case keyRequiredBy:
-			pkg.pushRequiredBy(v.Value)
-		}
+	switch sec.Val(keyVCSMode) {
+	case VCSModeGit:
+		pkg.vcsMode = VCSModeGit
+	default:
+		pkg.vcsMode = VCSModeGit
+	}
+
+	pkg.RemoteName = sec.Val(keyRemoteName)
+	pkg.RemoteURL = sec.Val(keyRemoteURL)
+	pkg.RemoteBranch = sec.Val(keyRemoteBranch)
+	pkg.Version = sec.Val(keyVersion)
+	pkg.isTag = IsTagVersion(pkg.Version)
+
+	vals := sec.Vals(keyDeps)
+	for x := 0; x < len(vals); x++ {
+		pkg.pushDep(vals[x])
+	}
+
+	vals = sec.Vals(keyDepsMissing)
+	for x := 0; x < len(vals); x++ {
+		pkg.pushMissing(vals[x])
+	}
+
+	vals = sec.Vals(keyRequiredBy)
+	for x := 0; x < len(vals); x++ {
+		pkg.pushRequiredBy(vals[x])
 	}
 }
 

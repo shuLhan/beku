@@ -75,10 +75,9 @@ var (
 	// ErrPackageName define an error if package name is empty or invalid.
 	ErrPackageName = errors.New("empty or invalid package name")
 
-	errDBPackageName = "missing package name, line %d at %s"
-	errDirNotEmpty   = "directory %s is not empty"
-	errExcluded      = "package '%s' is in excluded list\n"
-	errVCS           = "unknown VCS mode %s"
+	errDirNotEmpty = "directory %s is not empty"
+	errExcluded    = "package '%s' is in excluded list\n"
+	errVCS         = "unknown VCS mode %s"
 )
 
 var (
