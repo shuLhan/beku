@@ -925,7 +925,7 @@ func (env *Env) saveBeku() {
 	}
 
 	for _, exclude := range env.pkgsExclude {
-		env.db.Set(sectionBeku, "", keyExclude, exclude)
+		env.db.Add(sectionBeku, "", keyExclude, exclude)
 	}
 }
 
@@ -940,13 +940,13 @@ func (env *Env) savePackages() {
 		env.db.Set(sectionPackage, pkg.ImportPath, keyVersion, pkg.Version)
 
 		for _, dep := range pkg.Deps {
-			env.db.Set(sectionPackage, pkg.ImportPath, keyDeps, dep)
+			env.db.Add(sectionPackage, pkg.ImportPath, keyDeps, dep)
 		}
 		for _, req := range pkg.RequiredBy {
-			env.db.Set(sectionPackage, pkg.ImportPath, keyRequiredBy, req)
+			env.db.Add(sectionPackage, pkg.ImportPath, keyRequiredBy, req)
 		}
 		for _, mis := range pkg.DepsMissing {
-			env.db.Set(sectionPackage, pkg.ImportPath, keyDepsMissing, mis)
+			env.db.Add(sectionPackage, pkg.ImportPath, keyDepsMissing, mis)
 		}
 	}
 }
