@@ -1,3 +1,22 @@
+#  Beku v0.7.0 (2019-06-28)
+
+##  Enhancements
+
+-  Do not auto cleanup unused repositories.
+
+   Previously, we remove all unused repositories from $GOPATH, which caused
+   some important repositories that we forgot to track get removed during
+   freeze operation.
+    
+   This commit remove the auto cleanup and only print the unused repositories
+   to the screen.
+
+-  Add $GOCACHE and $HOME to environments on GoInstall
+    
+   The latest Go release will require $GOCACHE or $HOME environment variable
+   upon running "go install" command.
+
+
 #  Beku v0.6.0 (2019-03-30)
 
 ##  New Features
