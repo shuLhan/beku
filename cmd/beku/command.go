@@ -279,7 +279,7 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 //
 // parseFlags for multiple operations, invalid options, or empty targets.
 //
-func (cmd *command) parseFlags(args []string) (err error) {
+func (cmd *command) parseFlags(args []string) (err error) { //nolint: gocognit
 	if len(args) == 0 {
 		return errNoOperation
 	}
@@ -334,10 +334,8 @@ func (cmd *command) parseFlags(args []string) (err error) {
 		return errInvalidOptions
 	}
 
-	if cmd.op&opSyncInto == opSyncInto {
-		if cmd.op&opSync != opSync {
-			return errInvalidOptions
-		}
+	if (cmd.op&opSyncInto == opSyncInto) && (cmd.op&opSync != opSync) {
+		return errInvalidOptions
 	}
 
 	// Only one operation is allowed.
@@ -348,10 +346,8 @@ func (cmd *command) parseFlags(args []string) (err error) {
 	}
 
 	// "-R" or "-S" must have target
-	if op == opRemove {
-		if len(cmd.pkgs) == 0 {
-			return errNoTarget
-		}
+	if op == opRemove && len(cmd.pkgs) == 0 {
+		return errNoTarget
 	}
 
 	return nil

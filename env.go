@@ -55,10 +55,8 @@ type Env struct {
 // NewEnvironment will gather all information in user system.
 //
 func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
-	if !vendor {
-		if len(build.Default.GOPATH) == 0 {
-			vendor = true
-		}
+	if !vendor && len(build.Default.GOPATH) == 0 {
+		vendor = true
 	}
 	if len(build.Default.GOROOT) == 0 {
 		return nil, ErrGOROOT
@@ -133,19 +131,6 @@ func (env *Env) addExclude(importPath string) bool {
 
 	env.pkgsExclude = append(env.pkgsExclude, importPath)
 	return true
-}
-
-func (env *Env) cleanUnused() {
-	for _, pkg := range env.pkgsUnused {
-		fmt.Println("[ENV] cleanUnused >>>", pkg.FullPath)
-		_ = pkg.Remove()
-
-		pkgPath := filepath.Join(env.dirPkg, pkg.ImportPath)
-
-		fmt.Println("[ENV] cleanUnused >>>", pkgPath)
-		_ = os.RemoveAll(pkgPath)
-		_ = libio.RmdirEmptyAll(pkgPath)
-	}
 }
 
 //

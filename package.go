@@ -91,9 +91,7 @@ func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 		}
 		err = git.CheckoutRevision(pkg.FullPath, pkg.RemoteName, pkg.RemoteBranch, newVersion)
 	}
-
 	return
-
 }
 
 //
@@ -433,12 +431,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 // load package metadata from database (INI Section).
 //
 func (pkg *Package) load(sec *ini.Section) {
-	switch sec.Val(keyVCSMode) {
-	case VCSModeGit:
-		pkg.vcsMode = VCSModeGit
-	default:
-		pkg.vcsMode = VCSModeGit
-	}
+	pkg.vcsMode = VCSModeGit
 
 	pkg.RemoteName = sec.Val(keyRemoteName)
 	pkg.RemoteURL = sec.Val(keyRemoteURL)
@@ -598,12 +591,12 @@ func (pkg *Package) UpdateMissingDep(newPkg *Package, addAsDep bool) (found bool
 
 //
 // pushDep will append import path into list of dependencies only if it's not
-// exist. If import path exist it will return false.
+// exist.
 //
-func (pkg *Package) pushDep(importPath string) bool {
+func (pkg *Package) pushDep(importPath string) {
 	for x := 0; x < len(pkg.Deps); x++ {
 		if importPath == pkg.Deps[x] {
-			return false
+			return
 		}
 	}
 
@@ -613,23 +606,18 @@ func (pkg *Package) pushDep(importPath string) bool {
 		fmt.Printf("[PKG] pushDep %s >>> %s\n", pkg.ImportPath,
 			importPath)
 	}
-
-	return true
 }
 
 //
 // pushMissing import path only if not exist yet.
 //
-func (pkg *Package) pushMissing(importPath string) bool {
+func (pkg *Package) pushMissing(importPath string) {
 	for x := 0; x < len(pkg.DepsMissing); x++ {
 		if pkg.DepsMissing[x] == importPath {
-			return false
+			return
 		}
 	}
-
 	pkg.DepsMissing = append(pkg.DepsMissing, importPath)
-
-	return true
 }
 
 //
