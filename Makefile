@@ -34,7 +34,10 @@ coverbrowse: $(COVER_HTML)
 	xdg-open $<
 
 lint:
-	golangci-lint run --enable-all ./...
+	golangci-lint run --enable-all \
+		--disable=wsl \
+		--disable=gomnd \
+		--disable=funlen ./...
 
 clean:
 	rm -rf $(COVER_OUT) $(COVER_HTML)
