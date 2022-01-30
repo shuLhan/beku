@@ -49,7 +49,7 @@ func TestGetCompareURL(t *testing.T) {
 
 		got := GetCompareURL(c.remoteURL, c.oldVer, c.newVer)
 
-		test.Assert(t, "", c.exp, got, true)
+		test.Assert(t, "", c.exp, got)
 	}
 }
 
@@ -96,7 +96,7 @@ func TestIsIgnoredDir(t *testing.T) {
 	for _, c := range cases {
 		t.Log(c)
 		got = IsIgnoredDir(c.name)
-		test.Assert(t, "", c.exp, got, true)
+		test.Assert(t, "", c.exp, got)
 	}
 }
 
@@ -131,7 +131,7 @@ func TestIsTagVersion(t *testing.T) {
 
 		got = IsTagVersion(c.ver)
 
-		test.Assert(t, "", c.exp, got, true)
+		test.Assert(t, "", c.exp, got)
 	}
 }
 
@@ -164,7 +164,7 @@ func TestParsePkgVersion(t *testing.T) {
 
 		gotPkg, gotVer = parsePkgVersion(c.pkgName)
 
-		test.Assert(t, "package name", c.expPkg, gotPkg, true)
-		test.Assert(t, "version", c.expVer, gotVer, true)
+		test.Assert(t, "package name", c.expPkg, gotPkg)
+		test.Assert(t, "version", c.expVer, gotVer)
 	}
 }

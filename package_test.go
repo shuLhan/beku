@@ -39,14 +39,14 @@ func TestPackageRemove(t *testing.T) {
 
 		err := c.pkg.Remove()
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err, true)
+			test.Assert(t, "err", c.expErr, err)
 			continue
 		}
 
 		expErr := fmt.Sprintf("stat %s: no such file or directory", c.pkg.FullPath)
 		_, err = os.Stat(c.pkg.FullPath)
 
-		test.Assert(t, "src dir should not exist", expErr, err.Error(), true)
+		test.Assert(t, "src dir should not exist", expErr, err.Error())
 
 		pkg := filepath.Join(testEnv.dirPkg, c.pkg.ImportPath)
 
@@ -54,7 +54,7 @@ func TestPackageRemove(t *testing.T) {
 		_, err = os.Stat(pkg)
 
 		if err != nil {
-			test.Assert(t, "pkg dir should not exist", expErr, err.Error(), true)
+			test.Assert(t, "pkg dir should not exist", expErr, err.Error())
 		}
 	}
 }
@@ -92,7 +92,7 @@ func TestPackageInstall(t *testing.T) {
 		err := c.pkg.Install()
 
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 			continue
 		}
 	}
@@ -174,7 +174,7 @@ func TestIsEqual(t *testing.T) {
 
 		got = c.pkg.IsEqual(c.other)
 
-		test.Assert(t, "", c.exp, got, true)
+		test.Assert(t, "", c.exp, got)
 	}
 }
 
@@ -260,16 +260,15 @@ func TestAddDep(t *testing.T) {
 		testEnv.pkgsMissing = nil
 		got = testGitPkgCur.addDep(testEnv, c.importPath)
 
-		test.Assert(t, "return", c.exp, got, true)
+		test.Assert(t, "return", c.exp, got)
 
 		if !got {
 			continue
 		}
 
-		test.Assert(t, "Deps", c.expDeps, testGitPkgCur.Deps, true)
-		test.Assert(t, "DepsMissing", c.expDepsMissing, testGitPkgCur.DepsMissing, true)
-		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing,
-			testEnv.pkgsMissing, true)
+		test.Assert(t, "Deps", c.expDeps, testGitPkgCur.Deps)
+		test.Assert(t, "DepsMissing", c.expDepsMissing, testGitPkgCur.DepsMissing)
+		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing, testEnv.pkgsMissing)
 	}
 
 	testGitPkgCur.Deps = nil
@@ -306,9 +305,8 @@ func TestPushRequiredBy(t *testing.T) {
 
 		got = testGitPkgCur.pushRequiredBy(c.importPath)
 
-		test.Assert(t, "return value", c.exp, got, true)
-		test.Assert(t, "RequiredBy", c.expRequiredBy,
-			testGitPkgCur.RequiredBy, true)
+		test.Assert(t, "return value", c.exp, got)
+		test.Assert(t, "RequiredBy", c.expRequiredBy, testGitPkgCur.RequiredBy)
 	}
 }
 
@@ -340,8 +338,8 @@ func TestPackageRemoveRequiredBy(t *testing.T) {
 
 		got := c.pkg.RemoveRequiredBy(c.importPath)
 
-		test.Assert(t, "return value", c.exp, got, true)
-		test.Assert(t, "RequiredBy", c.expRequiredBy, c.pkg.RequiredBy, true)
+		test.Assert(t, "return value", c.exp, got)
+		test.Assert(t, "RequiredBy", c.expRequiredBy, c.pkg.RequiredBy)
 	}
 }
 
@@ -451,7 +449,7 @@ func TestPackageLoad(t *testing.T) {
 
 		pkg.load(sec)
 
-		test.Assert(t, "", c.exp, pkg, true)
+		test.Assert(t, "", c.exp, pkg)
 	}
 }
 
@@ -488,10 +486,10 @@ func TestGoInstall(t *testing.T) {
 
 		if err != nil {
 			errLines := strings.Split(stderr, "\n")
-			test.Assert(t, "stderr", c.expStderr, errLines[0], true)
+			test.Assert(t, "stderr", c.expStderr, errLines[0])
 		} else {
 			outLines := strings.Split(stdout, "\n")
-			test.Assert(t, "stdout", c.expStdout, outLines[0], true)
+			test.Assert(t, "stdout", c.expStdout, outLines[0])
 		}
 
 		if len(c.expBin) > 0 {
@@ -534,7 +532,7 @@ func TestPackageString(t *testing.T) {
 
 	for _, c := range cases {
 		got := c.pkg.String()
-		test.Assert(t, "string", c.exp, got, true)
+		test.Assert(t, "string", c.exp, got)
 	}
 }
 
@@ -640,7 +638,7 @@ func TestUpdate(t *testing.T) {
 
 		if err != nil {
 			t.Log("stderr:", stderr)
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 			continue
 		}
 
@@ -648,7 +646,7 @@ func TestUpdate(t *testing.T) {
 			t.Log("stdout:", stdout)
 		}
 
-		test.Assert(t, "current pkg", *c.expPkg, *c.curPkg, true)
+		test.Assert(t, "current pkg", *c.expPkg, *c.curPkg)
 	}
 }
 
@@ -720,8 +718,8 @@ func TestUpdateMissingDep(t *testing.T) {
 
 		got := c.curPkg.UpdateMissingDep(c.misPkg, true)
 
-		test.Assert(t, "return value", c.exp, got, true)
-		test.Assert(t, "package", c.expCurPkg, c.curPkg, true)
+		test.Assert(t, "return value", c.exp, got)
+		test.Assert(t, "package", c.expCurPkg, c.curPkg)
 	}
 }
 
@@ -753,7 +751,7 @@ func TestPackageGoClean(t *testing.T) {
 
 		err = c.pkg.GoClean()
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err, true)
+			test.Assert(t, "err", c.expErr, err)
 			continue
 		}
 
@@ -761,7 +759,7 @@ func TestPackageGoClean(t *testing.T) {
 			_, err = os.Stat(c.pkgBin)
 			if err != nil {
 				exp := fmt.Sprintf(c.expBinErr, c.pkgBin)
-				test.Assert(t, "pkgBin", exp, err.Error(), true)
+				test.Assert(t, "pkgBin", exp, err.Error())
 			}
 		}
 	}

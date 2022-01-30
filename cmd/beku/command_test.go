@@ -256,11 +256,11 @@ func TestParseFlags(t *testing.T) {
 
 		err := cmd.parseFlags(c.args)
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 			continue
 		}
 
-		test.Assert(t, "cmd", c.expCmd, cmd, true)
+		test.Assert(t, "cmd", c.expCmd, cmd)
 	}
 }
 
@@ -317,16 +317,16 @@ func TestNewCommand(t *testing.T) {
 
 		cmd, err := newCommand()
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 			build.Default.GOPATH = orgGOPATH
 			os.Args = orgArgs
 			continue
 		}
 
-		test.Assert(t, "command.op", c.expCmd.op, cmd.op, true)
-		test.Assert(t, "command.pkgs", c.expCmd.pkgs, cmd.pkgs, true)
-		test.Assert(t, "command.syncInto", c.expCmd.syncInto, cmd.syncInto, true)
-		test.Assert(t, "command.firstTime", c.expCmd.firstTime, cmd.firstTime, true)
+		test.Assert(t, "command.op", c.expCmd.op, cmd.op)
+		test.Assert(t, "command.pkgs", c.expCmd.pkgs, cmd.pkgs)
+		test.Assert(t, "command.syncInto", c.expCmd.syncInto, cmd.syncInto)
+		test.Assert(t, "command.firstTime", c.expCmd.firstTime, cmd.firstTime)
 
 		build.Default.GOPATH = orgGOPATH
 		os.Args = orgArgs

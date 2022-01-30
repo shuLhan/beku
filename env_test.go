@@ -42,8 +42,8 @@ func TestEnvAddExclude(t *testing.T) {
 
 		got := testEnv.addExclude(c.exclude)
 
-		test.Assert(t, "expExclude", c.expExclude, testEnv.pkgsExclude, true)
-		test.Assert(t, "expReturn", c.expReturn, got, true)
+		test.Assert(t, "expExclude", c.expExclude, testEnv.pkgsExclude)
+		test.Assert(t, "expReturn", c.expReturn, got)
 	}
 }
 
@@ -164,9 +164,9 @@ func TestEnvExclude(t *testing.T) {
 
 		testEnv.Exclude(c.excludes)
 
-		test.Assert(t, "exp excludes", c.expExclude, testEnv.pkgsExclude, true)
-		test.Assert(t, "pkgs length", c.expPkgsLen, len(testEnv.pkgs), true)
-		test.Assert(t, "pkgs missing", c.expMissing, testEnv.pkgsMissing, true)
+		test.Assert(t, "exp excludes", c.expExclude, testEnv.pkgsExclude)
+		test.Assert(t, "pkgs length", c.expPkgsLen, len(testEnv.pkgs))
+		test.Assert(t, "pkgs missing", c.expMissing, testEnv.pkgsMissing)
 
 		if c.expPkg == nil {
 			continue
@@ -174,7 +174,7 @@ func TestEnvExclude(t *testing.T) {
 
 		_, got := testEnv.GetPackageFromDB(c.expPkg.ImportPath, "")
 
-		test.Assert(t, "expPkg", c.expPkg, got, true)
+		test.Assert(t, "expPkg", c.expPkg, got)
 	}
 
 	err = testEnv.Save(testDBSaveExclude)
@@ -212,7 +212,7 @@ func TestEnvLoad(t *testing.T) {
 
 		err = testEnv.Load(c.file)
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 			continue
 		}
 	}
@@ -277,7 +277,7 @@ func TestEnvGetPackageFromDB(t *testing.T) {
 
 		_, got := testEnv.GetPackageFromDB(c.importPath, c.remoteURL)
 
-		test.Assert(t, "", c.exp, got, true)
+		test.Assert(t, "", c.exp, got)
 	}
 }
 
@@ -360,8 +360,8 @@ github.com/ksubedi/gomove           0.2.17
 		stdout := mock.Output()
 		stderr := mock.Error()
 
-		test.Assert(t, "expStdout", c.expStdout, stdout, true)
-		test.Assert(t, "expStderr", c.expStderr, stderr, true)
+		test.Assert(t, "expStdout", c.expStdout, stdout)
+		test.Assert(t, "expStderr", c.expStderr, stderr)
 	}
 }
 
@@ -406,7 +406,7 @@ func TestEnvFilterUnusedDeps(t *testing.T) {
 		unused := make(map[string]bool)
 		testEnv.filterUnusedDeps(pkg, unused)
 
-		test.Assert(t, "exp unused", c.exp, unused, true)
+		test.Assert(t, "exp unused", c.exp, unused)
 	}
 }
 
@@ -440,7 +440,7 @@ func TestEnvSave(t *testing.T) {
 
 		_, err = os.Stat(c.file)
 		if err != nil {
-			test.Assert(t, "expStatErr", c.expStatErr, err.Error(), true)
+			test.Assert(t, "expStatErr", c.expStatErr, err.Error())
 			continue
 		}
 
@@ -482,8 +482,8 @@ func TestEnvUpdateMissing(t *testing.T) {
 
 		_, got := testEnv.GetPackageFromDB(c.expPkg, "")
 
-		test.Assert(t, "expDeps", c.expDeps, got.Deps, true)
-		test.Assert(t, "expMissing", c.expMissing, got.DepsMissing, true)
+		test.Assert(t, "expDeps", c.expDeps, got.Deps)
+		test.Assert(t, "expMissing", c.expMissing, got.DepsMissing)
 	}
 }
 
@@ -520,8 +520,8 @@ func TestEnvScan(t *testing.T) {
 			continue
 		}
 
-		test.Assert(t, "expPkgs", c.expPkgs, testEnv.pkgs, true)
-		test.Assert(t, "expMissing", c.expMissing, testEnv.pkgsMissing, true)
+		test.Assert(t, "expPkgs", c.expPkgs, testEnv.pkgs)
+		test.Assert(t, "expMissing", c.expMissing, testEnv.pkgsMissing)
 	}
 }
 
@@ -541,7 +541,7 @@ func TestEnvSync(t *testing.T) {
 
 		err := testEnv.Sync(c.pkgName, c.importPath)
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 			continue
 		}
 	}

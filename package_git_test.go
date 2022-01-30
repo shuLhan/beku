@@ -31,12 +31,12 @@ func TestGitScan(t *testing.T) {
 
 		err = testGitPkgCur.Scan()
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err, true)
+			test.Assert(t, "err", c.expErr, err)
 			continue
 		}
 
-		test.Assert(t, "Version", c.expVersion, testGitPkgCur.Version, true)
-		test.Assert(t, "isTag", c.expIsTag, testGitPkgCur.isTag, true)
+		test.Assert(t, "Version", c.expVersion, testGitPkgCur.Version)
+		test.Assert(t, "isTag", c.expIsTag, testGitPkgCur.isTag)
 	}
 }
 
@@ -56,13 +56,11 @@ func TestGitScanDeps(t *testing.T) {
 
 		err = testGitPkgCur.ScanDeps(testEnv)
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err.Error(), true)
+			test.Assert(t, "err", c.expErr, err.Error())
 		}
 
-		test.Assert(t, "Deps", c.expDeps, testGitPkgCur.Deps, true)
-		test.Assert(t, "DepsMissing", c.expDepsMissing,
-			testGitPkgCur.DepsMissing, true)
-		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing,
-			testEnv.pkgsMissing, true)
+		test.Assert(t, "Deps", c.expDeps, testGitPkgCur.Deps)
+		test.Assert(t, "DepsMissing", c.expDepsMissing, testGitPkgCur.DepsMissing)
+		test.Assert(t, "env.pkgsMissing", c.expPkgsMissing, testEnv.pkgsMissing)
 	}
 }
