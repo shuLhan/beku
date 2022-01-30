@@ -1,3 +1,38 @@
+#  Beku v0.7.1 (2022-01-30)
+
+This is the last release for v0 of beku.
+The next release will pivot the beku program to maintain Go versions.
+
+## Chores
+
+*  go.mod: update all dependencies
+
+   This changes affect code that use lib/test.Assert().
+
+*  all: simplify running linter
+
+   Instead of enabling all linters, run the default linter provided by
+   the latest golangci-lint.
+
+*  all: replace beku_test in testdata with gitsubmodule
+
+   Previously, the beku_test is bare clone of git repository stored as is.
+   This cause an initial clone of the beku repository itself does not
+   recognize it as git repository, which make the test fail:
+
+     go test -v -coverprofile=cover.out ./... || rm -f cover.out
+     fatal: '/home/ms/go/src/git.sr.ht/~shulhan/beku/testdata/beku_test.git' does not appear to be a git repository
+     fatal: Could not read from remote repository.
+
+     Please make sure you have the correct access rights
+     and the repository exists.
+     2022/01/30 10:56:19 gitInstall: Clone: exit status 128
+     FAIL    github.com/shuLhan/beku 0.008s
+
+   This changes make the testdata/beku_test.git as git submodule, to make
+   the test run well.
+
+
 #  Beku v0.7.0 (2019-06-28)
 
 ##  Enhancements
@@ -7,12 +42,12 @@
    Previously, we remove all unused repositories from $GOPATH, which caused
    some important repositories that we forgot to track get removed during
    freeze operation.
-    
+
    This commit remove the auto cleanup and only print the unused repositories
    to the screen.
 
 -  Add $GOCACHE and $HOME to environments on GoInstall
-    
+
    The latest Go release will require $GOCACHE or $HOME environment variable
    upon running "go install" command.
 
