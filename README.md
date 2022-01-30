@@ -9,7 +9,7 @@ For beku as library see the following
 For beku as program see the below documentation or at
 [![GoDoc](https://godoc.org/github.com/shuLhan/beku/cmd/beku?status.svg)](https://godoc.org/github.com/shuLhan/beku/cmd/beku).
 
-# Beku program
+## Beku program
 
 Beku is command line program to manage packages in user's environment (GOPATH
 or vendor directory). Beku provide syntax like `pacman`.
@@ -163,13 +163,31 @@ and checkout the commit `5c1cf69` as the working version.
 Update all packages in database to new tag or commits with approval from
 user.
 
-# Known Limitations
+
+## Development
+
+This repository use git submodules to test functionalities that use `git
+clone`.
+Command for cloning git repository for new development:
+
+	$ git clone --recurse-submodules <URL>
+
+or for existing clone,
+
+	$ git submodule update --init --recursive
+
+Then run `make` to make sure all test run well,
+
+	$ make
+
+## Known Limitations
 
 - Only work with package hosted with Git on HTTPS or SSH.
 
 - Tested only on Git v2.17 or greater
 
-# References
+
+## References
 
 [1] https://www.archlinux.org/pacman/
 

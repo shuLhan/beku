@@ -1,0 +1,3 @@
+[submodule "beku_test"]
+	path = testdata/beku_test.git
+	url = git@github.com:shuLhan/beku_test.git
