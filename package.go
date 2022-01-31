@@ -325,10 +325,6 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 	importsDup := strings.Split(string(out), "\n")
 
 	for x := 0; x < len(importsDup); x++ {
-		if env.vendor {
-			importsDup[x] = strings.TrimPrefix(importsDup[x], env.prefix+"/")
-		}
-
 		found = false
 		for y := 0; y < len(imports); y++ {
 			if importsDup[x] == imports[y] {

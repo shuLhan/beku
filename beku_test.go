@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 	defStdout = mock.Stdout()
 	defStderr = mock.Stderr()
 
-	testEnv, err = NewEnvironment(false, false)
+	testEnv, err = NewEnvironment(false)
 	if err != nil {
 		log.Fatal(err)
 	}

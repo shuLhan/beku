@@ -1,7 +1,7 @@
 # Beku
 
 Beku is a library and program to manage packages in user's environment (GOPATH
-or vendor directory).
+directory).
 
 For beku as library see the following
 [![GoDoc](https://godoc.org/github.com/shuLhan/beku?status.svg)](https://godoc.org/github.com/shuLhan/beku).
@@ -12,7 +12,7 @@ For beku as program see the below documentation or at
 ## Beku program
 
 Beku is command line program to manage packages in user's environment (GOPATH
-or vendor directory). Beku provide syntax like `pacman`.
+directory). Beku provide syntax like `pacman`.
 
 Beku read and write the package database into a file named "beku.db".
 
@@ -34,12 +34,6 @@ inside a script.
 Do not install any missing dependencies. This options can be used on freeze
 or sync operations.
 
-    -V, --vendor
-
-Operate in vendor mode. This option used only when first scanning
-(`beku -V -S`).
-Any operation after that, will use the "vendor" directory in current
-working directory as installation prefix.
 
 ## Freeze Operation
 

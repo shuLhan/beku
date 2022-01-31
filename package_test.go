@@ -191,9 +191,6 @@ func TestAddDep(t *testing.T) {
 		desc:       "Is the same path as package",
 		importPath: testGitRepo,
 	}, {
-		desc:       "Is vendor package",
-		importPath: "vendor/github.com/shuLhan/beku",
-	}, {
 		desc:       "Is standard package",
 		importPath: "os/exec",
 	}, {

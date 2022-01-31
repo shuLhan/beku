@@ -4,7 +4,7 @@
 
 //
 // Package beku provide library for managing Go packages in user's environment
-// (GOPATH or vendor directory).
+// (GOPATH directory).
 //
 package beku
 
@@ -28,61 +28,58 @@ import (
 // packages, and list of missing packages.
 //
 type Env struct {
-	path         string
-	prefix       string
+	path   string
+	prefix string // Equal to GOPATH.
+
 	dirBin       string
-	dirPkg       string
 	dirGoRootSrc string
+	dirPkg       string
 	dirSrc       string
-	pkgs         []*Package
-	pkgsExclude  []string
-	pkgsMissing  []string
-	pkgsStd      []string
-	pkgsUnused   []*Package
-	db           *ini.Ini
-	dbDefFile    string
-	dbFile       string
-	countNew     int
-	countUpdate  int
-	fmtMaxPath   int
-	dirty        bool
-	NoConfirm    bool
-	noDeps       bool
-	vendor       bool
+
+	dbDefFile string
+	dbFile    string
+
+	pkgs        []*Package
+	pkgsExclude []string
+	pkgsMissing []string
+	pkgsStd     []string
+	pkgsUnused  []*Package
+
+	db *ini.Ini
+
+	countNew    int
+	countUpdate int
+	fmtMaxPath  int
+
+	dirty     bool
+	NoConfirm bool
+	noDeps    bool
 }
 
 //
 // NewEnvironment will gather all information in user system.
 //
-func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
-	if !vendor && len(build.Default.GOPATH) == 0 {
-		vendor = true
-	}
+func NewEnvironment(noDeps bool) (env *Env, err error) {
 	if len(build.Default.GOROOT) == 0 {
 		return nil, ErrGOROOT
 	}
 
 	env = &Env{
-		path:         os.Getenv(envPATH),
-		dirGoRootSrc: filepath.Join(build.Default.GOROOT, dirSrc),
+		path:   os.Getenv(envPATH),
+		prefix: build.Default.GOPATH,
+
 		dirBin:       filepath.Join(build.Default.GOPATH, dirBin),
-		dirPkg: filepath.Join(build.Default.GOPATH, dirPkg,
-			build.Default.GOOS+"_"+build.Default.GOARCH),
+		dirGoRootSrc: filepath.Join(build.Default.GOROOT, dirSrc),
+		dirPkg:       filepath.Join(build.Default.GOPATH, dirPkg, build.Default.GOOS+"_"+build.Default.GOARCH),
+		dirSrc:       filepath.Join(build.Default.GOPATH, dirSrc),
+
+		dbDefFile: filepath.Join(build.Default.GOPATH, dirDB, DefDBName),
+
 		noDeps: noDeps,
-		vendor: vendor,
 	}
 
 	if len(env.path) == 0 {
 		env.path = defPATH
-	}
-
-	if vendor {
-		err = env.initVendor()
-		if err != nil {
-			return
-		}
-	} else {
-		env.initGopath()
 	}
 
 	err = env.scanStdPackages(env.dirGoRootSrc)
@@ -94,24 +91,6 @@ func NewEnvironment(vendor, noDeps bool) (env *Env, err error) {
 }
 
 func (env *Env) initGopath() {
-	env.prefix = build.Default.GOPATH
-	env.dirSrc = filepath.Join(build.Default.GOPATH, dirSrc)
-	env.dbDefFile = filepath.Join(build.Default.GOPATH, dirDB, DefDBName)
-}
-
-func (env *Env) initVendor() (err error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return
-	}
-
-	prefix := strings.TrimPrefix(wd, filepath.Join(build.Default.GOPATH, dirSrc)+"/")
-
-	env.prefix = filepath.Join(prefix, dirVendor)
-	env.dirSrc = filepath.Join(wd, dirVendor)
-	env.dbDefFile = DefDBName
-
-	return
 }
 
 //
@@ -557,8 +536,6 @@ func (env *Env) Load(file string) (err error) {
 }
 
 func (env *Env) loadBeku() {
-	env.vendor = env.db.GetBool(sectionBeku, "", keyVendor, false)
-
 	for _, v := range env.db.Gets(sectionBeku, "", keyExclude) {
 		env.addExclude(v)
 	}
@@ -903,12 +880,6 @@ func (env *Env) Save(file string) (err error) {
 }
 
 func (env *Env) saveBeku() {
-	if env.vendor {
-		env.db.Set(sectionBeku, "", keyVendor, "true")
-	} else {
-		env.db.Set(sectionBeku, "", keyVendor, "false")
-	}
-
 	for _, exclude := range env.pkgsExclude {
 		env.db.Add(sectionBeku, "", keyExclude, exclude)
 	}
@@ -944,14 +915,13 @@ func (env *Env) String() string {
 
 	fmt.Fprintf(&buf, `
 [ENV]
-             Vendor: %t
              Prefix: %s
             Dir bin: %s
             Dir pkg: %s
             Dir src: %s
        Dir root src: %s
   Standard Packages: %s
-`, env.vendor, env.prefix, env.dirBin, env.dirPkg, env.dirSrc, env.dirGoRootSrc, env.pkgsStd)
+`, env.prefix, env.dirBin, env.dirPkg, env.dirSrc, env.dirGoRootSrc, env.pkgsStd)
 
 	for x := 0; x < len(env.pkgs); x++ {
 		fmt.Fprintf(&buf, "%s", env.pkgs[x].String())

@@ -44,7 +44,6 @@ const (
 	sectionPackage = "package"
 
 	keyExclude = "exclude"
-	keyVendor  = "vendor"
 
 	keyDeps         = "deps"
 	keyDepsMissing  = "missing"

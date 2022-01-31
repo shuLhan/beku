@@ -4,7 +4,7 @@
 
 //
 // Beku is a command line program to manage packages in user's environment
-// (GOPATH or vendor) directory.  Beku provide syntax like `pacman`.
+// (GOPATH) directory.  Beku provide syntax like `pacman`.
 //
 // See README in root of this repository for user manual [1].
 //
