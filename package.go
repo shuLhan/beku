@@ -26,10 +26,8 @@ const (
 	VCSModeGit = "git"
 )
 
-//
 // Package define Go package information: path to package, version, whether is
 // tag or not, and VCS mode.
-//
 type Package struct {
 	ImportPath   string
 	FullPath     string
@@ -46,10 +44,8 @@ type Package struct {
 	isTag        bool
 }
 
-//
 // NewPackage create a package set the package version, tag status, and
 // dependencies.
-//
 func NewPackage(gopathSrc, name, importPath string) (pkg *Package, err error) {
 	repoRoot, err := vcs.RepoRootForImportPath(name, debug.Value >= 1)
 	if err != nil {
@@ -78,9 +74,7 @@ func NewPackage(gopathSrc, name, importPath string) (pkg *Package, err error) {
 	return
 }
 
-//
 // CheckoutVersion will set the package version to new version.
-//
 func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 	if pkg.vcsMode == VCSModeGit {
 		if len(pkg.RemoteBranch) == 0 {
@@ -94,9 +88,7 @@ func (pkg *Package) CheckoutVersion(newVersion string) (err error) {
 	return
 }
 
-//
 // CompareVersion will compare package version using current package as base.
-//
 func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 	if pkg.vcsMode == VCSModeGit {
 		err = git.LogRevisions(pkg.FullPath, pkg.Version, newPkg.Version)
@@ -105,10 +97,8 @@ func (pkg *Package) CompareVersion(newPkg *Package) (err error) {
 	return
 }
 
-//
 // FetchLatestVersion will try to update the package and get the latest
 // version (tag or commit).
-//
 func (pkg *Package) FetchLatestVersion() (err error) {
 	if pkg.vcsMode == VCSModeGit {
 		err = git.FetchAll(pkg.FullPath)
@@ -132,9 +122,7 @@ func (pkg *Package) Freeze() (err error) {
 	return
 }
 
-//
 // GoClean will remove the package binaries and archives.
-//
 func (pkg *Package) GoClean() (err error) {
 	_, err = os.Stat(pkg.FullPath)
 	if err != nil {
@@ -162,10 +150,8 @@ func (pkg *Package) GoClean() (err error) {
 	return
 }
 
-//
 // Install a package. Clone package "src" directory, set to the latest tag if
 // exist or to the latest commit, and scan dependencies.
-//
 func (pkg *Package) Install() (err error) {
 	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitInstall()
@@ -174,11 +160,9 @@ func (pkg *Package) Install() (err error) {
 	return
 }
 
-//
 // IsEqual will return true if current package have the same import path,
 // remote name, remote URL, and version with other package; otherwise it will
 // return false.
-//
 func (pkg *Package) IsEqual(other *Package) bool {
 	if other == nil {
 		return false
@@ -202,11 +186,9 @@ func (pkg *Package) IsEqual(other *Package) bool {
 	return true
 }
 
-//
 // IsNewer will return true if current package is using tag and have newer
 // version that other package.  If current package is not using tag, it's
 // always return true.
-//
 func (pkg *Package) IsNewer(older *Package) bool {
 	if !pkg.isTag {
 		return true
@@ -214,9 +196,7 @@ func (pkg *Package) IsNewer(older *Package) bool {
 	return pkg.Version >= older.Version
 }
 
-//
 // Remove package installed binaries, archives, and source.
-//
 func (pkg *Package) Remove() (err error) {
 	err = pkg.GoClean()
 	if err != nil {
@@ -240,11 +220,9 @@ func (pkg *Package) Remove() (err error) {
 	return
 }
 
-//
 // RemoveRequiredBy will remove package importPath from list of required-by.
 // It will return true if importPath is removed from list, otherwise it will
 // return false.
-//
 func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 	var requiredBy []string
 
@@ -261,10 +239,8 @@ func (pkg *Package) RemoveRequiredBy(importPath string) (ok bool) {
 	return
 }
 
-//
 // Scan will set the package version, `isTag` status, and remote URL using
 // metadata in package repository.
-//
 func (pkg *Package) Scan() (err error) {
 	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitScan()
@@ -279,10 +255,8 @@ func (pkg *Package) Scan() (err error) {
 	return
 }
 
-//
 // ScanDeps will scan package dependencies, removing standard packages, keep
 // only external dependencies.
-//
 func (pkg *Package) ScanDeps(env *Env) (err error) {
 	if debug.Value >= 1 {
 		fmt.Println("[PKG] ScanDeps", pkg.ImportPath)
@@ -300,10 +274,8 @@ func (pkg *Package) ScanDeps(env *Env) (err error) {
 	return
 }
 
-//
 // GetRecursiveImports will get all import path recursively using `go list`
 // and return it as slice of string without any duplication.
-//
 func (pkg *Package) GetRecursiveImports(env *Env) (
 	imports []string, err error,
 ) {
@@ -343,7 +315,6 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 	return imports, nil
 }
 
-//
 // addDep will add `importPath` to package dependencies only if it's,
 //
 // (0) not empty
@@ -360,7 +331,6 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 //
 // It will return true if import path is added as dependencies or as missing
 // one; otherwise it will return false.
-//
 func (pkg *Package) addDep(env *Env, importPath string) bool {
 	// (0)
 	if len(importPath) == 0 {
@@ -423,9 +393,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 	return true
 }
 
-//
 // load package metadata from database (INI Section).
-//
 func (pkg *Package) load(sec *ini.Section) {
 	pkg.vcsMode = VCSModeGit
 
@@ -451,12 +419,10 @@ func (pkg *Package) load(sec *ini.Section) {
 	}
 }
 
-//
 // GoInstall a package recursively ("./...").
 //
 // Set PATH to let go install that require gcc work when invoked from
 // non-interactive shell (e.g. buildbot).
-//
 func (pkg *Package) GoInstall(envPath string) (err error) {
 	cmd := exec.Command("go", "install")
 	if debug.Value >= 2 {
@@ -487,9 +453,7 @@ func (pkg *Package) GoInstall(envPath string) (err error) {
 	return
 }
 
-//
 // String return formatted output of the package instance.
-//
 func (pkg *Package) String() string {
 	var buf bytes.Buffer
 
@@ -513,10 +477,8 @@ func (pkg *Package) String() string {
 	return buf.String()
 }
 
-//
 // Update the current package to the new package. The new package may contain
 // new remote or new version.
-//
 func (pkg *Package) Update(newPkg *Package) (err error) {
 	if pkg.ImportPath != newPkg.ImportPath {
 		err = os.Rename(pkg.FullPath, newPkg.FullPath)
@@ -551,7 +513,6 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 	return nil
 }
 
-//
 // UpdateMissingDep will remove missing package if it's already provided by
 // new package import-path.
 //
@@ -561,7 +522,6 @@ func (pkg *Package) Update(newPkg *Package) (err error) {
 //
 // It will return true if new package solve the missing deps on current
 // package, otherwise it will return false.
-//
 func (pkg *Package) UpdateMissingDep(newPkg *Package, addAsDep bool) (found bool) {
 	var missing []string
 	for x := 0; x < len(pkg.DepsMissing); x++ {
@@ -585,10 +545,8 @@ func (pkg *Package) UpdateMissingDep(newPkg *Package, addAsDep bool) (found bool
 	return
 }
 
-//
 // pushDep will append import path into list of dependencies only if it's not
 // exist.
-//
 func (pkg *Package) pushDep(importPath string) {
 	for x := 0; x < len(pkg.Deps); x++ {
 		if importPath == pkg.Deps[x] {
@@ -604,9 +562,7 @@ func (pkg *Package) pushDep(importPath string) {
 	}
 }
 
-//
 // pushMissing import path only if not exist yet.
-//
 func (pkg *Package) pushMissing(importPath string) {
 	for x := 0; x < len(pkg.DepsMissing); x++ {
 		if pkg.DepsMissing[x] == importPath {
@@ -616,9 +572,7 @@ func (pkg *Package) pushMissing(importPath string) {
 	pkg.DepsMissing = append(pkg.DepsMissing, importPath)
 }
 
-//
 // pushRequiredBy add the import path as required by current package.
-//
 func (pkg *Package) pushRequiredBy(importPath string) bool {
 	for x := 0; x < len(pkg.RequiredBy); x++ {
 		if importPath == pkg.RequiredBy[x] {

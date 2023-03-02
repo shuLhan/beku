@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//
 // Package beku provide library for managing Go packages in user's environment
 // (GOPATH directory).
-//
 package beku
 
 import (
@@ -22,11 +20,9 @@ import (
 	libio "github.com/shuLhan/share/lib/io"
 )
 
-//
 // Env contains the environment of Go including GOROOT source directory,
 // package root directory (prefix), list of packages, list of standard
 // packages, and list of missing packages.
-//
 type Env struct {
 	path   string
 	prefix string // Equal to GOPATH.
@@ -56,9 +52,7 @@ type Env struct {
 	noDeps    bool
 }
 
-//
 // NewEnvironment will gather all information in user system.
-//
 func NewEnvironment(noDeps bool) (env *Env, err error) {
 	if len(build.Default.GOROOT) == 0 {
 		return nil, ErrGOROOT
@@ -93,11 +87,9 @@ func NewEnvironment(noDeps bool) (env *Env, err error) {
 func (env *Env) initGopath() {
 }
 
-//
 // addExclude will add package to list of excluded packages. It will return
 // true if importPath is not already exist in list; otherwise it will return
 // false.
-//
 func (env *Env) addExclude(importPath string) bool {
 	if len(importPath) == 0 {
 		return false
@@ -112,9 +104,7 @@ func (env *Env) addExclude(importPath string) bool {
 	return true
 }
 
-//
 // Exclude mark list of packages to be excluded from future operations.
-//
 func (env *Env) Exclude(importPaths []string) {
 	exPkg := new(Package)
 
@@ -136,10 +126,8 @@ func (env *Env) Exclude(importPaths []string) {
 	}
 }
 
-//
 // Freeze all packages in database. Install all registered packages in
 // database and remove non-registered from "src" and "pkg" directories.
-//
 func (env *Env) Freeze() (err error) {
 	var localPkg *Package
 
@@ -189,9 +177,7 @@ out:
 	return nil
 }
 
-//
 // GetLocalPackage will return installed package from system.
-//
 func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 	fullPath := filepath.Join(env.dirSrc, importPath)
 	dirGit := filepath.Join(fullPath, gitDir)
@@ -220,10 +206,8 @@ func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 	return
 }
 
-//
 // GetPackageFromDB will return index and package in database.
 // If no package found, it will return -1 and nil.
-//
 func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
 	for x := 0; x < len(env.pkgs); x++ {
 		if remoteURL == env.pkgs[x].RemoteURL {
@@ -243,10 +227,8 @@ func (env *Env) GetPackageFromDB(importPath, remoteURL string) (int, *Package) {
 	return -1, nil
 }
 
-//
 // GetUnused will get all non-registered packages from "src" directory,
 // without including all excluded packages.
-//
 func (env *Env) GetUnused(srcPath string) (err error) {
 	fis, err := ioutil.ReadDir(srcPath)
 	if err != nil {
@@ -306,10 +288,8 @@ func (env *Env) GetUnused(srcPath string) (err error) {
 	return nil
 }
 
-//
 // IsExcluded will return true if import path is registered as one of excluded
 // package; otherwise it will return false.
-//
 func (env *Env) IsExcluded(importPath string) bool {
 	if len(importPath) == 0 {
 		return true
@@ -322,9 +302,7 @@ func (env *Env) IsExcluded(importPath string) bool {
 	return false
 }
 
-//
 // Scan will gather all package information in user system to start `beku`-ing.
-//
 func (env *Env) Scan() (err error) {
 	err = env.scanPackages(env.dirSrc)
 	if err != nil {
@@ -341,11 +319,9 @@ func (env *Env) Scan() (err error) {
 	return
 }
 
-//
 // scanStdPackages will traverse each directory in GOROOT `src` recursively
 // until no subdirectory found. All path to subdirectories will be saved on
 // Environment `pkgsStd`.
-//
 func (env *Env) scanStdPackages(srcPath string) error {
 	fis, err := ioutil.ReadDir(srcPath)
 	if err != nil {
@@ -373,10 +349,8 @@ func (env *Env) scanStdPackages(srcPath string) error {
 	return nil
 }
 
-//
 // scanPackages will traverse each directory in `src` recursively until
 // it's found VCS metadata, e.g. `.git` directory.
-//
 func (env *Env) scanPackages(srcPath string) (err error) {
 	if debug.Value >= 1 {
 		fmt.Println("[ENV] scanPackages >>>", srcPath)
@@ -432,10 +406,8 @@ func (env *Env) scanPackages(srcPath string) (err error) {
 	return nil
 }
 
-//
 // newPackage will append the directory at path as a package only if
 // its contain version information.
-//
 func (env *Env) newPackage(fullPath string) (err error) {
 	pkgName := strings.TrimPrefix(fullPath, env.dirSrc+"/")
 
@@ -496,10 +468,8 @@ func (env *Env) addPackage(pkg *Package) {
 	}
 }
 
-//
 // addPackageMissing will add import path to list of missing package only if
 // not exist yet.
-//
 func (env *Env) addPackageMissing(importPath string) {
 	for x := 0; x < len(env.pkgsMissing); x++ {
 		if importPath == env.pkgsMissing[x] {
@@ -510,9 +480,7 @@ func (env *Env) addPackageMissing(importPath string) {
 	env.pkgsMissing = append(env.pkgsMissing, importPath)
 }
 
-//
 // Load will read saved dependencies from file.
-//
 func (env *Env) Load(file string) (err error) {
 	if len(file) == 0 {
 		env.dbFile = env.dbDefFile
@@ -561,10 +529,8 @@ func (env *Env) loadPackages() {
 	}
 }
 
-//
 // Query the package database. If package is not empty, it will only show the
 // information about that package.
-//
 func (env *Env) Query(pkgs []string) {
 	format := fmt.Sprintf("%%-%ds  %%s\n", env.fmtMaxPath)
 
@@ -588,9 +554,7 @@ func (env *Env) Query(pkgs []string) {
 	}
 }
 
-//
 // Rescan for new packages.
-//
 func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	err = env.Scan()
 	if err != nil {
@@ -667,10 +631,8 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	return true, nil
 }
 
-//
 // Remove package from environment. If recursive is true, it will also remove
 // their dependencies, as long as they are not required by other package.
-//
 func (env *Env) Remove(rmPkg string, recursive bool) (err error) {
 	if env.IsExcluded(rmPkg) {
 		fmt.Printf(errExcluded, rmPkg)
@@ -788,10 +750,8 @@ func (env *Env) filterUnusedDeps(pkg *Package, tobeRemoved map[string]bool) {
 	}
 }
 
-//
 // removePackage from list environment (including source and installed archive
 // or binary). This also remove in other packages "RequiredBy" if exist.
-//
 func (env *Env) removePackage(importPath string) (err error) {
 	pkgIdx, pkg := env.GetPackageFromDB(importPath, "")
 	if pkg == nil {
@@ -809,10 +769,8 @@ func (env *Env) removePackage(importPath string) (err error) {
 	return
 }
 
-//
 // removePkgFromDBByIdx remove package from database by package index in the
 // list.
-//
 func (env *Env) removePkgFromDBByIdx(idx int) {
 	if idx < 0 {
 		return
@@ -827,9 +785,7 @@ func (env *Env) removePkgFromDBByIdx(idx int) {
 	env.dirty = true
 }
 
-//
 // removeRequiredBy will remove import path in package required-by.
-//
 func (env *Env) removeRequiredBy(importPath string) {
 	for x := 0; x < len(env.pkgs); x++ {
 		ok := env.pkgs[x].RemoveRequiredBy(importPath)
@@ -839,9 +795,7 @@ func (env *Env) removeRequiredBy(importPath string) {
 	}
 }
 
-//
 // Save the dependencies to `file` only if it's dirty flag is true.
-//
 func (env *Env) Save(file string) (err error) {
 	if !env.dirty {
 		return
@@ -907,9 +861,7 @@ func (env *Env) savePackages() {
 	}
 }
 
-//
 // String return formatted output of the environment instance.
-//
 func (env *Env) String() string {
 	var buf bytes.Buffer
 
@@ -934,11 +886,9 @@ func (env *Env) String() string {
 	return buf.String()
 }
 
-//
 // install a package.
 // If destination directory is not empty, it will ask for user confirmation to
 // clean the directory first.
-//
 func (env *Env) install(pkg *Package) (ok bool, err error) {
 	if !libio.IsDirEmpty(pkg.FullPath) {
 		fmt.Printf("[ENV] install >>> Directory %s is not empty.\n", pkg.FullPath)
@@ -1019,9 +969,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	return true, nil
 }
 
-//
 // installMissing will install all missing packages.
-//
 func (env *Env) installMissing(pkg *Package) (err error) {
 	if env.noDeps {
 		return
@@ -1048,11 +996,9 @@ func (env *Env) installMissing(pkg *Package) (err error) {
 	return
 }
 
-//
 // updateMissing will remove missing package if it's already provided by new
 // package. If "addAsDep" is true and the new package provide the missing one,
 // then it will be added as one of package dependencies.
-//
 func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 	var updated bool
 
@@ -1080,10 +1026,8 @@ func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 	env.pkgsMissing = newMissings
 }
 
-//
 // Sync will download and install a package including their dependencies. If
 // the importPath is defined, it will be downloaded into that directory.
-//
 func (env *Env) Sync(pkgName, importPath string) (err error) {
 	err = ErrPackageName
 
@@ -1148,9 +1092,7 @@ func (env *Env) Sync(pkgName, importPath string) (err error) {
 	return nil
 }
 
-//
 // SyncMany packages at once.
-//
 func (env *Env) SyncMany(pkgs []string) (err error) {
 	for _, pkg := range pkgs {
 		err = env.Sync(pkg, "")
@@ -1162,9 +1104,7 @@ func (env *Env) SyncMany(pkgs []string) (err error) {
 	return
 }
 
-//
 // SyncAll packages into latest version (tag or commit).
-//
 func (env *Env) SyncAll() (err error) {
 	var (
 		countUpdate int

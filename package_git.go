@@ -12,9 +12,7 @@ import (
 	"github.com/shuLhan/share/lib/git"
 )
 
-//
 // gitFreeze set the package remote name and URL, branch, and revision.
-//
 func (pkg *Package) gitFreeze() (err error) {
 	err = git.RemoteChange(pkg.FullPath, pkg.RemoteName, pkg.RemoteName,
 		pkg.RemoteURL)
@@ -39,9 +37,7 @@ func (pkg *Package) gitFreeze() (err error) {
 	return
 }
 
-//
 // gitInstall the package into source directory.
-//
 func (pkg *Package) gitInstall() (err error) {
 	err = git.Clone(pkg.RemoteURL, pkg.FullPath)
 	if err != nil {
@@ -83,9 +79,7 @@ func (pkg *Package) gitInstall() (err error) {
 	return nil
 }
 
-//
 // gitScan will scan the package version and remote URL.
-//
 func (pkg *Package) gitScan() (err error) {
 	pkg.Version, err = git.LatestVersion(pkg.FullPath)
 	if err != nil {
@@ -143,10 +137,8 @@ func (pkg *Package) gitGetBranch() (err error) {
 	return nil
 }
 
-//
 // gitUpdate will change the currrent package remote name, URL, or version
 // based on new package information.
-//
 func (pkg *Package) gitUpdate(newPkg *Package) (err error) {
 	if pkg.RemoteName != newPkg.RemoteName || pkg.RemoteURL != newPkg.RemoteURL {
 		err = git.RemoteChange(pkg.FullPath, pkg.RemoteName,

@@ -10,7 +10,6 @@ import (
 	"strings"
 )
 
-//
 // GetCompareURL return the URL that compare two versions of package from
 // given remote URL. Remote URL can be in git format
 // ("git@github.com:<username>/<reponame>") or in HTTP format.
@@ -18,7 +17,6 @@ import (
 // On package that hosted on Github, the compare URL format is,
 //
 //	https://github.com/<username>/<reponame>/compare/<old-version>...<new-version>
-//
 func GetCompareURL(remoteURL, oldVer, newVer string) (url string) {
 	if len(remoteURL) == 0 {
 		return
@@ -60,10 +58,8 @@ func GetCompareURL(remoteURL, oldVer, newVer string) (url string) {
 	return url
 }
 
-//
 // IsIgnoredDir will return true if directory start with "_" or ".", or
 // equal with "vendor" or "testdata"; otherwise it will return false.
-//
 func IsIgnoredDir(name string) bool {
 	prefix := name[0]
 
@@ -77,10 +73,8 @@ func IsIgnoredDir(name string) bool {
 	return false
 }
 
-//
 // IsTagVersion return true if "version" prefixed with "v" or contains at
 // least one dot "." character.
-//
 func IsTagVersion(version string) bool {
 	version = strings.TrimSpace(version)
 	if len(version) == 0 {
@@ -95,10 +89,8 @@ func IsTagVersion(version string) bool {
 	return false
 }
 
-//
 // parsePkgVersion given the following package-version format "pkg@v1.0.0", it
 // will return "pkg" and "v1.0.0".
-//
 func parsePkgVersion(pkgVersion string) (pkgName, version string) {
 	if len(pkgVersion) == 0 {
 		return

@@ -265,9 +265,7 @@ func (cmd *command) parseLongFlags(arg string) (op operation, err error) {
 	return op, nil
 }
 
-//
 // parseFlags for multiple operations, invalid options, or empty targets.
-//
 func (cmd *command) parseFlags(args []string) (err error) { //nolint: gocognit
 	if len(args) == 0 {
 		return errNoOperation
