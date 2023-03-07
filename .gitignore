@@ -1,11 +1,12 @@
-/testdata/beku.db.exclude
-/testdata/beku.db.save
-/testdata/a/b/file
-/testdata/src/github.com/shuLhan/beku_test
-/testdata/src/github.com/shuLhan/share
+*.html
 /beku
 /beku.test
 /cover.html
 /cover.out
 /cpu.prof
 /mem.prof
+/testdata/a/b/file
+/testdata/beku.db.exclude
+/testdata/beku.db.save
+/testdata/src/github.com/shuLhan/beku_test
+/testdata/src/github.com/shuLhan/share
