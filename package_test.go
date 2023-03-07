@@ -37,9 +37,11 @@ func TestPackageRemove(t *testing.T) {
 			c.pkg, _ = NewPackage(testEnv.dirSrc, c.pkgName, c.pkgName)
 		}
 
-		err := c.pkg.Remove()
+		var err error
+
+		err = c.pkg.Remove()
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err)
+			test.Assert(t, `error`, c.expErr, err.Error())
 			continue
 		}
 
@@ -81,7 +83,7 @@ func TestPackageInstall(t *testing.T) {
 	}, {
 		desc:   `Install again`,
 		pkg:    testGitPkgInstall,
-		expErr: "gitInstall: Clone: exit status 128",
+		expErr: `Install: gitInstall: Clone: exit status 128`,
 	}}
 
 	for _, c := range cases {
@@ -748,7 +750,7 @@ func TestPackageGoClean(t *testing.T) {
 
 		err = c.pkg.GoClean()
 		if err != nil {
-			test.Assert(t, "err", c.expErr, err)
+			test.Assert(t, `error`, c.expErr, err.Error())
 			continue
 		}
 

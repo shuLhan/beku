@@ -39,10 +39,11 @@ func (pkg *Package) gitFreeze() (err error) {
 
 // gitInstall the package into source directory.
 func (pkg *Package) gitInstall() (err error) {
+	var logp = `gitInstall`
+
 	err = git.Clone(pkg.RemoteURL, pkg.FullPath)
 	if err != nil {
-		err = fmt.Errorf("gitInstall: %s", err)
-		return
+		return fmt.Errorf(`%s: %w`, logp, err)
 	}
 
 	var rev string
@@ -53,8 +54,7 @@ func (pkg *Package) gitInstall() (err error) {
 		} else {
 			rev, err = git.LatestCommit(pkg.FullPath, "")
 			if err != nil {
-				err = fmt.Errorf("gitInstall: %s", err)
-				return
+				return fmt.Errorf(`%s: %w`, logp, err)
 			}
 		}
 		pkg.Version = rev
@@ -63,7 +63,7 @@ func (pkg *Package) gitInstall() (err error) {
 	if len(pkg.RemoteBranch) == 0 {
 		err = pkg.gitGetBranch()
 		if err != nil {
-			return
+			return fmt.Errorf(`%s: %w`, logp, err)
 		}
 	}
 
@@ -71,8 +71,7 @@ func (pkg *Package) gitInstall() (err error) {
 		err = git.CheckoutRevision(pkg.FullPath, pkg.RemoteName,
 			pkg.RemoteBranch, pkg.Version)
 		if err != nil {
-			err = fmt.Errorf("gitInstall: %s", err)
-			return
+			return fmt.Errorf(`%s: %w`, logp, err)
 		}
 	}
 

@@ -201,21 +201,20 @@ func (pkg *Package) IsNewer(older *Package) bool {
 
 // Remove package installed binaries, archives, and source.
 func (pkg *Package) Remove() (err error) {
+	var logp = `Remove`
+
 	err = pkg.GoClean()
 	if err != nil {
-		err = fmt.Errorf("Remove: %s", err)
-		return
+		return fmt.Errorf(`%s: %w`, logp, err)
 	}
 
 	if debug.Value >= 1 {
-		fmt.Printf("[PKG] Remove %s >>> %s\n", pkg.ImportPath,
-			pkg.FullPath)
+		fmt.Printf("%s: %s >>> %s\n", logp, pkg.ImportPath, pkg.FullPath)
 	}
 
 	err = os.RemoveAll(pkg.FullPath)
 	if err != nil {
-		err = fmt.Errorf("Remove: %s", err)
-		return
+		return fmt.Errorf(`%s: %w`, logp, err)
 	}
 
 	_ = libio.RmdirEmptyAll(pkg.FullPath)
