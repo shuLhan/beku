@@ -9,6 +9,7 @@ import (
 	"go/build"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/shuLhan/share/lib/debug"
@@ -23,12 +24,12 @@ const (
 )
 
 var (
-	testEnv           *Env     //nolint: gochecknoglobals
-	testGitPkgCur     *Package //nolint: gochecknoglobals
-	testGitPkgNew     *Package //nolint: gochecknoglobals
-	testGitPkgInstall *Package //nolint: gochecknoglobals
+	testEnv           *Env
+	testGitPkgCur     *Package
+	testGitPkgNew     *Package
+	testGitPkgInstall *Package
 
-	testGitRepoSrcLocal = "/testdata/beku_test.git" //nolint: gochecknoglobals
+	testGitRepoSrcLocal = `/testdata/beku_test.git`
 )
 
 func TestMain(m *testing.M) {
@@ -39,7 +40,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	testGOPATH += "/testdata"
+	testGOPATH = filepath.Join(testGOPATH, `testdata`)
 	build.Default.GOPATH = testGOPATH
 
 	defer func() {
@@ -50,6 +51,11 @@ func TestMain(m *testing.M) {
 	defStderr = mock.Stderr()
 
 	testEnv, err = NewEnvironment(false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.RemoveAll(testEnv.dirSrc)
 	if err != nil {
 		log.Fatal(err)
 	}

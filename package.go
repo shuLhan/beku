@@ -124,40 +124,43 @@ func (pkg *Package) Freeze() (err error) {
 
 // GoClean will remove the package binaries and archives.
 func (pkg *Package) GoClean() (err error) {
+	var logp = `GoClean`
+
 	_, err = os.Stat(pkg.FullPath)
 	if err != nil {
-		err = nil
-		return
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf(`%s: %s`, logp, err)
 	}
 
-	cmd := exec.Command("go", "clean", "-i", "-cache", "-testcache", "./...")
+	cmd := exec.Command("go", "clean", "-i", "./...")
 	cmd.Dir = pkg.FullPath
 	cmd.Env = append(cmd.Env, "GO111MODULE=off")
 	cmd.Env = append(cmd.Env, "GOPATH="+build.Default.GOPATH)
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	if debug.Value >= 1 {
-		fmt.Printf("[PKG] GoClean %s >>> %s %s\n", pkg.ImportPath, cmd.Dir, cmd.Args)
-	}
-
 	err = cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("GoClean: %s", err)
-		return
+		return fmt.Errorf(`%s: %s`, logp, err)
 	}
 
-	return
+	return nil
 }
 
 // Install a package. Clone package "src" directory, set to the latest tag if
 // exist or to the latest commit, and scan dependencies.
 func (pkg *Package) Install() (err error) {
+	var logp = `Install`
+
 	if pkg.vcsMode == VCSModeGit {
 		err = pkg.gitInstall()
+		if err != nil {
+			return fmt.Errorf(`%s: %w`, logp, err)
+		}
 	}
-
-	return
+	return nil
 }
 
 // IsEqual will return true if current package have the same import path,
