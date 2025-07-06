@@ -12,8 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/test/mock"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/test/mock"
 )
 
 const (
@@ -72,7 +71,7 @@ func TestMain(m *testing.M) {
 	testGitRepoSrcLocal = "file://" + wd + testGitRepoSrcLocal
 	testGitPkgInstall.RemoteURL = testGitRepoSrcLocal
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Printf("test env : %+v\n", *testEnv)
 		fmt.Printf("testGitPkgCur: %+v\n", *testGitPkgCur)
 		fmt.Printf("testGitPkgNew: %+v\n", *testGitPkgNew)

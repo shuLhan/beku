@@ -8,8 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/git"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/git"
 )
 
 // gitFreeze set the package remote name and URL, branch, and revision.
@@ -130,7 +129,7 @@ func (pkg *Package) gitGetBranch() (err error) {
 	} else if len(branches) > 0 {
 		pkg.RemoteBranch = branches[len(branches)-1]
 	}
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Printf("= gitGetBranch: %s\n", pkg.RemoteBranch)
 	}
 	return nil

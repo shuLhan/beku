@@ -16,10 +16,9 @@ import (
 
 	"golang.org/x/tools/go/vcs"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/git"
-	"github.com/shuLhan/share/lib/ini"
-	libio "github.com/shuLhan/share/lib/io"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/git"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
+	libos "git.sr.ht/~shulhan/pakakeh.go/lib/os"
 )
 
 const (
@@ -47,7 +46,7 @@ type Package struct {
 // NewPackage create a package set the package version, tag status, and
 // dependencies.
 func NewPackage(gopathSrc, name, importPath string) (pkg *Package, err error) {
-	repoRoot, err := vcs.RepoRootForImportPath(name, debug.Value >= 1)
+	repoRoot, err := vcs.RepoRootForImportPath(name, Debug > 0)
 	if err != nil {
 		fmt.Fprintf(defStderr, "[PKG] NewPackage >>> error: %s\n", err.Error())
 		return
@@ -67,7 +66,7 @@ func NewPackage(gopathSrc, name, importPath string) (pkg *Package, err error) {
 		state:      packageStateNew,
 	}
 
-	if debug.Value >= 2 {
+	if Debug >= 2 {
 		fmt.Printf("[PKG] NewPackage >>> %+v\n", pkg)
 	}
 
@@ -208,7 +207,7 @@ func (pkg *Package) Remove() (err error) {
 		return fmt.Errorf(`%s: %w`, logp, err)
 	}
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Printf("%s: %s >>> %s\n", logp, pkg.ImportPath, pkg.FullPath)
 	}
 
@@ -217,7 +216,7 @@ func (pkg *Package) Remove() (err error) {
 		return fmt.Errorf(`%s: %w`, logp, err)
 	}
 
-	_ = libio.RmdirEmptyAll(pkg.FullPath)
+	_ = libos.RmdirEmptyAll(pkg.FullPath)
 
 	return
 }
@@ -260,7 +259,7 @@ func (pkg *Package) Scan() (err error) {
 // ScanDeps will scan package dependencies, removing standard packages, keep
 // only external dependencies.
 func (pkg *Package) ScanDeps(env *Env) (err error) {
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[PKG] ScanDeps", pkg.ImportPath)
 	}
 
@@ -285,7 +284,7 @@ func (pkg *Package) GetRecursiveImports(env *Env) (
 	cmd.Dir = pkg.FullPath
 	cmd.Stderr = defStderr
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Printf("= GetRecursiveImports %s %s\n", cmd.Dir, cmd.Args)
 	}
 
@@ -341,7 +340,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 
 	// (1)
 	if strings.HasPrefix(importPath, pkg.ImportPath) {
-		if debug.Value >= 2 {
+		if Debug >= 2 {
 			fmt.Printf("[PKG] addDep %s >>> skip self import: %s\n",
 				pkg.ImportPath, importPath)
 		}
@@ -364,7 +363,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		if pkgs[0] != env.pkgsStd[x] {
 			continue
 		}
-		if debug.Value >= 2 {
+		if Debug >= 2 {
 			fmt.Printf("[PKG] addDep %s >>> skip std: %s\n",
 				pkg.ImportPath, importPath)
 		}
@@ -383,7 +382,7 @@ func (pkg *Package) addDep(env *Env, importPath string) bool {
 		return true
 	}
 
-	if debug.Value >= 2 {
+	if Debug >= 2 {
 		fmt.Printf("[PKG] addDep %s >>> missing: %s\n",
 			pkg.ImportPath, importPath)
 	}
@@ -427,7 +426,7 @@ func (pkg *Package) load(sec *ini.Section) {
 // non-interactive shell (e.g. buildbot).
 func (pkg *Package) GoInstall(envPath string) (err error) {
 	cmd := exec.Command("go", "install")
-	if debug.Value >= 2 {
+	if Debug >= 2 {
 		cmd.Args = append(cmd.Args, "-v")
 	}
 	cmd.Args = append(cmd.Args, "./...")
@@ -444,7 +443,7 @@ func (pkg *Package) GoInstall(envPath string) (err error) {
 	cmd.Stdout = defStdout
 	cmd.Stderr = defStderr
 
-	if debug.Value == 0 {
+	if Debug == 0 {
 		fmt.Printf("= GoInstall %s\n", cmd.Dir)
 	} else {
 		fmt.Printf("= GoInstall %s\n%s\n%s\n", cmd.Dir, cmd.Env, cmd.Args)
@@ -558,7 +557,7 @@ func (pkg *Package) pushDep(importPath string) {
 
 	pkg.Deps = append(pkg.Deps, importPath)
 
-	if debug.Value >= 2 {
+	if Debug >= 2 {
 		fmt.Printf("[PKG] pushDep %s >>> %s\n", pkg.ImportPath,
 			importPath)
 	}

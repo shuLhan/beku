@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/shuLhan/share/lib/ini"
-	"github.com/shuLhan/share/lib/test"
-	"github.com/shuLhan/share/lib/test/mock"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/test"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/test/mock"
 )
 
 func TestPackageRemove(t *testing.T) {
@@ -200,31 +200,31 @@ func TestAddDep(t *testing.T) {
 		envPkgs: []*Package{{
 			ImportPath: "github.com/shuLhan/beku",
 		}, {
-			ImportPath: "github.com/shuLhan/share",
+			ImportPath: "git.sr.ht/~shulhan/pakakeh.go",
 		}},
-		importPath: "github.com/shuLhan/share/lib/test",
+		importPath: "git.sr.ht/~shulhan/pakakeh.go/lib/test",
 		exp:        true,
 		expDeps: []string{
-			"github.com/shuLhan/share",
+			"git.sr.ht/~shulhan/pakakeh.go",
 		},
 	}, {
 		desc: "Is exist on environment (again)",
 		envPkgs: []*Package{{
 			ImportPath: "github.com/shuLhan/beku",
 		}, {
-			ImportPath: "github.com/shuLhan/share",
+			ImportPath: "git.sr.ht/~shulhan/pakakeh.go",
 		}},
-		importPath: "github.com/shuLhan/share/lib/test",
+		importPath: "git.sr.ht/~shulhan/pakakeh.go/lib/test",
 		exp:        true,
 		expDeps: []string{
-			"github.com/shuLhan/share",
+			"git.sr.ht/~shulhan/pakakeh.go",
 		},
 	}, {
 		desc:       "Is not exist on environment (missing)",
 		importPath: "github.com/shuLhan/tekstus",
 		exp:        true,
 		expDeps: []string{
-			"github.com/shuLhan/share",
+			"git.sr.ht/~shulhan/pakakeh.go",
 		},
 		expDepsMissing: []string{
 			"github.com/shuLhan/tekstus",
@@ -237,7 +237,7 @@ func TestAddDep(t *testing.T) {
 		importPath: "github.com/shuLhan/tekstus",
 		exp:        true,
 		expDeps: []string{
-			"github.com/shuLhan/share",
+			"git.sr.ht/~shulhan/pakakeh.go",
 		},
 		expDepsMissing: []string{
 			"github.com/shuLhan/tekstus",

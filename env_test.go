@@ -10,10 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/test"
-	"github.com/shuLhan/share/lib/test/mock"
-	"github.com/shuLhan/share/lib/text/diff"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/test"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/test/mock"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/text/diff"
 )
 
 func TestEnvAddExclude(t *testing.T) {
@@ -135,8 +134,8 @@ func TestEnvExclude(t *testing.T) {
 		},
 		expPkgsLen: 48,
 		expPkg: &Package{
-			ImportPath:   "github.com/shuLhan/share",
-			FullPath:     filepath.Join(testEnv.dirSrc, "github.com/shuLhan/share"),
+			ImportPath:   "git.sr.ht/~shulhan/pakakeh.go",
+			FullPath:     filepath.Join(testEnv.dirSrc, "git.sr.ht/~shulhan/pakakeh.go"),
 			RemoteName:   "origin",
 			RemoteURL:    "git@github.com:shuLhan/share.git",
 			RemoteBranch: "master",
@@ -321,7 +320,7 @@ github.com/shuLhan/go-bindata       eb5746d
 github.com/shuLhan/gontacts         d4786e8
 github.com/shuLhan/haminer          42be4cb
 github.com/shuLhan/numerus          104dd6b
-github.com/shuLhan/share            b2c8fd7
+git.sr.ht/~shulhan/pakakeh.go            b2c8fd7
 github.com/shuLhan/tabula           14d5c16
 github.com/shuLhan/tekstus          651065d
 github.com/sirupsen/logrus          68cec9f
@@ -449,7 +448,7 @@ func TestEnvSave(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if debug.Value >= 1 {
+		if Debug >= 1 {
 			fmt.Printf("diffs: %s\n", diffs)
 		}
 	}

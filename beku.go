@@ -59,6 +59,10 @@ const (
 	gitDir           = ".git"
 )
 
+// Debug flag to debug running command.
+// Set from environment variable BEKU_DEBUG.
+var Debug int64 = 0
+
 // List of error messages.
 var (
 	ErrGOROOT = errors.New("GOROOT is not defined")

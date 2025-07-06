@@ -13,11 +13,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
-	"github.com/shuLhan/share/lib/debug"
-	"github.com/shuLhan/share/lib/ini"
-	libio "github.com/shuLhan/share/lib/io"
+	"git.sr.ht/~shulhan/pakakeh.go/lib/ini"
+	libos "git.sr.ht/~shulhan/pakakeh.go/lib/os"
 )
 
 // Env contains the environment of Go including GOROOT source directory,
@@ -56,6 +56,11 @@ type Env struct {
 func NewEnvironment(noDeps bool) (env *Env, err error) {
 	if len(build.Default.GOROOT) == 0 {
 		return nil, ErrGOROOT
+	}
+
+	var envBekuDebug = os.Getenv(`BEKU_DEBUG`)
+	if envBekuDebug != `` {
+		Debug, _ = strconv.ParseInt(envBekuDebug, 10, 64)
 	}
 
 	env = &Env{
@@ -190,7 +195,7 @@ func (env *Env) GetLocalPackage(importPath string) (pkg *Package, err error) {
 
 	_, err = os.Stat(dirGit)
 	if err != nil {
-		if libio.IsDirEmpty(fullPath) {
+		if libos.IsDirEmpty(fullPath) {
 			err = nil
 		} else {
 			err = fmt.Errorf(errDirNotEmpty, fullPath)
@@ -352,7 +357,7 @@ func (env *Env) scanStdPackages(srcPath string) error {
 // scanPackages will traverse each directory in `src` recursively until
 // it's found VCS metadata, e.g. `.git` directory.
 func (env *Env) scanPackages(srcPath string) (err error) {
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[ENV] scanPackages >>>", srcPath)
 	}
 
@@ -420,7 +425,7 @@ func (env *Env) newPackage(fullPath string) (err error) {
 		return
 	}
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[ENV] newPackage >>>", pkg.ImportPath)
 	}
 
@@ -488,7 +493,7 @@ func (env *Env) Load(file string) (err error) {
 		env.dbFile = file
 	}
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[ENV] Load >>>", env.dbFile)
 	}
 
@@ -600,7 +605,7 @@ func (env *Env) Rescan(firstTime bool) (ok bool, err error) {
 	fmt.Println()
 
 	if !env.NoConfirm {
-		ok = libio.ConfirmYesNo(os.Stdin, msgContinue, false)
+		ok = libos.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
 		}
@@ -676,7 +681,7 @@ This package is required by,
 	}
 
 	if !env.NoConfirm {
-		ok := libio.ConfirmYesNo(os.Stdin, msgContinue, false)
+		ok := libos.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
 		}
@@ -691,7 +696,7 @@ This package is required by,
 
 		pkgImportPath := filepath.Join(env.dirPkg, importPath)
 
-		if debug.Value >= 1 {
+		if Debug >= 1 {
 			fmt.Println("[ENV] Remove >>> Removing", pkgImportPath)
 		}
 
@@ -701,7 +706,7 @@ This package is required by,
 			return
 		}
 
-		_ = libio.RmdirEmptyAll(pkgImportPath)
+		_ = libos.RmdirEmptyAll(pkgImportPath)
 	}
 
 	return nil
@@ -809,7 +814,7 @@ func (env *Env) Save(file string) (err error) {
 		}
 	}
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[ENV] Save >>>", file)
 	}
 
@@ -890,10 +895,10 @@ func (env *Env) String() string {
 // If destination directory is not empty, it will ask for user confirmation to
 // clean the directory first.
 func (env *Env) install(pkg *Package) (ok bool, err error) {
-	if !libio.IsDirEmpty(pkg.FullPath) {
+	if !libos.IsDirEmpty(pkg.FullPath) {
 		fmt.Printf("[ENV] install >>> Directory %s is not empty.\n", pkg.FullPath)
 		if !env.NoConfirm {
-			ok = libio.ConfirmYesNo(os.Stdin, msgCleanDir, false)
+			ok = libos.ConfirmYesNo(os.Stdin, msgCleanDir, false)
 			if !ok {
 				return
 			}
@@ -929,7 +934,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		}
 	}
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[ENV] update >>>", newPkg)
 	}
 
@@ -943,7 +948,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 		curPkg.String(), newPkg.String())
 
 	if !env.NoConfirm {
-		ok = libio.ConfirmYesNo(os.Stdin, msgUpdateView, false)
+		ok = libos.ConfirmYesNo(os.Stdin, msgUpdateView, false)
 		if ok {
 			err = curPkg.CompareVersion(newPkg)
 			if err != nil {
@@ -953,7 +958,7 @@ func (env *Env) update(curPkg, newPkg *Package) (ok bool, err error) {
 	}
 
 	if !env.NoConfirm {
-		ok = libio.ConfirmYesNo(os.Stdin, msgUpdateProceed, true)
+		ok = libos.ConfirmYesNo(os.Stdin, msgUpdateProceed, true)
 		if !ok {
 			return
 		}
@@ -1002,7 +1007,7 @@ func (env *Env) installMissing(pkg *Package) (err error) {
 func (env *Env) updateMissing(newPkg *Package, addAsDep bool) {
 	var updated bool
 
-	if debug.Value >= 1 {
+	if Debug >= 1 {
 		fmt.Println("[ENV] updateMissing >>>", newPkg.ImportPath)
 	}
 
@@ -1119,7 +1124,7 @@ func (env *Env) SyncAll() (err error) {
 	fmt.Println("[ENV] SyncAll >>> Updating all packages ...")
 
 	for _, pkg := range env.pkgs {
-		if libio.IsDirEmpty(pkg.FullPath) {
+		if libos.IsDirEmpty(pkg.FullPath) {
 			fmt.Printf("[ENV] SyncAll %s >>> Installing\n",
 				pkg.ImportPath)
 
@@ -1165,7 +1170,7 @@ func (env *Env) SyncAll() (err error) {
 	fmt.Println(buf.String())
 
 	if !env.NoConfirm {
-		ok := libio.ConfirmYesNo(os.Stdin, msgContinue, false)
+		ok := libos.ConfirmYesNo(os.Stdin, msgContinue, false)
 		if !ok {
 			return
 		}
