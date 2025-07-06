@@ -1,0 +1,21 @@
+= beku
+:toc:
+:sectanchors:
+:sectlinks:
+
+==  Documentation
+
+link:CHANGELOG.html[CHANGELOG]:: History of release.
+
+link:README.html[README]:: Manual page for beku.
+
+==  Development
+
+https://git.sr.ht/~shulhan/beku[Repository^]::
+Link to the source code.
+
+https://lists.sr.ht/~shulhan/beku[Mailing list^]::
+Place for discussion and sending patches.
+
+https://todo.sr.ht/~shulhan/beku[Issues^]::
+Link to open an issue or request for new feature.

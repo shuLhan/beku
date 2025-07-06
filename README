@@ -1,0 +1,203 @@
+= Beku
+:toc:
+:sectanchors:
+:sectlinks:
+
+Beku is a library and program to manage Go version and installed module,
+program, or source codes in user's GOPATH environment.
+
+
+== Issues
+
+This section describe list of issues trying to solve by this program.
+
+Manage installation of Go tools binary.
+
+Manage installation of Go module, including its source code and installed
+binaries.
+
+
+==  Workspace structure
+
+`${GOPATH}`:: This is the root of beku working directory.
+
+`${GOPATH}/beku/cache`:: A directory that store temporary files, for example
+downloaded Go tools binary in compressed format.
+
+`${GOPATH}/beku/share`:: Contains the extracted Go tools binary, using the
+following directory name format `goX.Y.Z`.
+
+`${GOPATH}/beku/go`:: Symlink to one of Go version in the share directory,
+indicated the active Go version.
+The path will be set as the value of ${GOROOT}.
+
+`${GOPATH}/beku/go_bootstrap`:: Symlink to one of Go version in the share
+directory, indicated the active Go version used for bootstrapping (building
+the Go from source).
+The path will be set as the value of ${GOROOT_BOOTSTRAP}.
+
+`${GOPATH}/beku/var/beku.db`:: Beku database file.
+Beku read and write the package database into a file named "beku.db".
++
+At first execution, beku will try to open the database file.
+If the file does not exist, beku will scan entire "${GOPATH}/src" and record
+it into the database file.
+
+
+==  Global options
+
+    --noconfirm
+
+No confirmation will be asked on any operation.
+Useful when running beku inside a script.
+
+    -d, --nodeps
+
+Do not install any missing dependencies. This options can be used on freeze
+or sync operations.
+
+
+==  Install operation
+
+    install <"go"|module>[@version]
+
+Install a Go tools or module.
+
+Given a parameter "go", it will download the Go tools from "https://go.dev/dl"
+using the current operating system and architecture (or values of $GOOS and
+$GOARCH) with version defined in parameter "version".
+If no version is given, it will clone the Go source code and build it.
+
+Given a module import path, beku will try to clone the module source code into
+source directory and checkout the tag defined in the "version".
+If no tag found, it will use the latest commit on master branch.
+
+If package already exist, it will reset the HEAD to the version that is set
+on database file.
+
+===  Options
+
+    [--into <destination>]
+
+This option will install the package import path into custom directory.
+It is useful if you have the fork of the main package but want to install
+it to the legacy directory.
+
+===  Examples
+
+	$ beku install go@1.17.6
+
+Download the Go tools version 1.17.6 into `${GOPATH}/beku/cache/`, and extract
+it into `${GOPATH}/beku/share/go1.17.6`.
+
+    $ beku install golang.org/x/text
+
+Download package `golang.org/x/text` into `${GOPATH}/src/golang.org/x/text`,
+and set their version to the latest commit on branch master.
+
+    $ beku -S github.com/golang/text --into golang.org/x/text
+
+Download package `github.com/golang/text` into
+`${GOPATH}/src/golang.org/x/text`, and set their version to the latest commit
+on branch master.
+
+    $ beku -S golang.org/x/text@v0.3.0
+
+Download package `golang.org/x/text` into `${GOPATH}/src/golang.org/x/text`
+and checkout the tag `v0.3.0` as the working version.
+
+    $ beku -S golang.org/x/text@5c1cf69
+
+Download package `golang.org/x/text` into `${GOPATH}/src/golang.org/x/text`
+and checkout the commit `5c1cf69` as the working version.
+
+
+==  Freeze Operation
+
+    -B, --freeze
+
+Operate on the package database and user's environment. This operation will
+ensure that all packages listed on database file is installed with their
+specific version. Also, all packages that are not registered will
+be removed from "src" and "pkg" directories.
+
+==  Database Operation
+
+    -D, --database
+
+Modify the package database. This operation required one of the options
+below.
+
+===  Options
+
+    -e, --exclude <pkg ...>
+
+Remove list of package by import path from database and add mark it as
+excluded package. Excluded package will be ignored on future operations.
+
+===  Examples
+
+    $ beku -De github.com/shuLhan/beku
+
+Exclude package "github.com/shuLhan/beku" from future scanning,
+installation, or removal operations.
+
+
+==  Query Operation
+
+    -Q, --query [pkg ...]
+
+Query the package database.
+
+
+==  Remove Operation
+
+    -R, --remove [pkg]
+
+Remove package from environment, including source and installed binaries and
+archives.
+
+===  Options
+
+    [-s,--recursive]
+
+Also remove all target dependencies, as long as is not required by other
+packages.
+
+===  Examples
+
+    $ beku -R github.com/shuLhan/beku
+
+Remove package "github.com/shuLhan/beku" source in "{prefix}/src",
+their installed binaries in "{prefix}/bin", and their installed archives on
+"{prefix}/pkg/{GOOS}\_{GOARCH}".
+
+    $ beku -R github.com/shuLhan/beku --recursive
+    $ beku -Rs github.com/shuLhan/beku
+
+Remove package "github.com/shuLhan/beku" source in "{prefix}/src",
+their installed binaries in "{prefix}/bin", their installed archives on
+"{prefix}/pkg/{GOOS}\_{GOARCH}", and all their dependencies.
+
+==  Development
+
+This repository use git submodules to test functionalities that use `git
+clone`.
+Command for cloning git repository for new development:
+
+	$ git clone --recurse-submodules <URL>
+
+or for existing clone,
+
+	$ git submodule update --init --recursive
+
+Then run `make` to make sure all test run well,
+
+	$ make
+
+
+==  Known Limitations
+
+- Only work with package hosted with Git on HTTPS or SSH.
+
+- Tested only on Git v2.17 or greater
